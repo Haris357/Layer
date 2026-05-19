@@ -1,0 +1,73 @@
+LAYER — END USER LICENSE AGREEMENT & TERMS OF USE
+
+Last updated: May 2026
+
+Please read this agreement carefully before installing Layer
+("the Software"). By installing or using the Software you accept
+these terms. If you do not agree, do not install the Software.
+
+
+1. LICENSE
+
+You are granted a personal, non-exclusive, royalty-free license to
+install and use the Software on devices that you own or control.
+You may not sell, sublicense, or redistribute the Software for a fee
+without written permission.
+
+
+2. WHAT THE SOFTWARE DOES
+
+Layer places customizable widgets on your desktop. To provide its
+features the Software reads certain information on your computer:
+
+  - Installed applications, for the app launcher widget.
+  - Now-playing media, system statistics (CPU, memory, disk,
+    battery), audio volume, and system notifications, for the
+    corresponding widgets.
+  - Files you explicitly choose to add (images, videos).
+
+All of this is processed locally on your device.
+
+
+3. PRIVACY
+
+The Software does not require an account and does not collect or
+transmit your personal data to the developer. Your canvas layout,
+notes, and settings are stored only on your computer.
+
+
+4. STARTUP
+
+By default the Software is configured to launch when you sign in to
+Windows. You can disable this at any time in Layer's Settings.
+
+
+5. NO WARRANTY
+
+The Software is provided "AS IS" without warranty of any kind,
+express or implied, including but not limited to fitness for a
+particular purpose. You use the Software at your own risk.
+
+
+6. LIMITATION OF LIABILITY
+
+To the maximum extent permitted by law, the developer shall not be
+liable for any damages arising from the use of, or inability to
+use, the Software.
+
+
+7. UPDATES
+
+The Software may check for and install updates to improve features
+and fix issues. Updates are subject to these same terms.
+
+
+8. TERMINATION
+
+This license remains in effect until terminated. It terminates
+automatically if you breach its terms. On termination you must stop
+using and uninstall the Software.
+
+
+By clicking "I Agree" you confirm that you have read and accept
+this agreement.
