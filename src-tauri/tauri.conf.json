@@ -39,6 +39,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": ["nsis"],
     "icon": [
       "icons/32x32.png",
@@ -59,6 +60,17 @@
         "sidebarImage": "icons/installer-sidebar.bmp",
         "installMode": "both",
         "displayLanguageSelector": false
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc4MEEyQTlFNTg3QUU5QgpSV1Nicm9mbHFhS0FCOWtTdXVrdklPZTdDL0twQjlnc01yT3Y2ajcrUDBGenJMK09KbEJ6VXVucQo=",
+      "endpoints": [
+        "https://github.com/Haris357/Layer-releases/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
       }
     }
   }

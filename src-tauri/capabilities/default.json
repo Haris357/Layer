@@ -11,6 +11,8 @@
     "fs:default",
     "dialog:default",
     "global-shortcut:default",
-    "autostart:default"
+    "autostart:default",
+    "updater:default",
+    "process:default"
   ]
 }

@@ -1,0 +1,57 @@
+name: Release
+
+# Push a version tag to build the installer and publish it to the public
+# Layer-releases repo, where the app's auto-updater picks it up.
+#   npm version patch   (or: edit versions, then `git tag v1.2.0`)
+#   git push --follow-tags
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Layer (signed)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npm run tauri build
+
+      - name: Generate update manifest
+        run: node scripts/make-latest-json.mjs ${{ github.ref_name }}
+
+      - name: Publish release to Layer-releases
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem src-tauri/target/release/bundle/nsis/*-setup.exe |
+            Select-Object -First 1
+          gh release create ${{ github.ref_name }} `
+            "$($exe.FullName)#Layer installer" `
+            "latest.json" `
+            --repo Haris357/Layer-releases `
+            --title "Layer ${{ github.ref_name }}" `
+            --notes "Layer ${{ github.ref_name }} — install or let the app auto-update."

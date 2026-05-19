@@ -24,3 +24,6 @@ Thumbs.db
 # Tauri updater signing keys — never commit
 *.key
 src-tauri/*.key
+
+# Generated update manifest (built in CI)
+latest.json

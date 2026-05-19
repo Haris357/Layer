@@ -9,6 +9,7 @@ import {
   quitApp,
   registerHotkey,
 } from '../lib/ipc'
+import { getUpdate, installUpdate } from '../lib/updater'
 import { Toggle, Slider, FieldRow, Segmented } from './ui'
 
 function buildAccelerator(e: KeyboardEvent): string | null {
@@ -41,6 +42,8 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [capturing, setCapturing] = useState(false)
   const [autostart, setAutostart] = useState(false)
   const [version, setVersion] = useState('1.0.0')
+  const [updateBusy, setUpdateBusy] = useState(false)
+  const [updateMsg, setUpdateMsg] = useState('')
 
   useEffect(() => {
     isEnabled()
@@ -68,6 +71,27 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const toggleAutostart = (value: boolean) => {
     setAutostart(value)
     ;(value ? enable() : disable()).catch(() => {})
+  }
+
+  const checkUpdates = async () => {
+    setUpdateBusy(true)
+    setUpdateMsg('Checking for updates…')
+    try {
+      const update = await getUpdate()
+      if (!update) {
+        setUpdateMsg("You're on the latest version.")
+        setUpdateBusy(false)
+        return
+      }
+      setUpdateMsg(`Downloading v${update.version}…`)
+      await installUpdate(update, (p) =>
+        setUpdateMsg(`Downloading v${update.version}… ${p}%`),
+      )
+      setUpdateMsg('Installing — Layer will restart…')
+    } catch {
+      setUpdateMsg('Could not check for updates.')
+      setUpdateBusy(false)
+    }
   }
 
   const exportImage = async () => {
@@ -182,10 +206,25 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           >
             a quiet layer on your desktop
           </div>
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              type="button"
+              disabled={updateBusy}
+              onClick={() => checkUpdates()}
+              className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] disabled:opacity-50"
+            >
+              Check for updates
+            </button>
+            {updateMsg && (
+              <span className="text-[12px] text-[var(--text-secondary)]">
+                {updateMsg}
+              </span>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => quitApp().catch(() => {})}
-            className="mt-2 text-[13px] font-medium"
+            className="mt-3 text-[13px] font-medium"
             style={{ color: 'var(--danger)' }}
           >
             Quit Layer
