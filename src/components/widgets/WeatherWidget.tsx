@@ -1,0 +1,224 @@
+import { useEffect, useState } from 'react'
+import {
+  Sun,
+  CloudSun,
+  Cloud,
+  CloudFog,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  Wind,
+  type LucideIcon,
+} from 'lucide-react'
+import type { WeatherWidget as WeatherWidgetType } from '../../types/widget'
+import { TextField } from '../ui'
+import { cn } from '../../lib/utils'
+import type { WidgetDefinition } from '../../lib/widgetRegistry'
+
+interface CodeInfo {
+  Icon: LucideIcon
+  label: string
+}
+
+function codeInfo(code: number): CodeInfo {
+  if (code === 0) return { Icon: Sun, label: 'Clear' }
+  if (code <= 2) return { Icon: CloudSun, label: 'Partly cloudy' }
+  if (code === 3) return { Icon: Cloud, label: 'Cloudy' }
+  if (code <= 48) return { Icon: CloudFog, label: 'Fog' }
+  if (code <= 57) return { Icon: CloudRain, label: 'Drizzle' }
+  if (code <= 67) return { Icon: CloudRain, label: 'Rain' }
+  if (code <= 77) return { Icon: CloudSnow, label: 'Snow' }
+  if (code <= 82) return { Icon: CloudRain, label: 'Showers' }
+  if (code <= 86) return { Icon: CloudSnow, label: 'Snow showers' }
+  return { Icon: CloudLightning, label: 'Thunderstorm' }
+}
+
+interface Current {
+  temp: number
+  code: number
+  wind: number
+}
+
+function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
+  const [data, setData] = useState<Current | null>(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      try {
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${widget.lat}&longitude=${widget.lon}&current=temperature_2m,weather_code,wind_speed_10m`,
+        )
+        const json = await res.json()
+        if (cancelled) return
+        setData({
+          temp: Math.round(json.current.temperature_2m),
+          code: json.current.weather_code,
+          wind: Math.round(json.current.wind_speed_10m),
+        })
+        setError(false)
+      } catch {
+        if (!cancelled) setError(true)
+      }
+    }
+    load()
+    const id = window.setInterval(load, 15 * 60 * 1000)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+    }
+  }, [widget.lat, widget.lon])
+
+  const info = data ? codeInfo(data.code) : null
+
+  return (
+    <div className="glass flex h-full w-full flex-col justify-between rounded-[12px] border border-[var(--border)] p-4">
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col">
+          <span
+            className="text-[var(--text-primary)]"
+            style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-2px' }}
+          >
+            {data ? `${data.temp}°` : '—'}
+          </span>
+          <span
+            className="text-[var(--text-secondary)]"
+            style={{ fontSize: 13, fontWeight: 500 }}
+          >
+            {error ? 'Unavailable' : info ? info.label : 'Loading…'}
+          </span>
+        </div>
+        {info && (
+          <info.Icon
+            size={40}
+            strokeWidth={1.5}
+            className="text-[var(--text-primary)]"
+          />
+        )}
+      </div>
+      <div className="flex items-center justify-between">
+        <span
+          className="truncate text-[var(--text-primary)]"
+          style={{ fontSize: 14, fontWeight: 600 }}
+        >
+          {widget.city}
+        </span>
+        {data && (
+          <span
+            className="flex items-center gap-1 text-[var(--text-tertiary)]"
+            style={{ fontSize: 12, fontWeight: 500 }}
+          >
+            <Wind size={12} strokeWidth={1.8} />
+            {data.wind} km/h
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+interface GeoResult {
+  name: string
+  latitude: number
+  longitude: number
+  country?: string
+  admin1?: string
+}
+
+function WeatherSettings({
+  widget,
+  onUpdate,
+}: {
+  widget: WeatherWidgetType
+  onUpdate: (patch: Partial<WeatherWidgetType>) => void
+}) {
+  const [query, setQuery] = useState(widget.city)
+  const [results, setResults] = useState<GeoResult[]>([])
+
+  useEffect(() => {
+    const q = query.trim()
+    if (q.length < 2) {
+      setResults([])
+      return
+    }
+    let cancelled = false
+    const id = window.setTimeout(() => {
+      fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          q,
+        )}&count=6`,
+      )
+        .then((res) => res.json())
+        .then((json) => {
+          if (!cancelled) {
+            setResults(Array.isArray(json.results) ? json.results : [])
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setResults([])
+        })
+    }, 350)
+    return () => {
+      cancelled = true
+      window.clearTimeout(id)
+    }
+  }, [query])
+
+  return (
+    <div className="flex w-[240px] flex-col gap-2">
+      <TextField
+        value={query}
+        placeholder="Search a city…"
+        onChange={setQuery}
+      />
+      {results.length > 0 && (
+        <div className="flex flex-col rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)]">
+          {results.map((r, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => {
+                onUpdate({
+                  city: r.name,
+                  lat: r.latitude,
+                  lon: r.longitude,
+                })
+                setResults([])
+              }}
+              className={cn(
+                'px-2.5 py-1.5 text-left text-[12px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]',
+              )}
+            >
+              {r.name}
+              {r.admin1 ? `, ${r.admin1}` : ''}
+              {r.country ? ` · ${r.country}` : ''}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export const weatherDefinition: WidgetDefinition<WeatherWidgetType> = {
+  type: 'weather',
+  label: 'Weather',
+  icon: CloudSun,
+  enabled: true,
+  minSize: { width: 210, height: 150 },
+  maxSize: { width: 380, height: 300 },
+  create: (x, y) => ({
+    type: 'weather',
+    x,
+    y,
+    width: 240,
+    height: 180,
+    locked: false,
+    city: 'London',
+    lat: 51.5072,
+    lon: -0.1276,
+  }),
+  Renderer: WeatherRenderer,
+  Settings: WeatherSettings,
+}

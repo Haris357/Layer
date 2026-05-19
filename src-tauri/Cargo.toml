@@ -1,0 +1,56 @@
+[package]
+name = "layer"
+version = "1.0.0"
+description = "A quiet layer on your desktop"
+authors = ["Layer"]
+edition = "2021"
+
+[lib]
+name = "layer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset", "tray-icon", "image-png"] }
+tauri-plugin-fs = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-autostart = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+sysinfo = "0.33"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.60", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Power",
+] }
+windows = { version = "0.59", features = [
+    "Foundation",
+    "Foundation_Collections",
+    "Media_Control",
+    "UI_Notifications",
+    "UI_Notifications_Management",
+    "ApplicationModel",
+    "Win32_System_Com",
+    "Win32_System_Com_StructuredStorage",
+    "Win32_System_Variant",
+    "Win32_Media_Audio",
+    "Win32_Media_Audio_Endpoints",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Graphics_Gdi",
+    "Win32_Storage_FileSystem",
+] }
+png = "0.17"
+base64 = "0.22"
+
+[profile.release]
+codegen-units = 16
+lto = false
+opt-level = 2
+strip = true
