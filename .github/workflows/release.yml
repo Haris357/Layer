@@ -49,8 +49,11 @@ jobs:
         run: |
           $exe = Get-ChildItem src-tauri/target/release/bundle/nsis/*-setup.exe |
             Select-Object -First 1
+          # Stable-named copy so the website can always link to the latest build.
+          Copy-Item $exe.FullName "Layer-Setup.exe"
           gh release create ${{ github.ref_name }} `
-            "$($exe.FullName)#Layer installer" `
+            "$($exe.FullName)#Layer installer (versioned)" `
+            "Layer-Setup.exe#Layer installer" `
             "latest.json" `
             --repo Haris357/Layer-releases `
             --title "Layer ${{ github.ref_name }}" `
