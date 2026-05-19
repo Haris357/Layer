@@ -440,6 +440,36 @@ pub fn capture_screen(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn capture_screen_base64() -> Result<String, String> {
+    #[cfg(target_os = "windows")]
+    {
+        use base64::Engine;
+        let png = capture_screen_png().ok_or("Screen capture failed")?;
+        Ok(base64::engine::general_purpose::STANDARD.encode(&png))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("Unsupported platform".to_string())
+    }
+}
+
+#[tauri::command]
+pub fn write_binary_file(path: String, data_base64: String) -> Result<(), String> {
+    use base64::Engine;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(data_base64.as_bytes())
+        .map_err(|e| e.to_string())?;
+    std::fs::write(&path, bytes).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn read_binary_file(path: String) -> Result<String, String> {
+    use base64::Engine;
+    let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+    Ok(base64::engine::general_purpose::STANDARD.encode(&bytes))
+}
+
+#[tauri::command]
 pub fn get_app_icon(path: String) -> Option<String> {
     #[cfg(target_os = "windows")]
     {

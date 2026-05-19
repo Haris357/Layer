@@ -2,6 +2,7 @@ import { Canvas } from './components/Canvas'
 import { TopIsland } from './components/TopIsland'
 import { CommandPalette } from './components/CommandPalette'
 import { Onboarding } from './components/Onboarding'
+import { Toast } from './components/Toast'
 import { useHotkey } from './hooks/useHotkey'
 import { usePersistence } from './hooks/usePersistence'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
@@ -27,6 +28,7 @@ export default function App() {
       <Canvas />
       <TopIsland />
       <CommandPalette />
+      <Toast />
       {!onboarded && <Onboarding />}
     </div>
   )

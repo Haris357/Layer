@@ -97,6 +97,9 @@ pub fn run() {
             commands::set_volume,
             commands::register_hotkey,
             commands::capture_screen,
+            commands::capture_screen_base64,
+            commands::write_binary_file,
+            commands::read_binary_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Layer");

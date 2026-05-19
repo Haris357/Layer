@@ -119,7 +119,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
-        className="glass flex h-[520px] w-[480px] flex-col rounded-[16px] border border-[var(--border)] p-6"
+        className="glass flex max-h-[90vh] w-[480px] flex-col overflow-y-auto rounded-[16px] border border-[var(--border)] p-6"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2

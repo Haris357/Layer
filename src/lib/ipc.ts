@@ -111,3 +111,12 @@ export const registerHotkey = (accelerator: string) =>
 
 export const captureScreen = (path: string) =>
   invoke<void>('capture_screen', { path })
+
+export const captureScreenBase64 = () =>
+  invoke<string>('capture_screen_base64')
+
+export const writeBinaryFile = (path: string, dataBase64: string) =>
+  invoke<void>('write_binary_file', { path, dataBase64 })
+
+export const readBinaryFile = (path: string) =>
+  invoke<string>('read_binary_file', { path })
