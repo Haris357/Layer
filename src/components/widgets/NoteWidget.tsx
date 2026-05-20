@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  StickyNote,
+  NotebookPen,
   Type,
   Play,
   Pause,
@@ -730,7 +730,7 @@ function NoteRenderer({ widget }: { widget: NoteWidgetType }) {
 export const noteDefinition: WidgetDefinition<NoteWidgetType> = {
   type: 'note',
   label: 'Note',
-  icon: StickyNote,
+  icon: NotebookPen,
   enabled: true,
   minSize: { width: 380, height: 300 },
   create: (x, y) => ({

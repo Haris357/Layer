@@ -18,28 +18,114 @@ pub fn setup_window(app: &App) -> Result<(), Box<dyn std::error::Error>> {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.set_skip_taskbar(true);
         let _ = window.set_ignore_cursor_events(true);
+        resize_to_virtual_desktop(&window);
+        set_noactivate(&window, true);
         set_layer(&window, false);
         start_hit_poll(window, hits);
     }
     Ok(())
 }
 
+// Toggles the WS_EX_NOACTIVATE extended window style. With it on, clicking
+// a Layer widget never steals focus from whatever app the user was on —
+// the foreground app stays foreground. We turn it off in edit mode so
+// keyboard input (typing in notes, journal, etc.) works.
 #[cfg(target_os = "windows")]
-pub fn set_layer(window: &WebviewWindow, front: bool) {
+fn set_noactivate(window: &WebviewWindow, enabled: bool) {
     use windows_sys::Win32::Foundation::HWND;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
-        GetSystemMetrics, SetWindowPos, HWND_BOTTOM, HWND_TOP, SM_CXSCREEN,
-        SM_CYSCREEN, SWP_NOACTIVATE,
+        GetWindowLongPtrW, SetWindowLongPtrW, GWL_EXSTYLE, WS_EX_NOACTIVATE,
     };
     let hwnd: HWND = match window.hwnd() {
         Ok(handle) => handle.0 as HWND,
         Err(_) => return,
     };
     unsafe {
-        let width = GetSystemMetrics(SM_CXSCREEN);
-        let height = GetSystemMetrics(SM_CYSCREEN);
-        let after = if front { HWND_TOP } else { HWND_BOTTOM };
-        SetWindowPos(hwnd, after, 0, 0, width, height, SWP_NOACTIVATE);
+        let cur = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        let flag = WS_EX_NOACTIVATE as isize;
+        let next = if enabled { cur | flag } else { cur & !flag };
+        if next != cur {
+            SetWindowLongPtrW(hwnd, GWL_EXSTYLE, next);
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn set_noactivate(_window: &WebviewWindow, _enabled: bool) {}
+
+// Returns (x, y, width, height) of the entire virtual desktop (the union
+// of every connected monitor). On a single-monitor machine this collapses
+// to the primary screen.
+#[cfg(target_os = "windows")]
+fn virtual_screen_rect() -> (i32, i32, i32, i32) {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GetSystemMetrics, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN,
+        SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN,
+    };
+    unsafe {
+        (
+            GetSystemMetrics(SM_XVIRTUALSCREEN),
+            GetSystemMetrics(SM_YVIRTUALSCREEN),
+            GetSystemMetrics(SM_CXVIRTUALSCREEN),
+            GetSystemMetrics(SM_CYVIRTUALSCREEN),
+        )
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn virtual_screen_rect() -> (i32, i32, i32, i32) {
+    (0, 0, 1920, 1080)
+}
+
+#[cfg(target_os = "windows")]
+fn resize_to_virtual_desktop(window: &WebviewWindow) {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        SetWindowPos, SWP_NOACTIVATE, SWP_NOZORDER,
+    };
+    let hwnd: HWND = match window.hwnd() {
+        Ok(handle) => handle.0 as HWND,
+        Err(_) => return,
+    };
+    let (x, y, w, h) = virtual_screen_rect();
+    unsafe {
+        SetWindowPos(
+            hwnd,
+            std::ptr::null_mut(),
+            x,
+            y,
+            w,
+            h,
+            SWP_NOACTIVATE | SWP_NOZORDER,
+        );
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn resize_to_virtual_desktop(_window: &WebviewWindow) {}
+
+// Layer always sits at the bottom of the z-order — a true desktop layer.
+// `front` is now just a no-op hint: edit/view mode is purely a UI state in
+// the canvas, never a window-level change. The window is always
+// NOACTIVATE so clicking widgets never claims focus from your apps, and
+// we never call SetForegroundWindow / HWND_TOP.
+#[cfg(target_os = "windows")]
+pub fn set_layer(window: &WebviewWindow, _front: bool) {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        SetWindowPos, ShowWindow, HWND_BOTTOM, SWP_NOACTIVATE, SW_SHOWNOACTIVATE,
+    };
+    let hwnd: HWND = match window.hwnd() {
+        Ok(handle) => handle.0 as HWND,
+        Err(_) => return,
+    };
+    set_noactivate(window, true);
+    unsafe {
+        // Make sure the window is visible (un-minimized) but without taking
+        // focus, then pin to bottom.
+        ShowWindow(hwnd, SW_SHOWNOACTIVATE);
+        let (x, y, w, h) = virtual_screen_rect();
+        SetWindowPos(hwnd, HWND_BOTTOM, x, y, w, h, SWP_NOACTIVATE);
     }
 }
 
@@ -62,19 +148,28 @@ fn cursor_pos() -> (i32, i32) {
     (0, 0)
 }
 
+// Polls the cursor and toggles per-region click-through, AND continuously
+// snaps the window to the bottom of the z-order so Layer is pinned to the
+// desktop — it can never float above another app, even momentarily.
 fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
     thread::spawn(move || {
         let mut ignoring = true;
         loop {
             let (cx, cy) = cursor_pos();
+            let (ox, oy) = match window.outer_position() {
+                Ok(p) => (p.x, p.y),
+                Err(_) => (0, 0),
+            };
+            let lx = cx - ox;
+            let ly = cy - oy;
             let inside = {
                 let state = hits.lock().unwrap();
                 state.force
                     || state.regions.iter().any(|r| {
-                        cx >= r[0]
-                            && cx < r[0] + r[2]
-                            && cy >= r[1]
-                            && cy < r[1] + r[3]
+                        lx >= r[0]
+                            && lx < r[0] + r[2]
+                            && ly >= r[1]
+                            && ly < r[1] + r[3]
                     })
             };
             let want_ignore = !inside;
@@ -82,7 +177,40 @@ fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
                 let _ = window.set_ignore_cursor_events(want_ignore);
                 ignoring = want_ignore;
             }
-            thread::sleep(Duration::from_millis(40));
+
+            // Re-pin to the bottom every tick — at 120 Hz this is faster
+            // than the eye can resolve, so any incidental bump above other
+            // apps is corrected before the next frame paints.
+            pin_to_bottom(&window);
+
+            thread::sleep(Duration::from_millis(8));
         }
     });
 }
+
+#[cfg(target_os = "windows")]
+fn pin_to_bottom(window: &WebviewWindow) {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        SetWindowPos, HWND_BOTTOM, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+        SWP_NOSENDCHANGING,
+    };
+    let hwnd: HWND = match window.hwnd() {
+        Ok(handle) => handle.0 as HWND,
+        Err(_) => return,
+    };
+    unsafe {
+        SetWindowPos(
+            hwnd,
+            HWND_BOTTOM,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOSENDCHANGING,
+        );
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn pin_to_bottom(_window: &WebviewWindow) {}

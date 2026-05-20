@@ -60,6 +60,36 @@ function nextZIndex(widgets: Widget[]): number {
   return widgets.reduce((max, w) => Math.max(max, w.zIndex), 0) + 1
 }
 
+// Strip widgets whose type isn't registered anymore (e.g. saved data that
+// references a widget we've since removed). Keeps the canvas from crashing
+// on stale persisted state.
+const KNOWN_TYPES: ReadonlySet<string> = new Set([
+  'note',
+  'link',
+  'clock',
+  'image',
+  'video',
+  'gallery',
+  'weather',
+  'stats',
+  'todo',
+  'countdown',
+  'worldclock',
+  'calendar',
+  'apps',
+  'search',
+  'nowplaying',
+  'notifications',
+  'converter',
+  'pomodoro',
+  'sticky',
+  'inbox',
+  'clipboard',
+])
+function pruneUnknown(widgets: Widget[]): Widget[] {
+  return widgets.filter((w) => KNOWN_TYPES.has(w.type))
+}
+
 export const useCanvasStore = create<CanvasState>((set, get) => {
   const pushHistory = () =>
     set((s) => ({ past: [...s.past, s.widgets].slice(-60), future: [] }))
@@ -258,13 +288,17 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       set({ widgets: [], selectedId: null })
     },
 
-    hydrate: (widgets) => set({ widgets, hydrated: true }),
+    hydrate: (widgets) =>
+      set({ widgets: pruneUnknown(widgets), hydrated: true }),
 
     hydrateTemplates: (templates, activeId) => {
-      const active =
-        templates.find((t) => t.id === activeId) ?? templates[0]
+      const cleaned = templates.map((t) => ({
+        ...t,
+        widgets: pruneUnknown(t.widgets),
+      }))
+      const active = cleaned.find((t) => t.id === activeId) ?? cleaned[0]
       set({
-        templates,
+        templates: cleaned,
         activeId: active ? active.id : '',
         widgets: active ? active.widgets : [],
         selectedId: null,
@@ -352,7 +386,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
           state.widgets,
         )
         const id = uid()
-        const fresh = widgets.map((w) => ({ ...w, id: uid() }))
+        const fresh = pruneUnknown(widgets).map((w) => ({ ...w, id: uid() }))
         const template: Template = {
           id,
           name,

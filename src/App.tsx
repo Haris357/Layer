@@ -3,6 +3,7 @@ import { TopIsland } from './components/TopIsland'
 import { CommandPalette } from './components/CommandPalette'
 import { Onboarding } from './components/Onboarding'
 import { Toast } from './components/Toast'
+import { QuickCaptureModal } from './components/QuickCaptureModal'
 import { useHotkey } from './hooks/useHotkey'
 import { usePersistence } from './hooks/usePersistence'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
@@ -14,6 +15,7 @@ import { useUpdateNotifications } from './hooks/useUpdateNotifications'
 import { useGalleryNotifications } from './hooks/useGalleryNotifications'
 import { useBatteryNotifications } from './hooks/useBatteryNotifications'
 import { useCalendarReminders } from './hooks/useCalendarReminders'
+import { useClipboardWatcher } from './hooks/useClipboardWatcher'
 import { useSettingsStore } from './store/settingsStore'
 
 export default function App() {
@@ -28,6 +30,7 @@ export default function App() {
   useGalleryNotifications()
   useBatteryNotifications()
   useCalendarReminders()
+  useClipboardWatcher()
 
   const onboarded = useSettingsStore((s) => s.onboarded)
 
@@ -36,6 +39,7 @@ export default function App() {
       <Canvas />
       <TopIsland />
       <CommandPalette />
+      <QuickCaptureModal />
       <Toast />
       {!onboarded && <Onboarding />}
     </div>

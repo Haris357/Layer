@@ -1,5 +1,6 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { listen } from '@tauri-apps/api/event'
 import {
   Layers,
   Settings as SettingsIcon,
@@ -14,6 +15,8 @@ import {
 import { useCanvasStore } from '../store/canvasStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { useNotificationStore } from '../store/notificationStore'
+import { notify } from '../lib/notify'
+import { getUpdate } from '../lib/updater'
 import { widgetList, type WidgetDefinition } from '../lib/widgetRegistry'
 import { resetAll as resetAllFiles } from '../lib/ipc'
 import { cn } from '../lib/utils'
@@ -80,6 +83,51 @@ export function TopIsland() {
   const unreadCount = useNotificationStore((s) =>
     s.items.reduce((n, i) => n + (i.read ? 0 : 1), 0),
   )
+
+  // The tray menu fires these events; we open the matching modal here.
+  useEffect(() => {
+    const unTpl = listen('open-templates', () => setShowTemplates(true))
+    const unNot = listen('open-notifications', () =>
+      setShowNotifications(true),
+    )
+    const unSet = listen('open-settings', () => setShowSettings(true))
+    const unLock = listen('toggle-lock-all', () => {
+      // Read the latest canvas state directly so this listener doesn't
+      // need to be torn down + rebuilt every time widgets change.
+      const s = useCanvasStore.getState()
+      const allLockedNow =
+        s.widgets.length > 0 && s.widgets.every((w) => w.locked)
+      s.lockAll(!allLockedNow)
+    })
+    const unUpd = listen('check-updates', async () => {
+      try {
+        const u = await getUpdate()
+        if (u) {
+          notify({
+            kind: 'update',
+            title: `Layer v${u.version} is available`,
+            body: 'Open Settings → Check for updates to install.',
+            dedupe: `available-${u.version}`,
+          })
+        } else {
+          notify({
+            kind: 'info',
+            title: 'You’re on the latest version ✦',
+            dedupe: `uptodate-${new Date().toDateString()}`,
+          })
+        }
+      } catch {
+        notify({ kind: 'info', title: 'Could not check for updates' })
+      }
+    })
+    return () => {
+      unTpl.then((f) => f()).catch(() => {})
+      unNot.then((f) => f()).catch(() => {})
+      unSet.then((f) => f()).catch(() => {})
+      unLock.then((f) => f()).catch(() => {})
+      unUpd.then((f) => f()).catch(() => {})
+    }
+  }, [])
 
   const open = mode === 'edit'
   const down =

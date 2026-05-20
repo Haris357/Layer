@@ -120,20 +120,3 @@ export const writeBinaryFile = (path: string, dataBase64: string) =>
 
 export const readBinaryFile = (path: string) =>
   invoke<string>('read_binary_file', { path })
-
-// --- Quick Settings system controls ---
-export const getWifi = () => invoke<boolean>('get_wifi')
-export const setWifi = (enabled: boolean) =>
-  invoke<void>('set_wifi', { enabled })
-export const getBluetooth = () => invoke<boolean>('get_bluetooth')
-export const setBluetooth = (enabled: boolean) =>
-  invoke<void>('set_bluetooth', { enabled })
-export const setAirplane = (enabled: boolean) =>
-  invoke<void>('set_airplane', { enabled })
-export const getBrightness = () => invoke<number>('get_brightness')
-export const setBrightness = (level: number) =>
-  invoke<void>('set_brightness', { level })
-export type PowerScheme = 'saver' | 'balanced' | 'performance'
-export const getPowerScheme = () => invoke<PowerScheme>('get_power_scheme')
-export const setPowerScheme = (scheme: PowerScheme) =>
-  invoke<void>('set_power_scheme', { scheme })

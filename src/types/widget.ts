@@ -16,7 +16,10 @@ export type WidgetType =
   | 'nowplaying'
   | 'notifications'
   | 'converter'
-  | 'quicksettings'
+  | 'pomodoro'
+  | 'sticky'
+  | 'inbox'
+  | 'clipboard'
 
 export type Mode = 'edit' | 'view'
 
@@ -173,8 +176,36 @@ export interface ConverterWidget extends BaseWidget {
   to: string
 }
 
-export interface QuickSettingsWidget extends BaseWidget {
-  type: 'quicksettings'
+export interface PomodoroWidget extends BaseWidget {
+  type: 'pomodoro'
+  workMinutes: number
+  shortBreak: number
+  longBreak: number
+  cyclesUntilLong: number
+  completedToday: number
+  statsDate: string
+}
+
+export type StickyColor =
+  | 'yellow'
+  | 'pink'
+  | 'blue'
+  | 'green'
+  | 'orange'
+  | 'lilac'
+
+export interface StickyWidget extends BaseWidget {
+  type: 'sticky'
+  text: string
+  color: StickyColor
+}
+
+export interface InboxWidget extends BaseWidget {
+  type: 'inbox'
+}
+
+export interface ClipboardWidget extends BaseWidget {
+  type: 'clipboard'
 }
 
 export type Widget =
@@ -195,7 +226,10 @@ export type Widget =
   | NowPlayingWidget
   | NotificationsWidget
   | ConverterWidget
-  | QuickSettingsWidget
+  | PomodoroWidget
+  | StickyWidget
+  | InboxWidget
+  | ClipboardWidget
 
 export type NewWidget = Omit<Widget, 'id' | 'zIndex'>
 

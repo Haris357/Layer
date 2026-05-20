@@ -34,6 +34,9 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
 
   const def = widgetRegistry[widget.type]
+  // Gracefully skip widgets whose type is no longer registered (e.g. saved
+  // data referencing a widget we've since removed) — never crash the canvas.
+  if (!def) return null
   const Renderer = def.Renderer
   const isSelected = selectedId === widget.id
   const canDrag = !widget.locked

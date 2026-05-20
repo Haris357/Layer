@@ -4,8 +4,8 @@ mod window;
 
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::Emitter;
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+use tauri::{Emitter, Manager};
+use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, ShortcutState};
 
 pub fn run() {
     tauri::Builder::default()
@@ -13,14 +13,27 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ))
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
-                .with_handler(|app, _shortcut, event| {
-                    if event.state == ShortcutState::Pressed {
+                .with_handler(|app, shortcut, event| {
+                    if event.state != ShortcutState::Pressed {
+                        return;
+                    }
+                    // Ctrl+Shift+N → Quick capture. Bring the window forward
+                    // first so the modal is actually visible.
+                    if shortcut.key == Code::KeyN {
+                        if let Some(w) = app.get_webview_window("main") {
+                            let _ = w.unminimize();
+                            let _ = w.show();
+                            window::set_layer(&w, true);
+                        }
+                        let _ = app.emit("quick-capture", ());
+                    } else {
                         let _ = app.emit("toggle-mode", ());
                     }
                 })
@@ -29,22 +42,63 @@ pub fn run() {
         .setup(|app| {
             window::setup_window(app)?;
             let _ = app.global_shortcut().register("CmdOrControl+Shift+Space");
+            let _ = app.global_shortcut().register("CmdOrControl+Shift+N");
 
             let toggle_item =
                 MenuItemBuilder::with_id("toggle", "Toggle edit mode").build(app)?;
+            let templates_item =
+                MenuItemBuilder::with_id("templates", "Templates…").build(app)?;
+            let notifications_item =
+                MenuItemBuilder::with_id("notifications", "Notifications…").build(app)?;
+            let settings_item =
+                MenuItemBuilder::with_id("settings", "Settings…").build(app)?;
+            let lock_item =
+                MenuItemBuilder::with_id("lock-all", "Toggle widget lock")
+                    .build(app)?;
+            let update_item =
+                MenuItemBuilder::with_id("check-updates", "Check for updates")
+                    .build(app)?;
             let quit_item =
                 MenuItemBuilder::with_id("quit", "Quit Layer").build(app)?;
             let menu = MenuBuilder::new(app)
-                .items(&[&toggle_item, &quit_item])
+                .items(&[
+                    &toggle_item,
+                    &templates_item,
+                    &notifications_item,
+                    &settings_item,
+                ])
+                .separator()
+                .items(&[&lock_item, &update_item])
+                .separator()
+                .items(&[&quit_item])
                 .build()?;
+
+            // Bring the window forward and emit a UI event in one go.
+            let open_panel = |app: &tauri::AppHandle, name: &str| {
+                if let Some(w) = app.get_webview_window("main") {
+                    let _ = w.unminimize();
+                    let _ = w.show();
+                    window::set_layer(&w, true);
+                }
+                let _ = app.emit(name, ());
+            };
 
             let mut tray = TrayIconBuilder::new()
                 .tooltip("Layer — click to toggle edit mode")
                 .menu(&menu)
                 .show_menu_on_left_click(false)
-                .on_menu_event(|app, event| match event.id().as_ref() {
+                .on_menu_event(move |app, event| match event.id().as_ref() {
                     "toggle" => {
                         let _ = app.emit("toggle-mode", ());
+                    }
+                    "templates" => open_panel(app, "open-templates"),
+                    "notifications" => open_panel(app, "open-notifications"),
+                    "settings" => open_panel(app, "open-settings"),
+                    "lock-all" => {
+                        let _ = app.emit("toggle-lock-all", ());
+                    }
+                    "check-updates" => {
+                        let _ = app.emit("check-updates", ());
                     }
                     "quit" => app.exit(0),
                     _ => {}
@@ -100,15 +154,6 @@ pub fn run() {
             commands::capture_screen_base64,
             commands::write_binary_file,
             commands::read_binary_file,
-            commands::get_wifi,
-            commands::set_wifi,
-            commands::get_bluetooth,
-            commands::set_bluetooth,
-            commands::set_airplane,
-            commands::get_brightness,
-            commands::set_brightness,
-            commands::get_power_scheme,
-            commands::set_power_scheme,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Layer");

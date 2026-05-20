@@ -18,7 +18,10 @@ import { searchDefinition } from '../components/widgets/SearchWidget'
 import { converterDefinition } from '../components/widgets/ConverterWidget'
 import { nowPlayingDefinition } from '../components/widgets/NowPlayingWidget'
 import { notificationsDefinition } from '../components/widgets/NotificationsWidget'
-import { quickSettingsDefinition } from '../components/widgets/QuickSettingsWidget'
+import { pomodoroDefinition } from '../components/widgets/PomodoroWidget'
+import { stickyDefinition } from '../components/widgets/StickyWidget'
+import { inboxDefinition } from '../components/widgets/InboxWidget'
+import { clipboardDefinition } from '../components/widgets/ClipboardWidget'
 
 export interface WidgetSize {
   width: number
@@ -61,19 +64,25 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   nowplaying: nowPlayingDefinition as WidgetDefinition,
   notifications: notificationsDefinition as WidgetDefinition,
   converter: converterDefinition as WidgetDefinition,
-  quicksettings: quickSettingsDefinition as WidgetDefinition,
+  pomodoro: pomodoroDefinition as WidgetDefinition,
+  sticky: stickyDefinition as WidgetDefinition,
+  inbox: inboxDefinition as WidgetDefinition,
+  clipboard: clipboardDefinition as WidgetDefinition,
 }
 
 export const widgetOrder: WidgetType[] = [
   'note',
+  'sticky',
+  'inbox',
   'todo',
+  'pomodoro',
   'clock',
   'worldclock',
   'calendar',
   'countdown',
   'search',
   'apps',
-  'quicksettings',
+  'clipboard',
   'nowplaying',
   'notifications',
   'converter',
