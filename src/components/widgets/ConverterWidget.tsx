@@ -3,6 +3,7 @@ import { ArrowLeftRight, Repeat } from 'lucide-react'
 import type { ConverterWidget as ConverterWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
 import { cn } from '../../lib/utils'
+import { Menu } from '../Menu'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 type Category = ConverterWidgetType['category']
@@ -105,9 +106,7 @@ function ConverterRenderer({ widget }: { widget: ConverterWidgetType }) {
   const swap = () => updateWidget(widget.id, { from: widget.to, to: widget.from })
 
   const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
-
-  const selectCls =
-    'min-w-0 flex-1 rounded-[7px] border border-[var(--border)] bg-[var(--fill-1)] px-2 py-1.5 text-[13px] font-medium text-[var(--text-primary)] outline-none'
+  const unitOptions = units.map((u) => ({ value: u, label: u }))
 
   return (
     <div className="glass flex h-full w-full flex-col gap-2.5 overflow-hidden rounded-[12px] border border-[var(--border)] p-3">
@@ -137,18 +136,12 @@ function ConverterRenderer({ widget }: { widget: ConverterWidgetType }) {
           inputMode="decimal"
           className="min-w-0 flex-1 rounded-[7px] border border-[var(--border)] bg-[var(--fill-1)] px-2 py-1.5 text-[14px] font-semibold text-[var(--text-primary)] outline-none"
         />
-        <select
+        <Menu<string>
           value={widget.from}
-          onMouseDown={stop}
-          onChange={(e) => updateWidget(widget.id, { from: e.target.value })}
-          className={selectCls}
-        >
-          {units.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
+          options={unitOptions}
+          onChange={(v) => updateWidget(widget.id, { from: v })}
+          className="min-w-0 flex-1"
+        />
       </div>
 
       <button
@@ -168,18 +161,12 @@ function ConverterRenderer({ widget }: { widget: ConverterWidgetType }) {
             {resultStr}
           </span>
         </div>
-        <select
+        <Menu<string>
           value={widget.to}
-          onMouseDown={stop}
-          onChange={(e) => updateWidget(widget.id, { to: e.target.value })}
-          className={selectCls}
-        >
-          {units.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
+          options={unitOptions}
+          onChange={(v) => updateWidget(widget.id, { to: v })}
+          className="min-w-0 flex-1"
+        />
       </div>
     </div>
   )

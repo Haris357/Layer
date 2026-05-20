@@ -18,6 +18,7 @@ import { searchDefinition } from '../components/widgets/SearchWidget'
 import { converterDefinition } from '../components/widgets/ConverterWidget'
 import { nowPlayingDefinition } from '../components/widgets/NowPlayingWidget'
 import { notificationsDefinition } from '../components/widgets/NotificationsWidget'
+import { quickSettingsDefinition } from '../components/widgets/QuickSettingsWidget'
 
 export interface WidgetSize {
   width: number
@@ -60,6 +61,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   nowplaying: nowPlayingDefinition as WidgetDefinition,
   notifications: notificationsDefinition as WidgetDefinition,
   converter: converterDefinition as WidgetDefinition,
+  quicksettings: quickSettingsDefinition as WidgetDefinition,
 }
 
 export const widgetOrder: WidgetType[] = [
@@ -71,6 +73,7 @@ export const widgetOrder: WidgetType[] = [
   'countdown',
   'search',
   'apps',
+  'quicksettings',
   'nowplaying',
   'notifications',
   'converter',

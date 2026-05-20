@@ -8,6 +8,8 @@ import {
   readBinaryFile,
   readTextFile,
 } from './ipc'
+import { notify } from './notify'
+import { rememberMyTemplate } from '../hooks/useGalleryNotifications'
 import type { Template, Widget } from '../types/widget'
 
 // Captures the desktop canvas as a base64 PNG (no data: prefix).
@@ -90,9 +92,9 @@ export async function publishToGallery(opts: {
   author: string
   description: string
   screenshotPng: string
-}) {
+}): Promise<string> {
   const thumb = await toThumbnail(opts.screenshotPng)
-  await addDoc(collection(db, 'templates'), {
+  const ref = await addDoc(collection(db, 'templates'), {
     name: opts.template.name.slice(0, 79),
     description:
       opts.description.trim() ||
@@ -106,4 +108,12 @@ export async function publishToGallery(opts: {
     score: 0,
     createdAt: serverTimestamp(),
   })
+  rememberMyTemplate(ref.id)
+  notify({
+    kind: 'publish',
+    title: `"${opts.template.name}" published to the gallery ✦`,
+    body: 'Look for it under Newest at layer-desktop.web.app/templates.',
+    templateId: ref.id,
+  })
+  return ref.id
 }

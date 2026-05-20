@@ -9,15 +9,18 @@ import {
   LockOpen,
   Square,
   SquareDashed,
+  Bell,
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useSettingsStore } from '../store/settingsStore'
+import { useNotificationStore } from '../store/notificationStore'
 import { widgetList, type WidgetDefinition } from '../lib/widgetRegistry'
 import { resetAll as resetAllFiles } from '../lib/ipc'
 import { cn } from '../lib/utils'
 import { ConfirmDialog } from './ConfirmDialog'
 import { SettingsModal } from './SettingsModal'
 import { TemplatesModal } from './TemplatesModal'
+import { NotificationsPanel } from './NotificationsPanel'
 
 const spring = { type: 'spring', stiffness: 380, damping: 34 } as const
 
@@ -72,11 +75,20 @@ export function TopIsland() {
   const [confirmReset, setConfirmReset] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const leaveTimer = useRef<number | undefined>(undefined)
+  const unreadCount = useNotificationStore((s) =>
+    s.items.reduce((n, i) => n + (i.read ? 0 : 1), 0),
+  )
 
   const open = mode === 'edit'
   const down =
-    hovered || open || confirmReset || showSettings || showTemplates
+    hovered ||
+    open ||
+    confirmReset ||
+    showSettings ||
+    showTemplates ||
+    showNotifications
   const allLocked = widgets.length > 0 && widgets.every((w) => w.locked)
   const anyBg = widgets.some(
     (w) => w.type !== 'note' && w.background !== false,
@@ -225,13 +237,32 @@ export function TopIsland() {
                   </ToolButton>
                   <ToolButton
                     index={widgetList.length + 3}
+                    label={
+                      unreadCount > 0
+                        ? `Notifications · ${unreadCount} new`
+                        : 'Notifications'
+                    }
+                    onClick={() => setShowNotifications(true)}
+                  >
+                    <span className="relative inline-flex">
+                      <Bell size={18} strokeWidth={1.5} />
+                      {unreadCount > 0 && (
+                        <span
+                          className="absolute -right-[3px] -top-[2px] h-[7px] w-[7px] rounded-full ring-2 ring-[var(--surface)]"
+                          style={{ background: 'var(--accent)' }}
+                        />
+                      )}
+                    </span>
+                  </ToolButton>
+                  <ToolButton
+                    index={widgetList.length + 4}
                     label="Settings"
                     onClick={() => setShowSettings(true)}
                   >
                     <SettingsIcon size={18} strokeWidth={1.5} />
                   </ToolButton>
                   <ToolButton
-                    index={widgetList.length + 4}
+                    index={widgetList.length + 5}
                     label="Reset canvas"
                     danger
                     onClick={() => setConfirmReset(true)}
@@ -264,6 +295,10 @@ export function TopIsland() {
       </AnimatePresence>
 
       <AnimatePresence>
+        {showNotifications && (
+          <NotificationsPanel onClose={() => setShowNotifications(false)} />
+        )}
+
         {showTemplates && (
           <TemplatesModal onClose={() => setShowTemplates(false)} />
         )}

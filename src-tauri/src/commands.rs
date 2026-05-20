@@ -724,3 +724,195 @@ pub fn register_hotkey(app: AppHandle, accelerator: String) -> Result<(), String
         .register(accelerator.as_str())
         .map_err(|e| e.to_string())
 }
+
+// ─── Quick Settings: radios, brightness, power scheme ─────────────────────
+
+#[cfg(target_os = "windows")]
+fn radio_state(kind_value: i32) -> Option<bool> {
+    use windows::Devices::Radios::{Radio, RadioState};
+    let task = Radio::GetRadiosAsync().ok()?;
+    let radios = task.get().ok()?;
+    for r in radios {
+        if let Ok(k) = r.Kind() {
+            if k.0 == kind_value {
+                if let Ok(state) = r.State() {
+                    return Some(state == RadioState::On);
+                }
+            }
+        }
+    }
+    None
+}
+
+#[cfg(target_os = "windows")]
+fn set_radio_state(kind_value: i32, on: bool) -> Result<(), String> {
+    use windows::Devices::Radios::{Radio, RadioState};
+    let task = Radio::GetRadiosAsync().map_err(|e| e.to_string())?;
+    let radios = task.get().map_err(|e| e.to_string())?;
+    let target = if on { RadioState::On } else { RadioState::Off };
+    for r in radios {
+        if let Ok(k) = r.Kind() {
+            if k.0 == kind_value {
+                let op = r.SetStateAsync(target).map_err(|e| e.to_string())?;
+                op.get().map_err(|e| e.to_string())?;
+            }
+        }
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+fn run_powershell(cmd: &str) -> Result<String, String> {
+    use std::os::windows::process::CommandExt;
+    use std::process::Command;
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+    let out = Command::new("powershell")
+        .creation_flags(CREATE_NO_WINDOW)
+        .args(["-NoProfile", "-NonInteractive", "-Command", cmd])
+        .output()
+        .map_err(|e| e.to_string())?;
+    Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
+}
+
+#[tauri::command]
+pub fn get_wifi() -> Result<bool, String> {
+    #[cfg(target_os = "windows")]
+    {
+        Ok(radio_state(1).unwrap_or(false))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("unsupported".to_string())
+    }
+}
+
+#[tauri::command]
+pub fn set_wifi(enabled: bool) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        set_radio_state(1, enabled)
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = enabled;
+        Err("unsupported".to_string())
+    }
+}
+
+#[tauri::command]
+pub fn get_bluetooth() -> Result<bool, String> {
+    #[cfg(target_os = "windows")]
+    {
+        Ok(radio_state(3).unwrap_or(false))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("unsupported".to_string())
+    }
+}
+
+#[tauri::command]
+pub fn set_bluetooth(enabled: bool) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        set_radio_state(3, enabled)
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = enabled;
+        Err("unsupported".to_string())
+    }
+}
+
+// Airplane = turn off both Wi-Fi and Bluetooth (closest functional equivalent
+// — Windows doesn't expose a public API to flip the system airplane flag).
+#[tauri::command]
+pub fn set_airplane(enabled: bool) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let _ = set_radio_state(1, !enabled);
+        let _ = set_radio_state(3, !enabled);
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = enabled;
+        Err("unsupported".to_string())
+    }
+}
+
+#[tauri::command]
+pub fn get_brightness() -> Result<u32, String> {
+    #[cfg(target_os = "windows")]
+    {
+        let out = run_powershell(
+            "(Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness).CurrentBrightness",
+        )?;
+        out.lines()
+            .filter_map(|l| l.trim().parse::<u32>().ok())
+            .next()
+            .ok_or_else(|| "brightness unsupported".to_string())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("unsupported".to_string())
+    }
+}
+
+#[tauri::command]
+pub fn set_brightness(level: u32) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let clamped = level.min(100);
+        let cmd = format!(
+            "(Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods).WmiSetBrightness(0, {})",
+            clamped
+        );
+        run_powershell(&cmd)?;
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = level;
+        Err("unsupported".to_string())
+    }
+}
+
+#[tauri::command]
+pub fn get_power_scheme() -> Result<String, String> {
+    #[cfg(target_os = "windows")]
+    {
+        let out = run_powershell("powercfg /getactivescheme")?;
+        if out.contains("a1841308") {
+            return Ok("saver".to_string());
+        }
+        if out.contains("8c5e7fda") {
+            return Ok("performance".to_string());
+        }
+        Ok("balanced".to_string())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("unsupported".to_string())
+    }
+}
+
+#[tauri::command]
+pub fn set_power_scheme(scheme: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let guid = match scheme.as_str() {
+            "saver" => "a1841308-3541-4fab-bc81-f71556f20b4a",
+            "performance" => "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
+            _ => "381b4222-f694-41f0-9685-ff5bb260df2e",
+        };
+        let cmd = format!("powercfg /setactive {}", guid);
+        run_powershell(&cmd)?;
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = scheme;
+        Err("unsupported".to_string())
+    }
+}

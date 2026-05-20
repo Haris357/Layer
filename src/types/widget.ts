@@ -16,6 +16,7 @@ export type WidgetType =
   | 'nowplaying'
   | 'notifications'
   | 'converter'
+  | 'quicksettings'
 
 export type Mode = 'edit' | 'view'
 
@@ -172,6 +173,10 @@ export interface ConverterWidget extends BaseWidget {
   to: string
 }
 
+export interface QuickSettingsWidget extends BaseWidget {
+  type: 'quicksettings'
+}
+
 export type Widget =
   | NoteWidget
   | LinkWidget
@@ -190,6 +195,7 @@ export type Widget =
   | NowPlayingWidget
   | NotificationsWidget
   | ConverterWidget
+  | QuickSettingsWidget
 
 export type NewWidget = Omit<Widget, 'id' | 'zIndex'>
 

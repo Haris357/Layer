@@ -19,6 +19,7 @@ import {
   importTemplateFile,
   publishToGallery,
 } from '../lib/templateShare'
+import { notify } from '../lib/notify'
 import { PublishDialog } from './PublishDialog'
 import type { Template } from '../types/widget'
 import { cn } from '../lib/utils'
@@ -73,6 +74,11 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
     if (result) {
       importTemplate(result.name, result.widgets)
       toast(`Imported “${result.name}”`)
+      notify({
+        kind: 'import',
+        title: `Imported "${result.name}"`,
+        body: `${result.widgets.length} widgets added as a new template.`,
+      })
     }
   }
 

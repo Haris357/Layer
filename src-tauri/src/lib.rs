@@ -100,6 +100,15 @@ pub fn run() {
             commands::capture_screen_base64,
             commands::write_binary_file,
             commands::read_binary_file,
+            commands::get_wifi,
+            commands::set_wifi,
+            commands::get_bluetooth,
+            commands::set_bluetooth,
+            commands::set_airplane,
+            commands::get_brightness,
+            commands::set_brightness,
+            commands::get_power_scheme,
+            commands::set_power_scheme,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Layer");

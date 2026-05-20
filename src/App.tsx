@@ -10,6 +10,10 @@ import { useHitRegions } from './hooks/useHitRegions'
 import { useResponsive } from './hooks/useResponsive'
 import { useTheme } from './hooks/useTheme'
 import { useStartup } from './hooks/useStartup'
+import { useUpdateNotifications } from './hooks/useUpdateNotifications'
+import { useGalleryNotifications } from './hooks/useGalleryNotifications'
+import { useBatteryNotifications } from './hooks/useBatteryNotifications'
+import { useCalendarReminders } from './hooks/useCalendarReminders'
 import { useSettingsStore } from './store/settingsStore'
 
 export default function App() {
@@ -20,6 +24,10 @@ export default function App() {
   useResponsive()
   useTheme()
   useStartup()
+  useUpdateNotifications()
+  useGalleryNotifications()
+  useBatteryNotifications()
+  useCalendarReminders()
 
   const onboarded = useSettingsStore((s) => s.onboarded)
 

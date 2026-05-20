@@ -3,6 +3,7 @@ import { Timer } from 'lucide-react'
 import type { CountdownWidget as CountdownWidgetType } from '../../types/widget'
 import { TextField } from '../ui'
 import { cn } from '../../lib/utils'
+import { notify } from '../../lib/notify'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 const DAY = 86400000
@@ -38,6 +39,25 @@ function CountdownRenderer({ widget }: { widget: CountdownWidgetType }) {
     const id = window.setInterval(() => setTick((t) => t + 1), 1000)
     return () => window.clearInterval(id)
   }, [])
+
+  // Fire exactly one notification when this countdown hits zero. The
+  // dedupe key is keyed to the widget + target so it never repeats.
+  useEffect(() => {
+    const targetMs = new Date(widget.target).getTime()
+    const remaining = targetMs - Date.now()
+    const fire = () =>
+      notify({
+        kind: 'timer',
+        title: `${widget.label || 'Countdown'} reached zero ✦`,
+        dedupe: `countdown-${widget.id}-${widget.target}`,
+      })
+    if (remaining <= 0) {
+      fire()
+      return
+    }
+    const id = window.setTimeout(fire, remaining)
+    return () => window.clearTimeout(id)
+  }, [widget.id, widget.target, widget.label])
 
   const card = widget.background !== false
   const b = breakdown(new Date(widget.target).getTime())

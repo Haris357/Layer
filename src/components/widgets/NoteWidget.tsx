@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -14,7 +14,6 @@ import {
   History as HistoryIcon,
   X,
   Shuffle,
-  Hexagon,
   Pin,
   Pencil,
   Trash2,
@@ -23,18 +22,24 @@ import type { NoteWidget as NoteWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
 import { useJournalStore } from '../../store/journalStore'
 import { cn } from '../../lib/utils'
+import { notify } from '../../lib/notify'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
-
-const SIZES = [16, 18, 20, 22, 24, 26]
 
 const FONTS: { label: string; value: string }[] = [
   { label: 'System', value: 'system-ui, sans-serif' },
+  { label: 'Inter', value: "'Inter', sans-serif" },
   { label: 'Lato', value: "'Lato', sans-serif" },
   { label: 'Serif', value: 'Georgia, serif' },
   { label: 'Lora', value: "'Lora', serif" },
   { label: 'Merriweather', value: "'Merriweather', serif" },
   { label: 'Playfair', value: "'Playfair Display', serif" },
   { label: 'Source Serif', value: "'Source Serif 4', serif" },
+  { label: 'EB Garamond', value: "'EB Garamond', serif" },
+  { label: 'IBM Plex Serif', value: "'IBM Plex Serif', serif" },
+  { label: 'Newsreader', value: "'Newsreader', serif" },
+  { label: 'Crimson Pro', value: "'Crimson Pro', serif" },
+  { label: 'Caveat', value: "'Caveat', cursive" },
+  { label: 'JetBrains Mono', value: "'JetBrains Mono', monospace" },
 ]
 
 const TIMER_TOTAL = 15 * 60
@@ -245,6 +250,11 @@ function Journal({
           window.clearInterval(id)
           setTimerOn(false)
           SOUND.timerEnd()
+          notify({
+            kind: 'timer',
+            title: 'Focus session complete ✦',
+            body: '15 minutes of deep work — nice.',
+          })
           return TIMER_TOTAL
         }
         return prev - 1
@@ -252,6 +262,22 @@ function Journal({
     }, 1000)
     return () => window.clearInterval(id)
   }, [timerOn])
+
+  // Close any open popovers (font menu, history) when the click lands
+  // outside this note widget.
+  const containerRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!fontMenu && !showHistory) return
+    const onDown = (e: MouseEvent) => {
+      const el = containerRef.current
+      if (el && !el.contains(e.target as Node)) {
+        setFontMenu(false)
+        setShowHistory(false)
+      }
+    }
+    document.addEventListener('mousedown', onDown, true)
+    return () => document.removeEventListener('mousedown', onDown, true)
+  }, [fontMenu, showHistory])
 
   const active = entries.find((e) => e.id === widget.activeEntryId) ?? null
 
@@ -281,12 +307,27 @@ function Journal({
 
   return (
     <div
+      ref={containerRef}
       className={cn(
         'flex h-full w-full overflow-hidden',
         fullscreen ? 'rounded-none' : 'rounded-[14px]',
       )}
       style={{ background: c.bg, fontFamily: "'Inter', sans-serif" }}
     >
+      {/* Hit-region overlay: while a popover is open, this covers the
+          whole viewport so clicks anywhere outside the popover close it
+          (even on empty canvas, which would otherwise be click-through). */}
+      {(fontMenu || showHistory) && (
+        <div
+          data-hit
+          className="fixed inset-0 z-[55]"
+          onMouseDown={() => {
+            setFontMenu(false)
+            setShowHistory(false)
+          }}
+        />
+      )}
+
       <div
         className="flex shrink-0 flex-col items-center gap-1 border-r py-2.5"
         style={{ borderColor: c.line, width: 50 }}
@@ -324,30 +365,34 @@ function Journal({
                 className="absolute left-full top-0 z-[60] ml-2 w-[208px] rounded-[12px] border p-2.5 shadow-xl"
                 style={{ background: c.panel, borderColor: c.line }}
               >
-                <div
-                  className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-wide"
-                  style={{ color: c.sub }}
-                >
-                  Size
+                <div className="mb-1 flex items-center justify-between px-1">
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-wide"
+                    style={{ color: c.sub }}
+                  >
+                    Size
+                  </span>
+                  <span
+                    className="text-[11px] tabular-nums"
+                    style={{ color: c.sub }}
+                  >
+                    {widget.fontSize}px
+                  </span>
                 </div>
-                <div className="mb-3 flex flex-wrap gap-1">
-                  {SIZES.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => updateWidget(widget.id, { fontSize: s })}
-                      className="rounded-[7px] px-2 py-1 text-[12px] font-semibold transition-colors"
-                      style={{
-                        color:
-                          s === widget.fontSize ? c.active : c.sub,
-                        background:
-                          s === widget.fontSize ? c.hover : 'transparent',
-                      }}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+                <input
+                  type="range"
+                  min={14}
+                  max={28}
+                  step={1}
+                  value={widget.fontSize}
+                  onChange={(e) =>
+                    updateWidget(widget.id, {
+                      fontSize: Number(e.target.value),
+                    })
+                  }
+                  className="mb-3 w-full"
+                  style={{ accentColor: c.active }}
+                />
                 <div
                   className="mb-1.5 flex items-center justify-between px-1"
                 >
@@ -370,7 +415,7 @@ function Journal({
                     <Shuffle size={13} />
                   </button>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex max-h-[230px] flex-col overflow-y-auto">
                   {FONTS.map((f) => (
                     <button
                       key={f.label}
@@ -437,10 +482,6 @@ function Journal({
           ) : (
             <Sun size={16} strokeWidth={1.8} />
           )}
-        </IconBtn>
-
-        <IconBtn tip="Buddy" theme={c} onClick={() => {}}>
-          <Hexagon size={16} strokeWidth={1.8} />
         </IconBtn>
 
         <div className="flex-1" />
@@ -522,7 +563,7 @@ function Journal({
               exit={{ x: '100%' }}
               transition={spring}
               onMouseDown={stop}
-              className="absolute right-0 top-0 flex h-full w-[268px] flex-col border-l"
+              className="absolute right-0 top-0 z-[60] flex h-full w-[268px] flex-col border-l"
               style={{ background: c.panel, borderColor: c.line }}
             >
               <div
