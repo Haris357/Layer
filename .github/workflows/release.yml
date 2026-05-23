@@ -37,13 +37,12 @@ jobs:
       # the cleaned text everywhere: GitHub release body, in-app updater notes,
       # and the announcement email.
       - name: Prepare release notes
+        id: notes
         shell: pwsh
         run: |
-          $clean = ''
-          if (Test-Path RELEASE_NOTES.md) {
-            $raw = Get-Content RELEASE_NOTES.md -Raw
-            $clean = ([regex]::Replace($raw, '(?s)<!--.*?-->', '')).Trim()
-          }
+          $raw = ''
+          if (Test-Path RELEASE_NOTES.md) { $raw = Get-Content RELEASE_NOTES.md -Raw }
+          $clean = ([regex]::Replace($raw, '(?s)<!--.*?-->', '')).Trim()
           if (-not $clean) {
             $clean = "Layer ${{ github.ref_name }} — install or let the app auto-update."
           }
@@ -51,6 +50,10 @@ jobs:
           "RELEASE_NOTES<<NOTES_EOF" | Add-Content $env:GITHUB_ENV
           $clean                     | Add-Content $env:GITHUB_ENV
           "NOTES_EOF"                | Add-Content $env:GITHUB_ENV
+          # Release notes can opt out of the subscriber email with a
+          # <!-- skip-email --> marker (handy for small patch releases).
+          $announce = if ($raw -match '(?i)skip-email') { 'false' } else { 'true' }
+          "announce=$announce" | Add-Content $env:GITHUB_OUTPUT
 
       - name: Build Layer (signed)
         env:
@@ -81,10 +84,12 @@ jobs:
       # Tell everyone on the download list about the new version. Best effort —
       # a mail hiccup won't mark the release failed (it's already published).
       - name: Install announcement deps
+        if: steps.notes.outputs.announce != 'false'
         working-directory: scripts
         run: npm install --no-audit --no-fund
 
       - name: Announce release to subscribers
+        if: steps.notes.outputs.announce != 'false'
         continue-on-error: true
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

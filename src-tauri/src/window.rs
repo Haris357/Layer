@@ -155,9 +155,12 @@ fn cursor_pos() -> (i32, i32) {
 pub fn setup_screensaver(app: &App) -> Result<(), Box<dyn std::error::Error>> {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.set_skip_taskbar(true);
-        resize_to_virtual_desktop(&window);
         set_noactivate(&window, false); // we want focus + key/mouse input
         let _ = window.set_ignore_cursor_events(false);
+        // True fullscreen via Tauri so it fills the whole monitor at native
+        // resolution regardless of display scaling (manual sizing landed at the
+        // logical, not physical, size on scaled displays).
+        let _ = window.set_fullscreen(true);
         set_topmost(&window, true);
         let _ = window.show();
         let _ = window.set_focus();
