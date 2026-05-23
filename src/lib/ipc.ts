@@ -120,6 +120,9 @@ export const setScreensaverEnabled = (enabled: boolean) =>
 export const previewScreensaver = () =>
   invoke<void>('preview_screensaver')
 
+export const showInFolder = (path: string) =>
+  invoke<void>('show_in_folder', { path })
+
 export const captureScreen = (path: string) =>
   invoke<void>('capture_screen', { path })
 

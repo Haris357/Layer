@@ -9,7 +9,9 @@ import {
   previewScreensaver,
   quitApp,
   registerHotkey,
+  showInFolder,
 } from '../lib/ipc'
+import { useToastStore } from '../store/toastStore'
 import { getUpdate, installUpdate } from '../lib/updater'
 import { Toggle, Slider, FieldRow, Segmented } from './ui'
 
@@ -109,7 +111,26 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
     onClose()
     // let the settings modal unmount before grabbing the screen
     setTimeout(() => {
-      captureScreen(path).catch(() => {})
+      captureScreen(path)
+        .then(() =>
+          useToastStore.getState().showToast({
+            message: 'Canvas exported',
+            icon: 'success',
+            duration: 7000,
+            actions: [
+              {
+                label: 'Open folder',
+                onClick: () => showInFolder(path).catch(() => {}),
+              },
+            ],
+          }),
+        )
+        .catch(() =>
+          useToastStore.getState().showToast({
+            message: 'Export failed',
+            icon: 'error',
+          }),
+        )
     }, 250)
   }
 

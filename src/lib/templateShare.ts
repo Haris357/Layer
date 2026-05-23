@@ -7,9 +7,13 @@ import {
   writeBinaryFile,
   readBinaryFile,
   readTextFile,
+  openUrl,
 } from './ipc'
 import { notify } from './notify'
+import { useToastStore } from '../store/toastStore'
 import { rememberMyTemplate } from '../hooks/useGalleryNotifications'
+
+const GALLERY_URL = 'https://layer-desktop.web.app/templates'
 import type { Template, Widget } from '../types/widget'
 
 // Captures the desktop canvas as a base64 PNG (no data: prefix).
@@ -114,6 +118,14 @@ export async function publishToGallery(opts: {
     title: `"${opts.template.name}" published to the gallery ✦`,
     body: 'Look for it under Newest at layer-desktop.web.app/templates.',
     templateId: ref.id,
+  })
+  useToastStore.getState().showToast({
+    message: 'Published to the gallery',
+    icon: 'success',
+    duration: 7000,
+    actions: [
+      { label: 'View', primary: true, onClick: () => openUrl(GALLERY_URL).catch(() => {}) },
+    ],
   })
   return ref.id
 }

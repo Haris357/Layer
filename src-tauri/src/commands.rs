@@ -98,6 +98,27 @@ pub fn exit_screensaver(app: AppHandle) {
     app.exit(0);
 }
 
+// Opens the system file explorer with the given file selected.
+#[tauri::command]
+pub fn show_in_folder(path: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        std::process::Command::new("explorer")
+            .raw_arg(format!("/select,\"{}\"", path))
+            .creation_flags(CREATE_NO_WINDOW)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = path;
+        Err("unsupported".into())
+    }
+}
+
 // Settings toggle: install or remove Layer as the active Windows screensaver.
 #[tauri::command]
 pub fn set_screensaver_enabled(enabled: bool) {

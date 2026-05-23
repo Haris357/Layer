@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Mode, NewWidget, Template, Widget } from '../types/widget'
 import { uid } from '../lib/utils'
 import { deleteAsset, isTauri } from '../lib/ipc'
+import { useToastStore } from './toastStore'
 
 function widgetAssets(widget: Widget): string[] {
   if (widget.type === 'image' || widget.type === 'video') return [widget.src]
@@ -133,23 +134,45 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     deleteWidget: (id) => {
       const state = get()
       const target = state.widgets.find((w) => w.id === id)
-      if (target) {
-        const stillUsed = new Set(
-          state.widgets
-            .filter((w) => w.id !== id)
-            .flatMap((w) => widgetAssets(w)),
-        )
-        widgetAssets(target).forEach((src) => {
-          if (src && !stillUsed.has(src)) {
-            deleteAsset(src).catch(() => {})
-          }
-        })
-      }
+      if (!target) return
+      const index = state.widgets.findIndex((w) => w.id === id)
       pushHistory()
       set((s) => ({
         widgets: s.widgets.filter((w) => w.id !== id),
         selectedId: s.selectedId === id ? null : s.selectedId,
       }))
+
+      // Offer a one-tap undo, and hold off on cleaning up assets until the
+      // window passes so an undo can fully restore image/video widgets.
+      let undone = false
+      useToastStore.getState().showToast({
+        message: 'Widget deleted',
+        icon: 'undo',
+        duration: 6000,
+        actions: [
+          {
+            label: 'Undo',
+            primary: true,
+            onClick: () => {
+              undone = true
+              set((s) => {
+                if (s.widgets.some((w) => w.id === target.id)) return {}
+                const widgets = [...s.widgets]
+                widgets.splice(Math.min(index, widgets.length), 0, target)
+                return { widgets, selectedId: target.id }
+              })
+            },
+          },
+        ],
+      })
+
+      setTimeout(() => {
+        if (undone) return
+        const stillUsed = new Set(get().widgets.flatMap((w) => widgetAssets(w)))
+        widgetAssets(target).forEach((src) => {
+          if (src && !stillUsed.has(src)) deleteAsset(src).catch(() => {})
+        })
+      }, 6500)
     },
 
     duplicateWidget: (id) => {
@@ -236,6 +259,10 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         widgets: state.widgets.map((w) => ({ ...w, locked })),
         selectedId: locked ? null : state.selectedId,
       }))
+      useToastStore.getState().showToast({
+        message: locked ? 'All widgets locked' : 'All widgets unlocked',
+        icon: 'lock',
+      })
     },
 
     setBackgroundAll: (background) => {

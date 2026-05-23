@@ -1,5 +1,16 @@
 @import 'tailwindcss';
 
+/* Toast countdown bar — GPU-composited so it animates smoothly even when the
+   click-through window isn't actively repainting the main thread. */
+@keyframes toast-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 :root,
 :root[data-theme='dark'] {
   --surface: rgba(23, 23, 27, 0.9);

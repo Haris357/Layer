@@ -176,6 +176,7 @@ pub fn run() {
             commands::exit_screensaver,
             commands::set_screensaver_enabled,
             commands::preview_screensaver,
+            commands::show_in_folder,
             commands::get_system_stats,
             commands::get_system_location,
             commands::list_apps,

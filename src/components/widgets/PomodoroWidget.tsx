@@ -3,6 +3,7 @@ import { Play, Pause, RotateCcw, Timer } from 'lucide-react'
 import type { PomodoroWidget as PomodoroWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
 import { notify } from '../../lib/notify'
+import { useToastStore } from '../../store/toastStore'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 type Phase = 'focus' | 'short' | 'long'
@@ -91,6 +92,11 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
         kind: 'timer',
         title: 'Focus session complete ✦',
         body: `${newCount} done today — time for a ${isLong ? 'long' : 'short'} break.`,
+      })
+      useToastStore.getState().showToast({
+        message: `Focus session complete — ${newCount} today 🎉`,
+        icon: 'focus',
+        duration: 6000,
       })
       setPhase(nextPhase)
       setRemaining(phaseDuration(nextPhase))

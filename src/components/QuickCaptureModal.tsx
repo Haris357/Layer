@@ -13,7 +13,7 @@ export function QuickCaptureModal() {
   const [text, setText] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const add = useInboxStore((s) => s.add)
-  const toast = useToastStore((s) => s.show)
+  const showToast = useToastStore((s) => s.showToast)
 
   useEffect(() => {
     const un = listen('quick-capture', () => {
@@ -40,7 +40,10 @@ export function QuickCaptureModal() {
     const t = text.trim()
     if (t) {
       add(t)
-      toast(`Captured: ${t.length > 40 ? t.slice(0, 40) + '…' : t}`)
+      showToast({
+        message: `Saved to Inbox: ${t.length > 36 ? t.slice(0, 36) + '…' : t}`,
+        icon: 'success',
+      })
     }
     setOpen(false)
     setText('')
