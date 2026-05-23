@@ -28,3 +28,6 @@ src-tauri/*.key
 
 # Generated update manifest (built in CI)
 latest.json
+
+# Cleaned release notes the workflow writes from RELEASE_NOTES.md
+notes.md

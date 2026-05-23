@@ -1,0 +1,11 @@
+{
+  "name": "layer-release-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Release-time helpers: update manifest + new-release announcement email.",
+  "dependencies": {
+    "firebase-admin": "^13.0.2",
+    "nodemailer": "^6.9.16"
+  }
+}
