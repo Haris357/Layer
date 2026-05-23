@@ -52,6 +52,11 @@ export interface SystemStats {
 export const getSystemStats = () =>
   invoke<SystemStats>('get_system_stats')
 
+// [latitude, longitude] from the Windows location service. Rejects if location
+// is disabled/blocked.
+export const getSystemLocation = () =>
+  invoke<[number, number]>('get_system_location')
+
 export interface AppEntry {
   name: string
   path: string
@@ -108,6 +113,12 @@ export const deleteAsset = (assetPath: string) =>
 
 export const registerHotkey = (accelerator: string) =>
   invoke<void>('register_hotkey', { accelerator })
+
+export const setScreensaverEnabled = (enabled: boolean) =>
+  invoke<void>('set_screensaver_enabled', { enabled })
+
+export const previewScreensaver = () =>
+  invoke<void>('preview_screensaver')
 
 export const captureScreen = (path: string) =>
   invoke<void>('capture_screen', { path })

@@ -1,21 +1,12 @@
-<!--
-  Edit this BEFORE you tag a release. On `git push --follow-tags` the
-  release workflow uses this file for three things:
-    1. the GitHub release body on Layer-releases
-    2. the in-app updater's "what's new" notes
-    3. the announcement email sent to everyone on the download list
+## ✨ Layer is now a screensaver
 
-  Keep it short and user-facing. Supported formatting: ## headings,
-  - bullet lists, **bold**, `code`, and [links](https://...).
-  Whatever's here gets sent — so make sure it matches the version you're
-  shipping.
--->
+Layer can run as your Windows screensaver — a calm, full-screen view with a big clock, the date, live weather, and whatever's currently playing, drifting over a soft ambient backdrop.
 
-## What's new
+- Turn it on or off anytime in **Settings → Screensaver**
+- Preview it instantly with **Ctrl + Shift + S**
+- It sets itself up automatically — no extra steps
 
-- Describe a new feature here
-- And another
+## 📍 Smarter location
 
-## Fixes
-
-- Describe a fix here
+- The **Weather** widget has a new **Use my location** button
+- Weather now uses your system location for an accurate, automatic city, with a graceful fallback when location access is off

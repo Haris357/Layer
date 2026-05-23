@@ -10,6 +10,7 @@ interface SettingsState {
   clockFormat24h: boolean
   theme: ThemePref
   autostartInit: boolean
+  screensaverEnabled: boolean
   onboarded: boolean
   setGridSize: (size: number) => void
   setSnapEnabled: (enabled: boolean) => void
@@ -17,6 +18,7 @@ interface SettingsState {
   setClockFormat24h: (value: boolean) => void
   setTheme: (theme: ThemePref) => void
   setAutostartInit: (value: boolean) => void
+  setScreensaverEnabled: (value: boolean) => void
   setOnboarded: (value: boolean) => void
 }
 
@@ -29,6 +31,7 @@ export const useSettingsStore = create<SettingsState>()(
       clockFormat24h: false,
       theme: 'system',
       autostartInit: false,
+      screensaverEnabled: true,
       onboarded: false,
       setGridSize: (gridSize) => set({ gridSize }),
       setSnapEnabled: (snapEnabled) => set({ snapEnabled }),
@@ -36,6 +39,8 @@ export const useSettingsStore = create<SettingsState>()(
       setClockFormat24h: (clockFormat24h) => set({ clockFormat24h }),
       setTheme: (theme) => set({ theme }),
       setAutostartInit: (autostartInit) => set({ autostartInit }),
+      setScreensaverEnabled: (screensaverEnabled) =>
+        set({ screensaverEnabled }),
       setOnboarded: (onboarded) => set({ onboarded }),
     }),
     { name: 'layer-settings' },

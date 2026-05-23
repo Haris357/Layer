@@ -16,6 +16,7 @@ import { useGalleryNotifications } from './hooks/useGalleryNotifications'
 import { useBatteryNotifications } from './hooks/useBatteryNotifications'
 import { useCalendarReminders } from './hooks/useCalendarReminders'
 import { useClipboardWatcher } from './hooks/useClipboardWatcher'
+import { useScreensaver } from './hooks/useScreensaver'
 import { useSettingsStore } from './store/settingsStore'
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
   useBatteryNotifications()
   useCalendarReminders()
   useClipboardWatcher()
+  useScreensaver()
 
   const onboarded = useSettingsStore((s) => s.onboarded)
 

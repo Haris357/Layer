@@ -6,6 +6,7 @@ import { useSettingsStore } from '../store/settingsStore'
 import {
   captureScreen,
   getAppVersion,
+  previewScreensaver,
   quitApp,
   registerHotkey,
 } from '../lib/ipc'
@@ -34,10 +35,14 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const snapEnabled = useSettingsStore((s) => s.snapEnabled)
   const hotkey = useSettingsStore((s) => s.hotkey)
   const theme = useSettingsStore((s) => s.theme)
+  const screensaverEnabled = useSettingsStore((s) => s.screensaverEnabled)
   const setGridSize = useSettingsStore((s) => s.setGridSize)
   const setSnapEnabled = useSettingsStore((s) => s.setSnapEnabled)
   const setHotkey = useSettingsStore((s) => s.setHotkey)
   const setTheme = useSettingsStore((s) => s.setTheme)
+  const setScreensaverEnabled = useSettingsStore(
+    (s) => s.setScreensaverEnabled,
+  )
 
   const [capturing, setCapturing] = useState(false)
   const [autostart, setAutostart] = useState(false)
@@ -178,6 +183,25 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           <FieldRow label="Launch Layer on startup">
             <Toggle checked={autostart} onChange={toggleAutostart} />
           </FieldRow>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-[12px] font-medium text-[var(--text-secondary)]">
+              Screensaver
+            </span>
+            <FieldRow label="Use Layer as my screensaver">
+              <Toggle
+                checked={screensaverEnabled}
+                onChange={setScreensaverEnabled}
+              />
+            </FieldRow>
+            <button
+              type="button"
+              onClick={() => previewScreensaver().catch(() => {})}
+              className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
+            >
+              Preview screensaver · Ctrl+Shift+S
+            </button>
+          </div>
 
           <div className="flex flex-col gap-2">
             <span className="text-[12px] font-medium text-[var(--text-secondary)]">

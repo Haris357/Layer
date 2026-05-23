@@ -1,4 +1,5 @@
 mod commands;
+mod screensaver;
 mod storage;
 mod window;
 
@@ -8,6 +9,24 @@ use tauri::{Emitter, Manager};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, ShortcutState};
 
 pub fn run() {
+    // Decide up front whether Windows launched us as a screensaver (/s). /p and
+    // /c are handled and exit inside here, so we only continue for /s or a
+    // normal launch.
+    let is_screensaver =
+        screensaver::launch_mode_from_args() == screensaver::LaunchMode::Screensaver;
+
+    // A second instance of the same app can't share the main app's WebView2
+    // data folder, so give the screensaver its own — it runs fine alongside a
+    // running Layer.
+    if is_screensaver {
+        if let Ok(local) = std::env::var("LOCALAPPDATA") {
+            std::env::set_var(
+                "WEBVIEW2_USER_DATA_FOLDER",
+                format!("{local}\\Layer\\screensaver-webview"),
+            );
+        }
+    }
+
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
@@ -33,16 +52,31 @@ pub fn run() {
                             window::set_layer(&w, true);
                         }
                         let _ = app.emit("quick-capture", ());
+                    } else if shortcut.key == Code::KeyS {
+                        // Ctrl+Shift+S → preview the screensaver right now.
+                        screensaver::preview();
                     } else {
                         let _ = app.emit("toggle-mode", ());
                     }
                 })
                 .build(),
         )
-        .setup(|app| {
+        .setup(move |app| {
+            app.manage(screensaver::Launch {
+                screensaver: is_screensaver,
+            });
+
+            // Screensaver mode: just show the ambient view on top — no tray,
+            // no global shortcuts, no desktop pinning.
+            if is_screensaver {
+                window::setup_screensaver(app)?;
+                return Ok(());
+            }
+
             window::setup_window(app)?;
             let _ = app.global_shortcut().register("CmdOrControl+Shift+Space");
             let _ = app.global_shortcut().register("CmdOrControl+Shift+N");
+            let _ = app.global_shortcut().register("CmdOrControl+Shift+S");
 
             let toggle_item =
                 MenuItemBuilder::with_id("toggle", "Toggle edit mode").build(app)?;
@@ -138,7 +172,12 @@ pub fn run() {
             commands::delete_asset,
             commands::quit_app,
             commands::get_app_version,
+            commands::get_launch_mode,
+            commands::exit_screensaver,
+            commands::set_screensaver_enabled,
+            commands::preview_screensaver,
             commands::get_system_stats,
+            commands::get_system_location,
             commands::list_apps,
             commands::launch_app,
             commands::get_app_icon,

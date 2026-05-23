@@ -8,11 +8,14 @@ import {
   CloudSnow,
   CloudLightning,
   Wind,
+  MapPin,
+  Loader2,
   type LucideIcon,
 } from 'lucide-react'
 import type { WeatherWidget as WeatherWidgetType } from '../../types/widget'
 import { TextField } from '../ui'
 import { cn } from '../../lib/utils'
+import { detectLocation } from '../../lib/location'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 interface CodeInfo {
@@ -135,6 +138,25 @@ function WeatherSettings({
 }) {
   const [query, setQuery] = useState(widget.city)
   const [results, setResults] = useState<GeoResult[]>([])
+  const [locating, setLocating] = useState(false)
+
+  const useMyLocation = async () => {
+    setLocating(true)
+    try {
+      const loc = await detectLocation()
+      if (loc) {
+        onUpdate({
+          city: loc.city || 'My location',
+          lat: loc.lat,
+          lon: loc.lon,
+        })
+        setQuery(loc.city || '')
+        setResults([])
+      }
+    } finally {
+      setLocating(false)
+    }
+  }
 
   useEffect(() => {
     const q = query.trim()
@@ -167,6 +189,19 @@ function WeatherSettings({
 
   return (
     <div className="flex w-[240px] flex-col gap-2">
+      <button
+        type="button"
+        onClick={() => useMyLocation()}
+        disabled={locating}
+        className="flex items-center justify-center gap-1.5 rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] disabled:opacity-60"
+      >
+        {locating ? (
+          <Loader2 size={13} strokeWidth={2} className="animate-spin" />
+        ) : (
+          <MapPin size={13} strokeWidth={2} />
+        )}
+        {locating ? 'Finding you…' : 'Use my location'}
+      </button>
       <TextField
         value={query}
         placeholder="Search a city…"

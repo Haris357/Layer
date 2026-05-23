@@ -80,6 +80,36 @@ pub fn get_app_version(app: AppHandle) -> Result<String, String> {
     Ok(app.package_info().version.to_string())
 }
 
+// "screensaver" when Windows launched us with /s, otherwise "normal". The
+// frontend uses this to decide which view to render.
+#[tauri::command]
+pub fn get_launch_mode(state: State<crate::screensaver::Launch>) -> String {
+    if state.screensaver {
+        "screensaver".into()
+    } else {
+        "normal".into()
+    }
+}
+
+// Called by the ambient view on any key/mouse activity to dismiss the
+// screensaver.
+#[tauri::command]
+pub fn exit_screensaver(app: AppHandle) {
+    app.exit(0);
+}
+
+// Settings toggle: install or remove Layer as the active Windows screensaver.
+#[tauri::command]
+pub fn set_screensaver_enabled(enabled: bool) {
+    crate::screensaver::set_enabled(enabled);
+}
+
+// Settings "Preview" button: show the screensaver right now.
+#[tauri::command]
+pub fn preview_screensaver() {
+    crate::screensaver::preview();
+}
+
 #[tauri::command]
 pub fn open_url(url: String) -> Result<(), String> {
     std::process::Command::new("cmd")
@@ -490,6 +520,38 @@ fn ensure_com() {
     }
 }
 
+// The system's current coordinates via the Windows Geolocator, when location
+// access is enabled. Runs on a worker thread with a timeout so it can never
+// hang the app if the location service is slow or blocked. Returns [lat, lon].
+#[tauri::command]
+pub fn get_system_location() -> Result<(f64, f64), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use std::sync::mpsc;
+        use std::time::Duration;
+        let (tx, rx) = mpsc::channel();
+        std::thread::spawn(move || {
+            ensure_com();
+            let res = (|| -> windows::core::Result<(f64, f64)> {
+                use windows::Devices::Geolocation::Geolocator;
+                let locator = Geolocator::new()?;
+                let pos = locator.GetGeopositionAsync()?.get()?;
+                let basic = pos.Coordinate()?.Point()?.Position()?;
+                Ok((basic.Latitude, basic.Longitude))
+            })();
+            let _ = tx.send(res.map_err(|e| e.to_string()));
+        });
+        match rx.recv_timeout(Duration::from_secs(6)) {
+            Ok(r) => r,
+            Err(_) => Err("location request timed out".into()),
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("unsupported".into())
+    }
+}
+
 #[derive(serde::Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct NowPlaying {
@@ -723,8 +785,9 @@ pub fn register_hotkey(app: AppHandle, accelerator: String) -> Result<(), String
     shortcut
         .register(accelerator.as_str())
         .map_err(|e| e.to_string())?;
-    // Re-register the (fixed) quick-capture shortcut so a custom toggle
-    // hotkey doesn't take it down with unregister_all.
+    // Re-register the (fixed) quick-capture + screensaver-preview shortcuts so
+    // a custom toggle hotkey doesn't take them down with unregister_all.
     let _ = shortcut.register("CmdOrControl+Shift+N");
+    let _ = shortcut.register("CmdOrControl+Shift+S");
     Ok(())
 }

@@ -148,6 +148,71 @@ fn cursor_pos() -> (i32, i32) {
     (0, 0)
 }
 
+// Screensaver mode: the same window, repurposed to sit on top of everything,
+// span all monitors, and take input (so any key/mouse can dismiss it). The
+// opposite of the normal desktop-pinned behaviour — so we skip the hit poll
+// and never push it to the bottom.
+pub fn setup_screensaver(app: &App) -> Result<(), Box<dyn std::error::Error>> {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.set_skip_taskbar(true);
+        resize_to_virtual_desktop(&window);
+        set_noactivate(&window, false); // we want focus + key/mouse input
+        let _ = window.set_ignore_cursor_events(false);
+        set_topmost(&window, true);
+        let _ = window.show();
+        let _ = window.set_focus();
+        bring_to_front(&window);
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+fn set_topmost(window: &WebviewWindow, on: bool) {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        SetWindowPos, HWND_NOTOPMOST, HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOMOVE,
+        SWP_NOSIZE,
+    };
+    let hwnd: HWND = match window.hwnd() {
+        Ok(h) => h.0 as HWND,
+        Err(_) => return,
+    };
+    let after = if on { HWND_TOPMOST } else { HWND_NOTOPMOST };
+    unsafe {
+        SetWindowPos(
+            hwnd,
+            after,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+        );
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn set_topmost(_window: &WebviewWindow, _on: bool) {}
+
+#[cfg(target_os = "windows")]
+fn bring_to_front(window: &WebviewWindow) {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        SetForegroundWindow, ShowWindow, SW_SHOW,
+    };
+    let hwnd: HWND = match window.hwnd() {
+        Ok(h) => h.0 as HWND,
+        Err(_) => return,
+    };
+    unsafe {
+        ShowWindow(hwnd, SW_SHOW);
+        SetForegroundWindow(hwnd);
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn bring_to_front(_window: &WebviewWindow) {}
+
 // Polls the cursor and toggles per-region click-through, AND continuously
 // snaps the window to the bottom of the z-order so Layer is pinned to the
 // desktop — it can never float above another app, even momentarily.
