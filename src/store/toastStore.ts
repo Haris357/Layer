@@ -29,6 +29,10 @@ export interface ToastSpec {
   // 0-100 → shows a determinate progress bar instead of the countdown bar
   // (used for live download progress).
   progress?: number
+  // Small right-aligned live status (e.g. "45% · 2.3/8.1 MB") shown while a
+  // progress toast is running. Kept separate from `message` so the main label
+  // stays stable and doesn't jitter as numbers tick.
+  detail?: string
 }
 
 export interface ActiveToast extends ToastSpec {

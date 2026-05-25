@@ -25,7 +25,8 @@ import {
 } from '../lib/ipc'
 import { useCanvasStore } from '../store/canvasStore'
 import { useToastStore } from '../store/toastStore'
-import { getUpdate, installUpdate } from '../lib/updater'
+import { getUpdate } from '../lib/updater'
+import { runUpdate } from '../lib/updateFlow'
 import { Toggle, Slider, FieldRow, Segmented } from './ui'
 
 type TabId = 'general' | 'appearance' | 'screensaver' | 'shortcuts' | 'about'
@@ -137,19 +138,19 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
     setUpdateMsg('Checking for updates…')
     try {
       const update = await getUpdate()
+      setUpdateBusy(false)
       if (!update) {
         setUpdateMsg("You're on the latest version.")
-        setUpdateBusy(false)
         return
       }
-      setUpdateMsg(`Downloading v${update.version}…`)
-      await installUpdate(update, (p) =>
-        setUpdateMsg(`Downloading v${update.version}… ${p}%`),
-      )
-      setUpdateMsg('Installing — Layer will restart…')
+      // Hand off to the toast flow: it downloads in the background and offers a
+      // Relaunch / Later choice when ready. Close Settings so the toast shows.
+      setUpdateMsg('')
+      onClose()
+      runUpdate(update)
     } catch {
-      setUpdateMsg('Could not check for updates.')
       setUpdateBusy(false)
+      setUpdateMsg('Could not check for updates.')
     }
   }
 

@@ -81,6 +81,21 @@ function ToastItem({
         {toast.message}
       </span>
 
+      <AnimatePresence mode="popLayout">
+        {toast.detail && (
+          <motion.span
+            key={toast.detail}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="shrink-0 tabular-nums text-[11.5px] font-medium text-[var(--text-tertiary)]"
+          >
+            {toast.detail}
+          </motion.span>
+        )}
+      </AnimatePresence>
+
       {toast.actions?.map((a) => (
         <button
           key={a.label}
@@ -100,27 +115,35 @@ function ToastItem({
         </button>
       ))}
 
-      <button
-        type="button"
-        aria-label="Dismiss"
-        onClick={() => onDismiss(toast.id)}
-        className="shrink-0 rounded-[7px] p-1 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
-      >
-        <X size={14} strokeWidth={2.4} />
-      </button>
+      {/* No dismiss button mid-download — closing would just hide the
+          progress while it keeps running. */}
+      {!determinate && (
+        <button
+          type="button"
+          aria-label="Dismiss"
+          onClick={() => onDismiss(toast.id)}
+          className="shrink-0 rounded-[7px] p-1 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
+        >
+          <X size={14} strokeWidth={2.4} />
+        </button>
+      )}
 
       {/* Progress / countdown bar. Driven by a GPU-composited transform so it
           stays smooth even when the click-through window isn't repainting the
           main thread. */}
       {determinate ? (
-        <div className="absolute inset-x-0 bottom-0 h-[2.5px]">
+        <div
+          className="absolute inset-x-0 bottom-0 h-[3px]"
+          style={{
+            background: 'color-mix(in srgb, var(--text-primary) 8%, transparent)',
+          }}
+        >
           <div
-            className="h-full origin-left"
+            className="h-full origin-left rounded-r-full"
             style={{
               transform: `scaleX(${Math.max(0, Math.min(100, toast.progress ?? 0)) / 100})`,
-              transition: 'transform 0.2s linear',
+              transition: 'transform 0.25s ease-out',
               background: tint,
-              opacity: 0.9,
             }}
           />
         </div>
