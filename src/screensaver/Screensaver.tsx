@@ -10,7 +10,24 @@ import {
   CloudLightning,
   type LucideIcon,
 } from 'lucide-react'
-import { getNowPlaying, loadTemplates, type NowPlaying } from '../lib/ipc'
+import {
+  getNowPlaying,
+  getScreensaverTheme,
+  loadSpaces,
+  type NowPlaying,
+} from '../lib/ipc'
+
+type SsTheme = 'ambient' | 'minimal' | 'quote'
+
+const QUOTES = [
+  'Breathe.',
+  'Stay present.',
+  'One thing at a time.',
+  'Rest is productive.',
+  'Be where your feet are.',
+  'Slow is smooth, smooth is fast.',
+  'Almost everything works again if you unplug it.',
+]
 import { ipLocation, systemLocation, type GeoLocation } from '../lib/location'
 import './screensaver.css'
 
@@ -46,7 +63,7 @@ interface Weather {
 // (works even in the screensaver's separate webview).
 async function widgetLocation(): Promise<GeoLocation | null> {
   try {
-    const raw = await loadTemplates()
+    const raw = await loadSpaces()
     if (!raw) return null
     const parsed = JSON.parse(raw) as {
       templates?: Array<{ widgets?: Array<Record<string, unknown>> }>
@@ -82,9 +99,10 @@ async function locate(): Promise<GeoLocation | null> {
   )
 }
 
-function useWeather(): Weather | null {
+function useWeather(active: boolean): Weather | null {
   const [data, setData] = useState<Weather | null>(null)
   useEffect(() => {
+    if (!active) return
     let cancelled = false
     const load = async () => {
       const loc = await locate()
@@ -110,13 +128,14 @@ function useWeather(): Weather | null {
       cancelled = true
       window.clearInterval(id)
     }
-  }, [])
+  }, [active])
   return data
 }
 
-function useNowPlaying(): NowPlaying | null {
+function useNowPlaying(active: boolean): NowPlaying | null {
   const [np, setNp] = useState<NowPlaying | null>(null)
   useEffect(() => {
+    if (!active) return
     let cancelled = false
     const poll = () => {
       getNowPlaying()
@@ -129,7 +148,7 @@ function useNowPlaying(): NowPlaying | null {
       cancelled = true
       window.clearInterval(id)
     }
-  }, [])
+  }, [active])
   return np
 }
 
@@ -137,12 +156,34 @@ function useNowPlaying(): NowPlaying | null {
 // screensaver. Any key or mouse activity dismisses it.
 export function Screensaver() {
   const [now, setNow] = useState(() => new Date())
+  const [theme, setTheme] = useState<SsTheme>('ambient')
+  const [quote, setQuote] = useState(
+    () => QUOTES[Math.floor(Math.random() * QUOTES.length)] ?? QUOTES[0],
+  )
+
+  // Which style to render (persisted by the main app to a file).
+  useEffect(() => {
+    getScreensaverTheme()
+      .then((t) => {
+        if (t === 'minimal' || t === 'quote' || t === 'ambient') setTheme(t)
+      })
+      .catch(() => {})
+  }, [])
 
   // Tick once a second — enough to keep the minute (and blinking colon) live.
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 1000)
     return () => window.clearInterval(id)
   }, [])
+
+  // Rotate the quote (quote theme only).
+  useEffect(() => {
+    if (theme !== 'quote') return
+    const id = window.setInterval(() => {
+      setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)] ?? QUOTES[0])
+    }, 12000)
+    return () => window.clearInterval(id)
+  }, [theme])
 
   // Dismiss on real input. We ignore the first mouse event (Windows often
   // emits a synthetic move at launch) and only quit once the cursor actually
@@ -186,11 +227,55 @@ export function Screensaver() {
     day: 'numeric',
   })
 
-  const weather = useWeather()
-  const np = useNowPlaying()
+  const ambient = theme === 'ambient'
+  const weather = useWeather(ambient)
+  const np = useNowPlaying(ambient)
   const wInfo = weather ? codeInfo(weather.code) : null
   const playing = !!(np?.hasSession && np.title)
 
+  const hint = (
+    <div className="ss-hint">move the mouse or press a key to exit</div>
+  )
+
+  // ── Minimal: stark, flat black, one huge thin clock anchored bottom-left ──
+  if (theme === 'minimal') {
+    return (
+      <div className="ss-root ss-minimal">
+        <div className="ss-min">
+          <div className="ss-min-time">
+            {h12}
+            <span className="ss-colon">:</span>
+            {minutes}
+            <span className="ss-min-ampm">{ampm}</span>
+          </div>
+          <div className="ss-min-date">{date}</div>
+        </div>
+        {hint}
+      </div>
+    )
+  }
+
+  // ── Quote: a serif line is the hero; the time sits small above it ──
+  if (theme === 'quote') {
+    return (
+      <div className="ss-root ss-quote-theme">
+        <div className="ss-aurora a" />
+        <div className="ss-aurora b" />
+        <div className="ss-aurora c" />
+        <div className="ss-content">
+          <div className="ss-q-time">
+            {h12}:{minutes} {ampm}
+          </div>
+          <p className="ss-q-text">“{quote}”</p>
+          <div className="ss-q-date">{date}</div>
+        </div>
+        <div className="ss-mark">Layer</div>
+        {hint}
+      </div>
+    )
+  }
+
+  // ── Ambient (default): centered, info-rich, drifting aurora ──
   return (
     <div className="ss-root">
       <div className="ss-aurora a" />
@@ -203,18 +288,7 @@ export function Screensaver() {
           {h12}
           <span className="ss-colon">:</span>
           {minutes}
-          <span
-            style={{
-              fontSize: '0.28em',
-              fontWeight: 500,
-              letterSpacing: '0.1em',
-              marginLeft: '0.18em',
-              verticalAlign: '0.7em',
-              opacity: 0.5,
-            }}
-          >
-            {ampm}
-          </span>
+          <span className="ss-ampm">{ampm}</span>
         </h1>
         <p className="ss-date">{date}</p>
 
@@ -249,7 +323,7 @@ export function Screensaver() {
       </div>
 
       <div className="ss-mark">Layer</div>
-      <div className="ss-hint">move the mouse or press a key to exit</div>
+      {hint}
     </div>
   )
 }

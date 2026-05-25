@@ -4,7 +4,9 @@ import { Clipboard, Pin, X, Search, Trash2 } from 'lucide-react'
 import type { ClipboardWidget as ClipboardWidgetType } from '../../types/widget'
 import { useClipboardStore } from '../../store/clipboardStore'
 import { useToastStore } from '../../store/toastStore'
+import { Tooltip } from '../Tooltip'
 import { cn } from '../../lib/utils'
+import { detectKind } from '../../lib/clipboardKind'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 function ClipboardRenderer() {
@@ -32,21 +34,32 @@ function ClipboardRenderer() {
   return (
     <div className="glass flex h-full w-full flex-col overflow-hidden rounded-[12px] border border-[var(--border)] p-2.5">
       <div className="mb-1.5 flex items-center justify-between gap-2 px-1">
-        <span
-          className="text-[var(--text-primary)]"
-          style={{ fontSize: 12, fontWeight: 700, letterSpacing: '-0.3px' }}
-        >
-          Clipboard
+        <span className="flex items-baseline gap-1.5">
+          <span
+            className="text-[var(--text-primary)]"
+            style={{ fontSize: 12, fontWeight: 700, letterSpacing: '-0.3px' }}
+          >
+            Clipboard
+          </span>
+          {items.length > 0 && (
+            <span
+              className="rounded-full bg-[var(--fill-2)] px-1.5 text-[9.5px] font-semibold text-[var(--text-tertiary)]"
+              style={{ lineHeight: '15px' }}
+            >
+              {items.length}
+            </span>
+          )}
         </span>
         {items.length > 0 && (
-          <button
-            type="button"
-            onClick={clearUnpinned}
-            title="Clear unpinned"
-            className="text-[var(--text-tertiary)] transition-colors hover:text-[var(--danger)]"
-          >
-            <Trash2 size={11} strokeWidth={2} />
-          </button>
+          <Tooltip label="Clear unpinned" side="bottom">
+            <button
+              type="button"
+              onClick={clearUnpinned}
+              className="text-[var(--text-tertiary)] transition-colors hover:text-[var(--danger)]"
+            >
+              <Trash2 size={11} strokeWidth={2} />
+            </button>
+          </Tooltip>
         )}
       </div>
 
@@ -73,61 +86,91 @@ function ClipboardRenderer() {
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
-          {filtered.map((i) => (
+          {filtered.map((i) => {
+            const meta = detectKind(i.text)
+            const Icon = meta.icon
+            return (
             <div
               key={i.id}
               className={cn(
-                'group/c relative flex items-start gap-1.5 rounded-[7px] px-1.5 py-1.5 transition-colors',
+                'group/c flex h-[34px] shrink-0 items-center gap-2 rounded-[8px] pl-2 pr-1 transition-colors',
                 i.pinned ? 'bg-[var(--fill-2)]' : 'hover:bg-[var(--fill-1)]',
               )}
             >
-              <button
-                type="button"
-                onClick={() => copy(i.text)}
-                title="Click to re-copy"
-                className="min-w-0 flex-1 text-left"
-              >
-                <div
-                  className="break-words text-[11.5px] leading-snug text-[var(--text-primary)]"
+              {/* type chip */}
+              {meta.kind === 'color' ? (
+                <span
+                  className="h-[20px] w-[20px] shrink-0 rounded-[6px] border border-[var(--border)]"
+                  style={{ background: meta.preview }}
+                />
+              ) : (
+                <span
+                  className="flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[6px]"
                   style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
+                    background: `color-mix(in srgb, ${meta.tint} 16%, transparent)`,
+                    color: meta.tint,
                   }}
                 >
-                  {i.text}
-                </div>
-              </button>
-              <div className="flex shrink-0 flex-col items-center gap-0.5">
+                  <Icon size={12} strokeWidth={2.2} />
+                </span>
+              )}
+              <Tooltip
+                label={`Copy ${meta.label.toLowerCase()}`}
+                side="top"
+                className="min-w-0 flex-1"
+              >
                 <button
                   type="button"
-                  onClick={() => togglePin(i.id)}
-                  title={i.pinned ? 'Unpin' : 'Pin'}
-                  className={cn(
-                    'transition-colors',
-                    i.pinned
-                      ? 'text-[var(--accent)]'
-                      : 'text-[var(--text-tertiary)] opacity-0 group-hover/c:opacity-100 hover:text-[var(--text-primary)]',
-                  )}
+                  onClick={() => copy(i.text)}
+                  className="block min-w-0 flex-1 text-left"
                 >
-                  <Pin
-                    size={11}
-                    strokeWidth={2}
-                    fill={i.pinned ? 'currentColor' : 'none'}
-                  />
+                  <div
+                    className={cn(
+                      'truncate',
+                      meta.mono
+                        ? 'font-mono text-[11px]'
+                        : 'text-[12px]',
+                      meta.kind === 'link'
+                        ? 'text-[#5b9aff] group-hover/c:underline'
+                        : 'text-[var(--text-primary)]',
+                    )}
+                  >
+                    {meta.preview}
+                  </div>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => remove(i.id)}
-                  title="Remove"
-                  className="text-[var(--text-tertiary)] opacity-0 transition-opacity group-hover/c:opacity-100 hover:text-[var(--danger)]"
-                >
-                  <X size={11} strokeWidth={2.5} />
-                </button>
+              </Tooltip>
+              <div className="flex shrink-0 items-center gap-0.5">
+                <Tooltip label={i.pinned ? 'Unpin' : 'Pin'} side="top">
+                  <button
+                    type="button"
+                    onClick={() => togglePin(i.id)}
+                    className={cn(
+                      'flex h-6 w-6 items-center justify-center rounded-[6px] transition-colors hover:bg-[var(--fill-3)]',
+                      i.pinned
+                        ? 'text-[var(--accent)]'
+                        : 'text-[var(--text-tertiary)] opacity-0 group-hover/c:opacity-100 hover:text-[var(--text-primary)]',
+                    )}
+                  >
+                    <Pin
+                      size={11}
+                      strokeWidth={2}
+                      fill={i.pinned ? 'currentColor' : 'none'}
+                    />
+                  </button>
+                </Tooltip>
+                <Tooltip label="Remove" side="top">
+                  <button
+                    type="button"
+                    onClick={() => remove(i.id)}
+                    className="flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-tertiary)] opacity-0 transition-opacity hover:bg-[var(--fill-3)] hover:text-[var(--danger)] group-hover/c:opacity-100"
+                  >
+                    <X size={11} strokeWidth={2.5} />
+                  </button>
+                </Tooltip>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { Inbox, Check, X, Trash2 } from 'lucide-react'
 import type { InboxWidget as InboxWidgetType } from '../../types/widget'
 import { useInboxStore } from '../../store/inboxStore'
 import { cn } from '../../lib/utils'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 function relTime(iso: string): string {
@@ -80,28 +81,30 @@ function InboxRenderer() {
                   {relTime(i.createdAt)}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => remove(i.id)}
-                className="shrink-0 self-start text-[var(--text-tertiary)] opacity-0 transition-opacity group-hover/i:opacity-100 hover:text-[var(--danger)]"
-                title="Remove"
-              >
-                <X size={11} strokeWidth={2.5} />
-              </button>
+              <Tooltip label="Remove" className="shrink-0 self-start">
+                <button
+                  type="button"
+                  onClick={() => remove(i.id)}
+                  className="text-[var(--text-tertiary)] opacity-0 transition-opacity group-hover/i:opacity-100 hover:text-[var(--danger)]"
+                >
+                  <X size={11} strokeWidth={2.5} />
+                </button>
+              </Tooltip>
             </div>
           ))}
         </div>
       )}
 
       {items.some((i) => i.done) && (
-        <button
-          type="button"
-          onClick={clearDone}
-          className="mt-1 flex items-center justify-center gap-1 rounded-[6px] px-2 py-1 text-[10.5px] font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
-        >
-          <Trash2 size={10} strokeWidth={2} />
-          Clear done
-        </button>
+        <Tooltip label="Clear done" side="top" className="mt-1">
+          <button
+            type="button"
+            onClick={clearDone}
+            className="flex items-center justify-center gap-1 rounded-[6px] px-2 py-1 text-[10.5px] font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
+          >
+            <Trash2 size={10} strokeWidth={2} />
+          </button>
+        </Tooltip>
       )}
     </div>
   )

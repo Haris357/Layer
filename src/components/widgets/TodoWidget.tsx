@@ -4,6 +4,7 @@ import type { TodoWidget as TodoWidgetType, TodoItem } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
 import { uid } from '../../lib/utils'
 import { cn } from '../../lib/utils'
+import { fireConfetti } from '../../lib/confetti'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
@@ -19,6 +20,17 @@ function TodoRenderer({ widget }: { widget: TodoWidgetType }) {
     if (!text) return
     setItems([...widget.items, { id: uid(), text, done: false }])
     setDraft('')
+  }
+
+  // Toggle a task; celebrate when this checks off the last one.
+  const toggle = (id: string) => {
+    const next = widget.items.map((i) =>
+      i.id === id ? { ...i, done: !i.done } : i,
+    )
+    setItems(next)
+    const wasAllDone = widget.items.length > 0 && widget.items.every((i) => i.done)
+    const nowAllDone = next.length > 0 && next.every((i) => i.done)
+    if (nowAllDone && !wasAllDone) fireConfetti()
   }
 
   const done = widget.items.filter((i) => i.done).length
@@ -37,13 +49,7 @@ function TodoRenderer({ widget }: { widget: TodoWidgetType }) {
           <div key={item.id} className="group flex items-center gap-2">
             <button
               type="button"
-              onClick={() =>
-                setItems(
-                  widget.items.map((i) =>
-                    i.id === item.id ? { ...i, done: !i.done } : i,
-                  ),
-                )
-              }
+              onClick={() => toggle(item.id)}
               className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors"
               style={{
                 borderColor: item.done

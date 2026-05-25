@@ -11,10 +11,10 @@ import {
 } from './ipc'
 import { notify } from './notify'
 import { useToastStore } from '../store/toastStore'
-import { rememberMyTemplate } from '../hooks/useGalleryNotifications'
+import { rememberMySpace } from '../hooks/useGalleryNotifications'
 
-const GALLERY_URL = 'https://layer-desktop.web.app/templates'
-import type { Template, Widget } from '../types/widget'
+const GALLERY_URL = 'https://layer-desktop.web.app/spaces'
+import type { Space, Widget } from '../types/widget'
 
 // Captures the desktop canvas as a base64 PNG (no data: prefix).
 export const captureCanvas = () => captureScreenBase64()
@@ -39,7 +39,7 @@ function toThumbnail(pngBase64: string, maxW = 1100): Promise<string> {
 }
 
 // Exports a template as a ZIP: {name}/template.json + {name}/screenshot.png
-export async function exportTemplateZip(t: Template, screenshotPng: string) {
+export async function exportSpaceZip(t: Space, screenshotPng: string) {
   const path = await save({
     defaultPath: `${t.name}.zip`,
     filters: [{ name: 'Layer template', extensions: ['zip'] }],
@@ -57,7 +57,7 @@ export async function exportTemplateZip(t: Template, screenshotPng: string) {
 }
 
 // Imports a template from a .zip, .layer or .json file the user picks.
-export async function importTemplateFile(): Promise<{
+export async function importSpaceFile(): Promise<{
   name: string
   widgets: Widget[]
 } | null> {
@@ -92,32 +92,32 @@ export async function importTemplateFile(): Promise<{
 
 // Publishes a template to the public gallery on the website.
 export async function publishToGallery(opts: {
-  template: Template
+  space: Space
   author: string
   description: string
   screenshotPng: string
 }): Promise<string> {
   const thumb = await toThumbnail(opts.screenshotPng)
   const ref = await addDoc(collection(db, 'templates'), {
-    name: opts.template.name.slice(0, 79),
+    name: opts.space.name.slice(0, 79),
     description:
       opts.description.trim() ||
-      `A ${opts.template.widgets.length}-widget Layer layout.`,
+      `A ${opts.space.widgets.length}-widget Layer layout.`,
     author: opts.author.trim() || 'Anonymous',
-    widgetCount: opts.template.widgets.length,
-    widgets: opts.template.widgets,
+    widgetCount: opts.space.widgets.length,
+    widgets: opts.space.widgets,
     thumb,
     upvotes: 0,
     downvotes: 0,
     score: 0,
     createdAt: serverTimestamp(),
   })
-  rememberMyTemplate(ref.id)
+  rememberMySpace(ref.id)
   notify({
     kind: 'publish',
-    title: `"${opts.template.name}" published to the gallery ✦`,
-    body: 'Look for it under Newest at layer-desktop.web.app/templates.',
-    templateId: ref.id,
+    title: `"${opts.space.name}" published to the gallery ✦`,
+    body: 'Look for it under Newest at layer-desktop.web.app/spaces.',
+    spaceId: ref.id,
   })
   useToastStore.getState().showToast({
     message: 'Published to the gallery',

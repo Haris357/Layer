@@ -33,6 +33,7 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
@@ -55,6 +56,9 @@ pub fn run() {
                     } else if shortcut.key == Code::KeyS {
                         // Ctrl+Shift+S → preview the screensaver right now.
                         screensaver::preview();
+                    } else if shortcut.key == Code::KeyE {
+                        // Ctrl+Shift+E → cycle to the next space.
+                        let _ = app.emit("cycle-space", ());
                     } else {
                         let _ = app.emit("toggle-mode", ());
                     }
@@ -77,11 +81,12 @@ pub fn run() {
             let _ = app.global_shortcut().register("CmdOrControl+Shift+Space");
             let _ = app.global_shortcut().register("CmdOrControl+Shift+N");
             let _ = app.global_shortcut().register("CmdOrControl+Shift+S");
+            let _ = app.global_shortcut().register("CmdOrControl+Shift+E");
 
             let toggle_item =
                 MenuItemBuilder::with_id("toggle", "Toggle edit mode").build(app)?;
             let templates_item =
-                MenuItemBuilder::with_id("templates", "Templates…").build(app)?;
+                MenuItemBuilder::with_id("spaces", "Spaces…").build(app)?;
             let notifications_item =
                 MenuItemBuilder::with_id("notifications", "Notifications…").build(app)?;
             let settings_item =
@@ -125,7 +130,7 @@ pub fn run() {
                     "toggle" => {
                         let _ = app.emit("toggle-mode", ());
                     }
-                    "templates" => open_panel(app, "open-templates"),
+                    "spaces" => open_panel(app, "open-spaces"),
                     "notifications" => open_panel(app, "open-notifications"),
                     "settings" => open_panel(app, "open-settings"),
                     "lock-all" => {
@@ -162,8 +167,8 @@ pub fn run() {
             commands::load_canvas,
             commands::save_journal,
             commands::load_journal,
-            commands::save_templates,
-            commands::load_templates,
+            commands::save_spaces,
+            commands::load_spaces,
             commands::write_text_file,
             commands::read_text_file,
             commands::reset_all,
@@ -176,7 +181,11 @@ pub fn run() {
             commands::exit_screensaver,
             commands::set_screensaver_enabled,
             commands::preview_screensaver,
+            commands::set_screensaver_theme,
+            commands::get_screensaver_theme,
             commands::show_in_folder,
+            commands::get_wallpaper_accent,
+            commands::set_hotcorner,
             commands::get_system_stats,
             commands::get_system_location,
             commands::list_apps,

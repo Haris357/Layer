@@ -20,6 +20,7 @@ import {
   type NotificationKind,
 } from '../store/notificationStore'
 import { relTime } from '../lib/notify'
+import { Tooltip } from './Tooltip'
 import { cn } from '../lib/utils'
 
 const ICONS: Record<NotificationKind, typeof Bell> = {
@@ -100,23 +101,25 @@ function Row({ n }: { n: AppNotification }) {
       </div>
       <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/n:opacity-100">
         {!n.read && (
+          <Tooltip label="Mark as read">
+            <button
+              type="button"
+              onClick={() => markRead(n.id)}
+              className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
+            >
+              <Check size={13} />
+            </button>
+          </Tooltip>
+        )}
+        <Tooltip label="Remove">
           <button
             type="button"
-            title="Mark as read"
-            onClick={() => markRead(n.id)}
-            className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
+            onClick={() => remove(n.id)}
+            className="rounded-[6px] p-1.5 text-[var(--text-tertiary)] hover:bg-[var(--fill-2)] hover:text-[var(--danger)]"
           >
-            <Check size={13} />
+            <Trash2 size={13} />
           </button>
-        )}
-        <button
-          type="button"
-          title="Remove"
-          onClick={() => remove(n.id)}
-          className="rounded-[6px] p-1.5 text-[var(--text-tertiary)] hover:bg-[var(--fill-2)] hover:text-[var(--danger)]"
-        >
-          <Trash2 size={13} />
-        </button>
+        </Tooltip>
       </div>
     </div>
   )
@@ -162,22 +165,26 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                     Mark all read
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="rounded-[7px] px-2 py-1 text-[11.5px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
-                >
-                  Clear all
-                </button>
+                <Tooltip label="Clear all">
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    className="rounded-[7px] p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </Tooltip>
               </>
             )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="ml-1 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-            >
-              <X size={18} />
-            </button>
+            <Tooltip label="Close" side="bottom">
+              <button
+                type="button"
+                onClick={onClose}
+                className="ml-1 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+              >
+                <X size={18} />
+              </button>
+            </Tooltip>
           </div>
         </div>
 

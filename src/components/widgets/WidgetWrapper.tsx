@@ -10,6 +10,7 @@ import { setForceInteractive } from '../../lib/ipc'
 import { computeSnap } from '../../lib/align'
 import { widgetRegistry } from '../../lib/widgetRegistry'
 import { ContextMenu } from '../ContextMenu'
+import { Tooltip } from '../Tooltip'
 import { SettingsPopover } from './SettingsPopover'
 
 const RESIZE = 'var(--cur-resize)'
@@ -127,7 +128,7 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
           data-hit
           data-nobg={widget.background === false ? '' : undefined}
           initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={{ opacity: widget.opacity ?? 1, scale: 1 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
           className="group relative h-full w-full"
           style={{
@@ -136,22 +137,24 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
                 ? '2px solid var(--border-strong)'
                 : 'none',
             outlineOffset: 4,
-            opacity: widget.opacity ?? 1,
           }}
           onMouseDown={handleMouseDown}
           onContextMenu={handleContextMenu}
         >
           {!widget.locked && (
-            <div
-              className="layer-drag-handle layer-grab absolute left-1.5 top-1.5 z-20 flex h-5 w-5 items-center justify-center rounded-[7px] border border-[var(--border)] bg-[var(--surface)] opacity-0 shadow-md transition-opacity duration-150 group-hover:opacity-100"
-              title="Drag to move"
+            <Tooltip
+              label="Drag to move"
+              side="right"
+              className="layer-drag-handle layer-grab absolute left-1.5 top-1.5 z-20 h-5 w-5 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
             >
-              <GripVertical
-                size={12}
-                strokeWidth={2}
-                className="text-[var(--text-secondary)]"
-              />
-            </div>
+              <div className="flex h-5 w-5 items-center justify-center rounded-[7px] border border-[var(--border)] bg-[var(--surface)] shadow-md">
+                <GripVertical
+                  size={12}
+                  strokeWidth={2}
+                  className="text-[var(--text-secondary)]"
+                />
+              </div>
+            </Tooltip>
           )}
           <Renderer widget={widget} />
           <AnimatePresence>

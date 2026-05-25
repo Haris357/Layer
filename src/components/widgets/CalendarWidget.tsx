@@ -30,6 +30,7 @@ import {
 } from '../../lib/calendar'
 import { cn } from '../../lib/utils'
 import { Menu } from '../Menu'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 type ViewKind = 'month' | 'week' | 'day'
@@ -79,10 +80,10 @@ function MonthView({
               key={i}
               type="button"
               onClick={() => onSelectDay(d)}
-              className="group/d flex flex-col items-center gap-0.5 rounded-[6px] py-0.5 transition-colors hover:bg-[var(--surface-hover)]"
+              className="group/d flex flex-col items-center gap-0.5 rounded-[7px] py-0.5 transition-colors hover:bg-[var(--surface-hover)]"
             >
               <span
-                className="flex h-[20px] w-[20px] items-center justify-center rounded-full"
+                className="flex h-[20px] w-[20px] items-center justify-center rounded-full transition-transform group-hover/d:scale-110"
                 style={{
                   fontSize: 11,
                   fontWeight: isToday ? 700 : 500,
@@ -90,6 +91,9 @@ function MonthView({
                   color: isToday
                     ? 'var(--on-accent)'
                     : 'var(--text-secondary)',
+                  boxShadow: isToday
+                    ? '0 2px 8px color-mix(in srgb, var(--accent) 45%, transparent)'
+                    : 'none',
                 }}
               >
                 {d.getDate()}
@@ -124,52 +128,95 @@ function WeekView({
   events: CalendarEvent[]
   onSelectDay: (d: Date) => void
 }) {
-  // 7 days starting from the Sunday of the cursor week.
+  // 7 days starting from the Sunday of the cursor week, as horizontal rows.
   const sunday = addDays(cursor, -cursor.getDay())
   const days = Array.from({ length: 7 }, (_, i) => addDays(sunday, i))
   return (
-    <div className="grid flex-1 grid-cols-7 gap-1 overflow-hidden">
+    <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
       {days.map((d) => {
         const isToday = sameDay(d, today)
-        const ev = eventsOnDay(events, d).slice(0, 6)
+        const isWeekend = d.getDay() === 0 || d.getDay() === 6
+        const dayEvents = eventsOnDay(events, d)
+        const ev = dayEvents.slice(0, 4)
+        const extra = dayEvents.length - ev.length
         return (
           <button
             key={d.toISOString()}
             type="button"
             onClick={() => onSelectDay(d)}
-            className="flex min-w-0 flex-col gap-1 rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] p-1.5 text-left transition-colors hover:border-[var(--border-strong)]"
+            className={cn(
+              'group/row relative flex min-h-[46px] items-center gap-2.5 overflow-hidden rounded-[10px] border px-2 py-1.5 text-left transition-all',
+              isToday
+                ? 'border-[var(--accent)] bg-[var(--accent-soft,var(--fill-2))]'
+                : 'border-[var(--border)] bg-[var(--fill-1)] hover:border-[var(--border-strong)] hover:bg-[var(--fill-2)]',
+            )}
           >
-            <div className="flex items-center justify-between">
+            {/* accent rail on today's row */}
+            {isToday && (
               <span
-                className="text-[var(--text-tertiary)]"
-                style={{ fontSize: 9, fontWeight: 600 }}
+                className="absolute left-0 top-0 h-full w-[3px]"
+                style={{ background: 'var(--accent)' }}
+              />
+            )}
+            {/* date column */}
+            <div className="flex w-[36px] shrink-0 flex-col items-center gap-0.5">
+              <span
+                style={{
+                  fontSize: 8.5,
+                  fontWeight: 700,
+                  letterSpacing: '0.5px',
+                  color: isWeekend
+                    ? 'var(--text-tertiary)'
+                    : 'var(--text-secondary)',
+                }}
               >
-                {WEEKDAYS_SHORT[d.getDay()]}
+                {(WEEKDAYS_SHORT[d.getDay()] ?? '').toUpperCase()}
               </span>
               <span
-                className="flex h-[18px] w-[18px] items-center justify-center rounded-full"
+                className="flex h-[22px] w-[22px] items-center justify-center rounded-full transition-transform group-hover/row:scale-105"
                 style={{
-                  fontSize: 10.5,
+                  fontSize: 12,
                   fontWeight: isToday ? 700 : 600,
                   background: isToday ? 'var(--accent)' : 'transparent',
-                  color: isToday
-                    ? 'var(--on-accent)'
-                    : 'var(--text-primary)',
+                  color: isToday ? 'var(--on-accent)' : 'var(--text-primary)',
+                  boxShadow: isToday
+                    ? '0 2px 8px color-mix(in srgb, var(--accent) 45%, transparent)'
+                    : 'none',
                 }}
               >
                 {d.getDate()}
               </span>
             </div>
-            <div className="flex flex-col gap-[2px] overflow-hidden">
-              {ev.map((e) => (
+            {/* divider */}
+            <span className="h-7 w-px shrink-0 bg-[var(--border)]" />
+            {/* events flow to the right */}
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+              {ev.length === 0 ? (
                 <span
-                  key={e.id}
-                  className="truncate rounded-[3px] px-1 text-[9px] font-medium text-white"
-                  style={{ background: COLORS[e.color] }}
+                  className="italic text-[var(--text-tertiary)]"
+                  style={{ fontSize: 10.5 }}
                 >
-                  {e.title}
+                  Free
                 </span>
-              ))}
+              ) : (
+                ev.map((e) => (
+                  <span
+                    key={e.id}
+                    className="inline-flex max-w-full items-center gap-1 truncate rounded-[5px] px-1.5 py-[2px] text-[10px] font-medium text-white shadow-sm"
+                    style={{ background: COLORS[e.color] }}
+                  >
+                    {e.title}
+                  </span>
+                ))
+              )}
+              {extra > 0 && (
+                <span
+                  className="rounded-[5px] bg-[var(--fill-3)] px-1.5 py-[2px] text-[var(--text-secondary)]"
+                  style={{ fontSize: 9.5, fontWeight: 700 }}
+                >
+                  +{extra}
+                </span>
+              )}
             </div>
           </button>
         )
@@ -300,13 +347,15 @@ function DayPopover({
             {WEEKDAYS_SHORT[date.getDay()]}, {MONTHS[date.getMonth()]}{' '}
             {date.getDate()}
           </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-          >
-            <X size={16} />
-          </button>
+          <Tooltip label="Close" side="bottom">
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+            >
+              <X size={16} />
+            </button>
+          </Tooltip>
         </div>
         <div className="flex flex-1 flex-col gap-1 overflow-y-auto">
           {list.length === 0 && (
@@ -443,13 +492,15 @@ function EventEditor({
           >
             {isEditing ? 'Edit event' : 'New event'}
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-          >
-            <X size={18} />
-          </button>
+          <Tooltip label="Close" side="bottom">
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+            >
+              <X size={18} />
+            </button>
+          </Tooltip>
         </div>
 
         <input
@@ -524,14 +575,15 @@ function EventEditor({
               className="flex-1"
             />
             {recurrence !== 'none' && (
-              <input
-                type="date"
-                value={until}
-                onChange={(e) => setUntil(e.target.value)}
-                placeholder="Until"
-                title="Repeat until"
-                className="w-[150px] rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[12.5px] text-[var(--text-primary)] outline-none"
-              />
+              <Tooltip label="Repeat until">
+                <input
+                  type="date"
+                  value={until}
+                  onChange={(e) => setUntil(e.target.value)}
+                  placeholder="Until"
+                  className="w-[150px] rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[12.5px] text-[var(--text-primary)] outline-none"
+                />
+              </Tooltip>
             )}
           </div>
         </div>
@@ -553,14 +605,15 @@ function EventEditor({
             {isEditing ? 'Save' : 'Add event'}
           </button>
           {isEditing && (
-            <button
-              type="button"
-              onClick={del}
-              title="Delete"
-              className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2 text-[var(--danger)] transition-colors hover:bg-[var(--fill-2)]"
-            >
-              <Trash2 size={15} />
-            </button>
+            <Tooltip label="Delete">
+              <button
+                type="button"
+                onClick={del}
+                className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2 text-[var(--danger)] transition-colors hover:bg-[var(--fill-2)]"
+              >
+                <Trash2 size={15} />
+              </button>
+            </Tooltip>
           )}
         </div>
       </motion.div>
@@ -619,29 +672,34 @@ function CalendarRenderer() {
   return (
     <div className="glass flex h-full w-full flex-col overflow-hidden rounded-[12px] border border-[var(--border)] p-3">
       <div className="mb-2 flex items-center justify-between gap-1">
-        <button
-          type="button"
-          onClick={() => shift(-1)}
-          className="rounded-[6px] p-1 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-        >
-          <ChevronLeft size={15} />
-        </button>
-        <button
-          type="button"
-          onClick={goToday}
-          title="Jump to today"
-          className="flex-1 truncate text-center text-[var(--text-primary)] transition-opacity hover:opacity-70"
-          style={{ fontSize: 12.5, fontWeight: 700 }}
-        >
-          {headerTitle}
-        </button>
-        <button
-          type="button"
-          onClick={() => shift(1)}
-          className="rounded-[6px] p-1 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-        >
-          <ChevronRight size={15} />
-        </button>
+        <Tooltip label="Previous" side="bottom">
+          <button
+            type="button"
+            onClick={() => shift(-1)}
+            className="rounded-[6px] p-1 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+          >
+            <ChevronLeft size={15} />
+          </button>
+        </Tooltip>
+        <Tooltip label="Jump to today" side="bottom" className="flex-1">
+          <button
+            type="button"
+            onClick={goToday}
+            className="flex-1 truncate text-center text-[var(--text-primary)] transition-opacity hover:opacity-70"
+            style={{ fontSize: 12.5, fontWeight: 700 }}
+          >
+            {headerTitle}
+          </button>
+        </Tooltip>
+        <Tooltip label="Next" side="bottom">
+          <button
+            type="button"
+            onClick={() => shift(1)}
+            className="rounded-[6px] p-1 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+          >
+            <ChevronRight size={15} />
+          </button>
+        </Tooltip>
       </div>
 
       <div className="mb-2 flex items-center justify-between">
@@ -652,9 +710,9 @@ function CalendarRenderer() {
               type="button"
               onClick={() => setView(v)}
               className={cn(
-                'rounded-[5px] px-2 py-0.5 text-[10.5px] font-semibold capitalize transition-colors',
+                'rounded-[5px] px-2 py-0.5 text-[10.5px] font-semibold capitalize transition-all',
                 view === v
-                  ? 'bg-[var(--surface)] text-[var(--text-primary)]'
+                  ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-sm'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
               )}
             >
@@ -662,14 +720,15 @@ function CalendarRenderer() {
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => setEditing({ dateHint: cursor })}
-          title="New event"
-          className="flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-        >
-          <Plus size={14} strokeWidth={2.2} />
-        </button>
+        <Tooltip label="New event">
+          <button
+            type="button"
+            onClick={() => setEditing({ dateHint: cursor })}
+            className="flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+          >
+            <Plus size={14} strokeWidth={2.2} />
+          </button>
+        </Tooltip>
       </div>
 
       {view === 'month' && (

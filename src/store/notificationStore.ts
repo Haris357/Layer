@@ -20,7 +20,7 @@ export interface AppNotification {
   createdAt: string // ISO
   read: boolean
   href?: string
-  templateId?: string
+  spaceId?: string
   // De-dupe key so the same one-time event doesn't fire repeatedly.
   dedupe?: string
 }

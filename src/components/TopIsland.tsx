@@ -4,13 +4,13 @@ import { listen } from '@tauri-apps/api/event'
 import {
   Layers,
   Settings as SettingsIcon,
-  RotateCcw,
   LayoutTemplate,
   Lock,
   LockOpen,
   Square,
   SquareDashed,
-  Bell,
+  BellRing,
+  X,
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useSettingsStore } from '../store/settingsStore'
@@ -18,14 +18,32 @@ import { useNotificationStore } from '../store/notificationStore'
 import { notify } from '../lib/notify'
 import { getUpdate } from '../lib/updater'
 import { widgetList, type WidgetDefinition } from '../lib/widgetRegistry'
-import { resetAll as resetAllFiles } from '../lib/ipc'
 import { cn } from '../lib/utils'
-import { ConfirmDialog } from './ConfirmDialog'
 import { SettingsModal } from './SettingsModal'
-import { TemplatesModal } from './TemplatesModal'
+import { SpacesModal } from './SpacesModal'
 import { NotificationsPanel } from './NotificationsPanel'
 
 const spring = { type: 'spring', stiffness: 380, damping: 34 } as const
+
+// Small, instant, good-looking tooltip shown below a dock button (the dock
+// hugs the top edge, so tooltips drop downward).
+function Tip({ label, show }: { label: string; show: boolean }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.span
+          initial={{ opacity: 0, y: -3, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -3, scale: 0.96 }}
+          transition={{ duration: 0.12, ease: 'easeOut' }}
+          className="glass pointer-events-none absolute left-1/2 top-full z-[60] mt-2 -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[var(--border)] px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] shadow-md"
+        >
+          {label}
+        </motion.span>
+      )}
+    </AnimatePresence>
+  )
+}
 
 function ToolButton({
   index,
@@ -40,11 +58,13 @@ function ToolButton({
   onClick: () => void
   children: ReactNode
 }) {
+  const [hov, setHov] = useState(false)
   return (
     <motion.button
       type="button"
-      title={label}
       onClick={onClick}
+      onHoverStart={() => setHov(true)}
+      onHoverEnd={() => setHov(false)}
       initial={{ opacity: 0, scale: 0.5, y: -8 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.5, y: -8 }}
@@ -52,13 +72,14 @@ function ToolButton({
       whileHover={{ scale: 1.15 }}
       whileTap={{ scale: 0.9 }}
       className={cn(
-        'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-150',
+        'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-150',
         danger
           ? 'text-[var(--danger)] hover:bg-[var(--fill-1)]'
           : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)]',
       )}
     >
       {children}
+      <Tip label={label} show={hov} />
     </motion.button>
   )
 }
@@ -67,7 +88,6 @@ export function TopIsland() {
   const mode = useCanvasStore((s) => s.mode)
   const toggleMode = useCanvasStore((s) => s.toggleMode)
   const addWidget = useCanvasStore((s) => s.addWidget)
-  const resetAll = useCanvasStore((s) => s.resetAll)
   const widgets = useCanvasStore((s) => s.widgets)
   const lockAll = useCanvasStore((s) => s.lockAll)
   const setBackgroundAll = useCanvasStore((s) => s.setBackgroundAll)
@@ -75,9 +95,9 @@ export function TopIsland() {
   const gridSize = useSettingsStore((s) => s.gridSize)
 
   const [hovered, setHovered] = useState(false)
-  const [confirmReset, setConfirmReset] = useState(false)
+  const [notchHov, setNotchHov] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [showTemplates, setShowTemplates] = useState(false)
+  const [showSpaces, setShowSpaces] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const leaveTimer = useRef<number | undefined>(undefined)
   const unreadCount = useNotificationStore((s) =>
@@ -86,7 +106,7 @@ export function TopIsland() {
 
   // The tray menu fires these events; we open the matching modal here.
   useEffect(() => {
-    const unTpl = listen('open-templates', () => setShowTemplates(true))
+    const unTpl = listen('open-spaces', () => setShowSpaces(true))
     const unNot = listen('open-notifications', () =>
       setShowNotifications(true),
     )
@@ -131,12 +151,7 @@ export function TopIsland() {
 
   const open = mode === 'edit'
   const down =
-    hovered ||
-    open ||
-    confirmReset ||
-    showSettings ||
-    showTemplates ||
-    showNotifications
+    hovered || open || showSettings || showSpaces || showNotifications
   const allLocked = widgets.length > 0 && widgets.every((w) => w.locked)
   const anyBg = widgets.some(
     (w) => w.type !== 'note' && w.background !== false,
@@ -167,12 +182,6 @@ export function TopIsland() {
     addWidget({ ...created, x, y })
   }
 
-  const handleReset = () => {
-    resetAll()
-    resetAllFiles().catch(() => {})
-    setConfirmReset(false)
-  }
-
   return (
     <>
       <div
@@ -196,19 +205,32 @@ export function TopIsland() {
               layout
               type="button"
               onClick={toggleMode}
+              onHoverStart={() => setNotchHov(true)}
+              onHoverEnd={() => setNotchHov(false)}
               whileTap={{ scale: 0.92 }}
-              title={open ? 'Close menu' : 'Open menu'}
               className={cn(
-                'flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] px-2 transition-colors duration-150',
+                'relative flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] px-2 transition-colors duration-150',
                 open
                   ? 'bg-[var(--surface-active)]'
                   : 'hover:bg-[var(--surface-hover)]',
               )}
             >
-              <Layers
-                size={18}
-                strokeWidth={1.5}
-                className="text-[var(--text-primary)]"
+              {open ? (
+                <X
+                  size={18}
+                  strokeWidth={2}
+                  className="text-[var(--text-primary)]"
+                />
+              ) : (
+                <Layers
+                  size={18}
+                  strokeWidth={1.5}
+                  className="text-[var(--text-primary)]"
+                />
+              )}
+              <Tip
+                label={open ? 'Exit edit mode' : 'Open menu'}
+                show={notchHov}
               />
               <AnimatePresence initial={false}>
                 {!open && (
@@ -278,8 +300,8 @@ export function TopIsland() {
                   <div className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
                   <ToolButton
                     index={widgetList.length + 2}
-                    label="Templates"
-                    onClick={() => setShowTemplates(true)}
+                    label="Spaces"
+                    onClick={() => setShowSpaces(true)}
                   >
                     <LayoutTemplate size={18} strokeWidth={1.5} />
                   </ToolButton>
@@ -293,7 +315,7 @@ export function TopIsland() {
                     onClick={() => setShowNotifications(true)}
                   >
                     <span className="relative inline-flex">
-                      <Bell size={18} strokeWidth={1.5} />
+                      <BellRing size={18} strokeWidth={1.5} />
                       {unreadCount > 0 && (
                         <span
                           className="absolute -right-[3px] -top-[2px] h-[7px] w-[7px] rounded-full ring-2 ring-[var(--surface)]"
@@ -309,32 +331,12 @@ export function TopIsland() {
                   >
                     <SettingsIcon size={18} strokeWidth={1.5} />
                   </ToolButton>
-                  <ToolButton
-                    index={widgetList.length + 5}
-                    label="Reset canvas"
-                    danger
-                    onClick={() => setConfirmReset(true)}
-                  >
-                    <RotateCcw size={18} strokeWidth={1.5} />
-                  </ToolButton>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
         </motion.div>
       </div>
-
-      <AnimatePresence>
-        {confirmReset && (
-          <ConfirmDialog
-            title="Reset canvas"
-            message="This will delete all widgets. Continue?"
-            confirmLabel="Reset"
-            onConfirm={handleReset}
-            onCancel={() => setConfirmReset(false)}
-          />
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {showSettings && (
@@ -347,8 +349,8 @@ export function TopIsland() {
           <NotificationsPanel onClose={() => setShowNotifications(false)} />
         )}
 
-        {showTemplates && (
-          <TemplatesModal onClose={() => setShowTemplates(false)} />
+        {showSpaces && (
+          <SpacesModal onClose={() => setShowSpaces(false)} />
         )}
       </AnimatePresence>
     </>

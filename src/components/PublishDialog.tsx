@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import type { Template } from '../types/widget'
+import type { Space } from '../types/widget'
 
 export function PublishDialog({
-  template,
+  space,
   onCancel,
   onPublish,
 }: {
-  template: Template
+  space: Space
   onCancel: () => void
   onPublish: (author: string, description: string) => void
 }) {
@@ -48,7 +48,7 @@ export function PublishDialog({
           className="mb-4 text-[var(--text-secondary)]"
           style={{ fontSize: 12.5, lineHeight: 1.5 }}
         >
-          “{template.name}” will appear in the public gallery with a screenshot
+          “{space.name}” will appear in the public gallery with a screenshot
           of your canvas.
         </p>
 

@@ -31,6 +31,7 @@ import {
 } from '../../lib/ipc'
 import { useCanvasStore } from '../../store/canvasStore'
 import { Segmented, TextField } from '../ui'
+import { Tooltip } from '../Tooltip'
 import { cn } from '../../lib/utils'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
@@ -108,38 +109,41 @@ function SortableListItem({
       style={style}
       className="group/item relative flex items-center rounded-[9px] transition-colors hover:bg-[var(--surface-hover)]"
     >
-      <button
-        type="button"
-        title={app.name}
-        onClick={() => launchApp(app.path).catch(() => {})}
-        className="flex min-w-0 flex-1 items-center gap-2.5 px-2 py-1.5 text-left"
-      >
-        <AppIcon app={app} size={34} />
-        <span
-          className="min-w-0 flex-1 truncate text-[var(--text-primary)]"
-          style={{ fontSize: 13, fontWeight: 500 }}
+      <Tooltip label={app.name} side="top" className="min-w-0 flex-1">
+        <button
+          type="button"
+          onClick={() => launchApp(app.path).catch(() => {})}
+          className="flex min-w-0 flex-1 items-center gap-2.5 px-2 py-1.5 text-left"
         >
-          {app.name}
-        </span>
-      </button>
+          <AppIcon app={app} size={34} />
+          <span
+            className="min-w-0 flex-1 truncate text-[var(--text-primary)]"
+            style={{ fontSize: 13, fontWeight: 500 }}
+          >
+            {app.name}
+          </span>
+        </button>
+      </Tooltip>
       <div className="mr-1 flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/item:opacity-100">
-        <button
-          type="button"
-          {...attributes}
-          {...listeners}
-          title="Drag to reorder"
-          className="cursor-grab rounded-[5px] p-1 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] active:cursor-grabbing"
-        >
-          <GripVertical size={13} />
-        </button>
-        <button
-          type="button"
-          title="Remove"
-          onClick={onRemove}
-          className="rounded-[5px] p-1 text-[var(--text-tertiary)] hover:text-[var(--danger)]"
-        >
-          <X size={14} />
-        </button>
+        <Tooltip label="Drag to reorder" side="top">
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="cursor-grab rounded-[5px] p-1 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] active:cursor-grabbing"
+          >
+            <GripVertical size={13} />
+          </button>
+        </Tooltip>
+        <Tooltip label="Remove" side="top">
+          <button
+            type="button"
+            onClick={onRemove}
+            className="rounded-[5px] p-1 text-[var(--text-tertiary)] hover:text-[var(--danger)]"
+          >
+            <X size={14} />
+          </button>
+        </Tooltip>
       </div>
     </div>
   )
@@ -166,39 +170,42 @@ function SortableGridItem({
       style={style}
       className="group/item relative flex flex-col items-center gap-1.5"
     >
-      <button
-        type="button"
-        title={app.name}
-        onClick={() => launchApp(app.path).catch(() => {})}
-        className="flex flex-col items-center gap-1.5"
-      >
-        <div className="transition-transform duration-150 hover:scale-110">
-          <AppIcon app={app} size={48} />
-        </div>
-        <span
-          className="w-full truncate text-center text-[var(--text-secondary)]"
-          style={{ fontSize: 10.5, fontWeight: 500 }}
+      <Tooltip label={app.name} side="top">
+        <button
+          type="button"
+          onClick={() => launchApp(app.path).catch(() => {})}
+          className="flex flex-col items-center gap-1.5"
         >
-          {app.name}
-        </span>
-      </button>
-      <button
-        type="button"
-        {...attributes}
-        {...listeners}
-        title="Drag to reorder"
-        className="absolute -left-1 -top-1 z-10 flex h-4 w-4 cursor-grab items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] opacity-0 transition-opacity group-hover/item:opacity-100 active:cursor-grabbing"
-      >
-        <GripVertical size={10} strokeWidth={2} />
-      </button>
-      <button
-        type="button"
-        title="Remove"
-        onClick={onRemove}
-        className="absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-[var(--danger)]"
-      >
-        <X size={10} strokeWidth={2.5} />
-      </button>
+          <div className="transition-transform duration-150 hover:scale-110">
+            <AppIcon app={app} size={48} />
+          </div>
+          <span
+            className="w-full truncate text-center text-[var(--text-secondary)]"
+            style={{ fontSize: 10.5, fontWeight: 500 }}
+          >
+            {app.name}
+          </span>
+        </button>
+      </Tooltip>
+      <Tooltip label="Drag to reorder" side="top" className="absolute -left-1 -top-1 z-10">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="flex h-4 w-4 cursor-grab items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] opacity-0 transition-opacity group-hover/item:opacity-100 active:cursor-grabbing"
+        >
+          <GripVertical size={10} strokeWidth={2} />
+        </button>
+      </Tooltip>
+      <Tooltip label="Remove" side="top" className="absolute -right-1 -top-1 z-10">
+        <button
+          type="button"
+          onClick={onRemove}
+          className="flex h-4 w-4 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] opacity-0 transition-opacity group-hover/item:opacity-100 hover:text-[var(--danger)]"
+        >
+          <X size={10} strokeWidth={2.5} />
+        </button>
+      </Tooltip>
     </div>
   )
 }
@@ -438,20 +445,25 @@ function AppsRenderer({ widget }: { widget: AppsWidgetType }) {
       )}
 
       {/* Floating "+" — always visible, lock-state independent. */}
-      <button
-        type="button"
-        title="Add apps or a folder"
-        onClick={() => setAddOpen((v) => !v)}
-        className={cn(
-          'absolute bottom-2 right-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border transition-colors',
-          addOpen
-            ? 'border-[var(--border-strong)] bg-[var(--fill-2)] text-[var(--text-primary)]'
-            : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]',
-        )}
-        style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.18)' }}
+      <Tooltip
+        label="Add apps or a folder"
+        side="top"
+        className="absolute bottom-2 right-2 z-20"
       >
-        <Plus size={16} strokeWidth={2.2} />
-      </button>
+        <button
+          type="button"
+          onClick={() => setAddOpen((v) => !v)}
+          className={cn(
+            'flex h-8 w-8 items-center justify-center rounded-full border transition-colors',
+            addOpen
+              ? 'border-[var(--border-strong)] bg-[var(--fill-2)] text-[var(--text-primary)]'
+              : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]',
+          )}
+          style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.18)' }}
+        >
+          <Plus size={16} strokeWidth={2.2} />
+        </button>
+      </Tooltip>
 
       <AnimatePresence>
         {addOpen && (

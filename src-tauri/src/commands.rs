@@ -50,12 +50,12 @@ pub fn load_journal(app: AppHandle) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn save_templates(app: AppHandle, json: String) -> Result<(), String> {
+pub fn save_spaces(app: AppHandle, json: String) -> Result<(), String> {
     storage::write_templates(&app, &json)
 }
 
 #[tauri::command]
-pub fn load_templates(app: AppHandle) -> Result<String, String> {
+pub fn load_spaces(app: AppHandle) -> Result<String, String> {
     storage::read_templates(&app)
 }
 
@@ -98,6 +98,72 @@ pub fn exit_screensaver(app: AppHandle) {
     app.exit(0);
 }
 
+// Returns the desktop's dominant accent colour as a #rrggbb hex string,
+// sampled from the current wallpaper (saturation-weighted so the accent is
+// vibrant rather than a muddy average).
+#[tauri::command]
+pub async fn get_wallpaper_accent() -> Result<String, String> {
+    #[cfg(target_os = "windows")]
+    {
+        // Decode + sample on a blocking thread so the (potentially large)
+        // wallpaper image never freezes the UI.
+        tauri::async_runtime::spawn_blocking(|| -> Result<String, String> {
+            use windows_sys::Win32::UI::WindowsAndMessaging::{
+                SystemParametersInfoW, SPI_GETDESKWALLPAPER,
+            };
+            let mut buf = [0u16; 520];
+            let ok = unsafe {
+                SystemParametersInfoW(
+                    SPI_GETDESKWALLPAPER,
+                    buf.len() as u32,
+                    buf.as_mut_ptr() as *mut std::ffi::c_void,
+                    0,
+                )
+            };
+            if ok == 0 {
+                return Err("no wallpaper".into());
+            }
+            let end = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
+            let path = String::from_utf16_lossy(&buf[..end]);
+            if path.is_empty() {
+                return Err("empty wallpaper path".into());
+            }
+
+            let img = image::open(&path).map_err(|e| e.to_string())?;
+            let small = img
+                .resize(48, 48, image::imageops::FilterType::Triangle)
+                .to_rgb8();
+
+            let (mut wr, mut wg, mut wb, mut wsum) = (0f64, 0f64, 0f64, 0f64);
+            for p in small.pixels() {
+                let (r, g, b) = (p[0] as f64, p[1] as f64, p[2] as f64);
+                let max = r.max(g).max(b);
+                let min = r.min(g).min(b);
+                let sat = if max == 0.0 { 0.0 } else { (max - min) / max };
+                // Vibrant pixels dominate; tiny base so flat walls still average.
+                let w = sat * sat + 0.02;
+                wr += r * w;
+                wg += g * w;
+                wb += b * w;
+                wsum += w;
+            }
+            if wsum == 0.0 {
+                return Err("no pixels".into());
+            }
+            let r = (wr / wsum).round() as u32;
+            let g = (wg / wsum).round() as u32;
+            let b = (wb / wsum).round() as u32;
+            Ok(format!("#{:02x}{:02x}{:02x}", r, g, b))
+        })
+        .await
+        .map_err(|e| e.to_string())?
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("unsupported".into())
+    }
+}
+
 // Opens the system file explorer with the given file selected.
 #[tauri::command]
 pub fn show_in_folder(path: String) -> Result<(), String> {
@@ -129,6 +195,24 @@ pub fn set_screensaver_enabled(enabled: bool) {
 #[tauri::command]
 pub fn preview_screensaver() {
     crate::screensaver::preview();
+}
+
+// Screensaver theme (ambient / minimal / quote), persisted to a file so the
+// separate screensaver process can read it.
+#[tauri::command]
+pub fn set_screensaver_theme(theme: String) {
+    crate::screensaver::set_theme(&theme);
+}
+
+#[tauri::command]
+pub fn get_screensaver_theme() -> String {
+    crate::screensaver::get_theme()
+}
+
+// Settings toggle: enable/disable the top-left hot corner that cycles spaces.
+#[tauri::command]
+pub fn set_hotcorner(enabled: bool) {
+    crate::window::set_hotcorner(enabled);
 }
 
 #[tauri::command]
@@ -545,27 +629,22 @@ fn ensure_com() {
 // access is enabled. Runs on a worker thread with a timeout so it can never
 // hang the app if the location service is slow or blocked. Returns [lat, lon].
 #[tauri::command]
-pub fn get_system_location() -> Result<(f64, f64), String> {
+pub async fn get_system_location() -> Result<(f64, f64), String> {
     #[cfg(target_os = "windows")]
     {
-        use std::sync::mpsc;
-        use std::time::Duration;
-        let (tx, rx) = mpsc::channel();
-        std::thread::spawn(move || {
+        tauri::async_runtime::spawn_blocking(|| -> Result<(f64, f64), String> {
             ensure_com();
-            let res = (|| -> windows::core::Result<(f64, f64)> {
+            (|| -> windows::core::Result<(f64, f64)> {
                 use windows::Devices::Geolocation::Geolocator;
                 let locator = Geolocator::new()?;
                 let pos = locator.GetGeopositionAsync()?.get()?;
                 let basic = pos.Coordinate()?.Point()?.Position()?;
                 Ok((basic.Latitude, basic.Longitude))
-            })();
-            let _ = tx.send(res.map_err(|e| e.to_string()));
-        });
-        match rx.recv_timeout(Duration::from_secs(6)) {
-            Ok(r) => r,
-            Err(_) => Err("location request timed out".into()),
-        }
+            })()
+            .map_err(|e| e.to_string())
+        })
+        .await
+        .map_err(|e| e.to_string())?
     }
     #[cfg(not(target_os = "windows"))]
     {
@@ -583,62 +662,73 @@ pub struct NowPlaying {
 }
 
 #[tauri::command]
-pub fn get_now_playing() -> NowPlaying {
+pub async fn get_now_playing() -> NowPlaying {
     #[cfg(target_os = "windows")]
     {
-        use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager as Mgr;
-        use windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus as Status;
-        ensure_com();
-        let result = (|| -> windows::core::Result<NowPlaying> {
-            let mgr = Mgr::RequestAsync()?.get()?;
-            let session = mgr.GetCurrentSession()?;
-            let mut np = NowPlaying {
-                has_session: true,
-                ..Default::default()
-            };
-            if let Ok(props) = session.TryGetMediaPropertiesAsync()?.get() {
-                np.title =
-                    props.Title().map(|s| s.to_string()).unwrap_or_default();
-                np.artist =
-                    props.Artist().map(|s| s.to_string()).unwrap_or_default();
-            }
-            if let Ok(info) = session.GetPlaybackInfo() {
-                np.playing = info
-                    .PlaybackStatus()
-                    .map(|s| s == Status::Playing)
-                    .unwrap_or(false);
-            }
-            Ok(np)
-        })();
-        if let Ok(np) = result {
-            return np;
-        }
+        // Run the WinRT calls on a blocking MTA worker thread. Their .get()
+        // deadlocks on the STA main thread (it needs a message pump), which
+        // would freeze the whole app; on an MTA thread it just blocks safely.
+        tauri::async_runtime::spawn_blocking(|| {
+            use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager as Mgr;
+            use windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus as Status;
+            ensure_com();
+            (|| -> windows::core::Result<NowPlaying> {
+                let mgr = Mgr::RequestAsync()?.get()?;
+                let session = mgr.GetCurrentSession()?;
+                let mut np = NowPlaying {
+                    has_session: true,
+                    ..Default::default()
+                };
+                if let Ok(props) = session.TryGetMediaPropertiesAsync()?.get() {
+                    np.title =
+                        props.Title().map(|s| s.to_string()).unwrap_or_default();
+                    np.artist =
+                        props.Artist().map(|s| s.to_string()).unwrap_or_default();
+                }
+                if let Ok(info) = session.GetPlaybackInfo() {
+                    np.playing = info
+                        .PlaybackStatus()
+                        .map(|s| s == Status::Playing)
+                        .unwrap_or(false);
+                }
+                Ok(np)
+            })()
+            .unwrap_or_default()
+        })
+        .await
+        .unwrap_or_default()
     }
-    NowPlaying::default()
+    #[cfg(not(target_os = "windows"))]
+    {
+        NowPlaying::default()
+    }
 }
 
 #[tauri::command]
-pub fn media_control(action: String) {
+pub async fn media_control(action: String) {
     #[cfg(target_os = "windows")]
     {
-        use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager as Mgr;
-        ensure_com();
-        let _ = (|| -> windows::core::Result<()> {
-            let mgr = Mgr::RequestAsync()?.get()?;
-            let session = mgr.GetCurrentSession()?;
-            match action.as_str() {
-                "next" => {
-                    session.TrySkipNextAsync()?.get()?;
+        let _ = tauri::async_runtime::spawn_blocking(move || {
+            use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager as Mgr;
+            ensure_com();
+            let _ = (|| -> windows::core::Result<()> {
+                let mgr = Mgr::RequestAsync()?.get()?;
+                let session = mgr.GetCurrentSession()?;
+                match action.as_str() {
+                    "next" => {
+                        session.TrySkipNextAsync()?.get()?;
+                    }
+                    "prev" => {
+                        session.TrySkipPreviousAsync()?.get()?;
+                    }
+                    _ => {
+                        session.TryTogglePlayPauseAsync()?.get()?;
+                    }
                 }
-                "prev" => {
-                    session.TrySkipPreviousAsync()?.get()?;
-                }
-                _ => {
-                    session.TryTogglePlayPauseAsync()?.get()?;
-                }
-            }
-            Ok(())
-        })();
+                Ok(())
+            })();
+        })
+        .await;
     }
     #[cfg(not(target_os = "windows"))]
     let _ = action;
@@ -654,15 +744,16 @@ pub struct NotificationItem {
 }
 
 #[tauri::command]
-pub fn get_notifications() -> Vec<NotificationItem> {
+pub async fn get_notifications() -> Vec<NotificationItem> {
     #[cfg(target_os = "windows")]
     {
+        tauri::async_runtime::spawn_blocking(|| {
         use windows::UI::Notifications::Management::UserNotificationListener;
         use windows::UI::Notifications::{
             KnownNotificationBindings, NotificationKinds,
         };
         ensure_com();
-        let result = (|| -> windows::core::Result<Vec<NotificationItem>> {
+        (|| -> windows::core::Result<Vec<NotificationItem>> {
             let listener = UserNotificationListener::Current()?;
             let _ = listener.RequestAccessAsync()?.get();
             let list = listener
@@ -715,12 +806,16 @@ pub fn get_notifications() -> Vec<NotificationItem> {
                 })
             }
             Ok(out)
-        })();
-        if let Ok(items) = result {
-            return items;
-        }
+        })()
+        .unwrap_or_default()
+        })
+        .await
+        .unwrap_or_default()
     }
-    Vec::new()
+    #[cfg(not(target_os = "windows"))]
+    {
+        Vec::new()
+    }
 }
 
 #[tauri::command]
@@ -806,9 +901,10 @@ pub fn register_hotkey(app: AppHandle, accelerator: String) -> Result<(), String
     shortcut
         .register(accelerator.as_str())
         .map_err(|e| e.to_string())?;
-    // Re-register the (fixed) quick-capture + screensaver-preview shortcuts so
-    // a custom toggle hotkey doesn't take them down with unregister_all.
+    // Re-register the fixed shortcuts so a custom toggle hotkey doesn't take
+    // them down with unregister_all.
     let _ = shortcut.register("CmdOrControl+Shift+N");
     let _ = shortcut.register("CmdOrControl+Shift+S");
+    let _ = shortcut.register("CmdOrControl+Shift+E");
     Ok(())
 }

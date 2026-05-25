@@ -1,6 +1,6 @@
 import { uid } from './utils'
 import type {
-  Template,
+  Space,
   Widget,
   ClockWidget,
   NoteWidget,
@@ -187,7 +187,7 @@ function command(): Widget[] {
   ]
 }
 
-export function buildBuiltins(): Template[] {
+export function buildBuiltins(): Space[] {
   return [
     { id: 'builtin-minimal', name: 'Minimal', builtin: true, widgets: minimal() },
     {

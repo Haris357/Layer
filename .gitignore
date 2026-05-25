@@ -31,3 +31,6 @@ latest.json
 
 # Cleaned release notes the workflow writes from RELEASE_NOTES.md
 notes.md
+
+# Raw sound downloads staging folder (used ones live in public/sounds)
+sound-effects/

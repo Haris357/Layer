@@ -4,6 +4,7 @@ import type { ConverterWidget as ConverterWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
 import { cn } from '../../lib/utils'
 import { Menu } from '../Menu'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 type Category = ConverterWidgetType['category']
@@ -144,13 +145,15 @@ function ConverterRenderer({ widget }: { widget: ConverterWidgetType }) {
         />
       </div>
 
-      <button
-        type="button"
-        onClick={swap}
-        className="flex items-center justify-center gap-1.5 self-center rounded-full px-2 py-0.5 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
-      >
-        <ArrowLeftRight size={13} />
-      </button>
+      <Tooltip label="Swap units" side="top" className="self-center">
+        <button
+          type="button"
+          onClick={swap}
+          className="flex items-center justify-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
+        >
+          <ArrowLeftRight size={13} />
+        </button>
+      </Tooltip>
 
       <div className="flex items-center gap-1.5">
         <div className="flex min-w-0 flex-1 items-center rounded-[7px] bg-[var(--fill-2)] px-2 py-1.5">

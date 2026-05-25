@@ -20,6 +20,7 @@ export type WidgetType =
   | 'sticky'
   | 'inbox'
   | 'clipboard'
+  | 'webembed'
 
 export type Mode = 'edit' | 'view'
 
@@ -51,6 +52,8 @@ export interface JournalEntry {
   updatedAt: string
   title?: string
   pinned?: boolean
+  /** Number of completed freewriting sessions on this entry. */
+  freewrites?: number
 }
 
 export interface JournalFile {
@@ -184,6 +187,16 @@ export interface PomodoroWidget extends BaseWidget {
   cyclesUntilLong: number
   completedToday: number
   statsDate: string
+  sound:
+    | 'none'
+    | 'rain'
+    | 'ocean'
+    | 'forest'
+    | 'fireplace'
+    | 'brown'
+    | 'pink'
+    | 'white'
+  soundVolume: number
 }
 
 export type StickyColor =
@@ -208,6 +221,13 @@ export interface ClipboardWidget extends BaseWidget {
   type: 'clipboard'
 }
 
+export interface WebEmbedWidget extends BaseWidget {
+  type: 'webembed'
+  url: string
+  zoom: number // 1 = 100%
+  refreshSec: number // 0 = no auto-refresh
+}
+
 export type Widget =
   | NoteWidget
   | LinkWidget
@@ -230,6 +250,7 @@ export type Widget =
   | StickyWidget
   | InboxWidget
   | ClipboardWidget
+  | WebEmbedWidget
 
 export type NewWidget = Omit<Widget, 'id' | 'zIndex'>
 
@@ -239,16 +260,16 @@ export interface CanvasFile {
   savedAt: string
 }
 
-export interface Template {
+export interface Space {
   id: string
   name: string
   builtin: boolean
   widgets: Widget[]
 }
 
-export interface TemplatesFile {
+export interface SpacesFile {
   version: 1
-  templates: Template[]
+  templates: Space[]
   activeId: string
   savedAt: string
 }

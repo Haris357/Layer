@@ -15,69 +15,70 @@ import { useToastStore } from '../store/toastStore'
 import { isTauri } from '../lib/ipc'
 import {
   captureCanvas,
-  exportTemplateZip,
-  importTemplateFile,
+  exportSpaceZip,
+  importSpaceFile,
   publishToGallery,
-} from '../lib/templateShare'
+} from '../lib/spaceShare'
 import { notify } from '../lib/notify'
 import { PublishDialog } from './PublishDialog'
-import type { Template } from '../types/widget'
+import { Tooltip } from './Tooltip'
+import type { Space } from '../types/widget'
 import { cn } from '../lib/utils'
 
-export function TemplatesModal({ onClose }: { onClose: () => void }) {
-  const templates = useCanvasStore((s) => s.templates)
+export function SpacesModal({ onClose }: { onClose: () => void }) {
+  const spaces = useCanvasStore((s) => s.spaces)
   const activeId = useCanvasStore((s) => s.activeId)
-  const switchTemplate = useCanvasStore((s) => s.switchTemplate)
-  const createTemplate = useCanvasStore((s) => s.createTemplate)
-  const renameTemplate = useCanvasStore((s) => s.renameTemplate)
-  const deleteTemplate = useCanvasStore((s) => s.deleteTemplate)
-  const importTemplate = useCanvasStore((s) => s.importTemplate)
+  const switchSpace = useCanvasStore((s) => s.switchSpace)
+  const createSpace = useCanvasStore((s) => s.createSpace)
+  const renameSpace = useCanvasStore((s) => s.renameSpace)
+  const deleteSpace = useCanvasStore((s) => s.deleteSpace)
+  const importSpace = useCanvasStore((s) => s.importSpace)
   const toast = useToastStore((s) => s.show)
 
   const [renaming, setRenaming] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
-  const [publishing, setPublishing] = useState<Template | null>(null)
+  const [publishing, setPublishing] = useState<Space | null>(null)
 
-  const startRename = (t: Template) => {
+  const startRename = (t: Space) => {
     setRenaming(t.id)
     setDraft(t.name)
   }
   const commitRename = () => {
-    if (renaming && draft.trim()) renameTemplate(renaming, draft.trim())
+    if (renaming && draft.trim()) renameSpace(renaming, draft.trim())
     setRenaming(null)
   }
 
-  const newTemplate = () => {
-    const count = templates.filter((t) => !t.builtin).length
-    createTemplate(`Template ${count + 1}`)
+  const newSpace = () => {
+    const count = spaces.filter((t) => !t.builtin).length
+    createSpace(`Space ${count + 1}`)
   }
 
   // Export a template as a ZIP (template.json + canvas screenshot).
-  const exportZip = (t: Template) => {
+  const exportZip = (t: Space) => {
     if (!isTauri()) return
-    switchTemplate(t.id)
+    switchSpace(t.id)
     onClose()
     setTimeout(async () => {
       try {
         const png = await captureCanvas()
-        await exportTemplateZip(t, png)
-        toast('Template exported ✦')
+        await exportSpaceZip(t, png)
+        toast('Space exported ✦')
       } catch {
-        toast('Couldn’t export the template.')
+        toast('Couldn’t export the space.')
       }
     }, 600)
   }
 
   const importTpl = async () => {
     if (!isTauri()) return
-    const result = await importTemplateFile()
+    const result = await importSpaceFile()
     if (result) {
-      importTemplate(result.name, result.widgets)
+      importSpace(result.name, result.widgets)
       toast(`Imported “${result.name}”`)
       notify({
         kind: 'import',
         title: `Imported "${result.name}"`,
-        body: `${result.widgets.length} widgets added as a new template.`,
+        body: `${result.widgets.length} widgets added as a new space.`,
       })
     }
   }
@@ -87,13 +88,13 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
     const t = publishing
     if (!t) return
     setPublishing(null)
-    switchTemplate(t.id)
+    switchSpace(t.id)
     onClose()
     setTimeout(async () => {
       try {
         const png = await captureCanvas()
         await publishToGallery({
-          template: t,
+          space: t,
           author,
           description,
           screenshotPng: png,
@@ -125,15 +126,17 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
               className="text-[var(--text-primary)]"
               style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-1.2px' }}
             >
-              Templates
+              Spaces
             </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-            >
-              <X size={18} />
-            </button>
+            <Tooltip label="Close" side="bottom">
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+              >
+                <X size={18} />
+              </button>
+            </Tooltip>
           </div>
           <p
             className="mb-4 text-[var(--text-secondary)]"
@@ -144,7 +147,7 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
           </p>
 
           <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
-            {templates.map((t) => {
+            {spaces.map((t) => {
               const active = t.id === activeId
               return (
                 <div
@@ -158,7 +161,7 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
                 >
                   <button
                     type="button"
-                    onClick={() => switchTemplate(t.id)}
+                    onClick={() => switchSpace(t.id)}
                     className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border"
                     style={{
                       borderColor: active
@@ -189,7 +192,7 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => switchTemplate(t.id)}
+                      onClick={() => switchSpace(t.id)}
                       className="min-w-0 flex-1 truncate text-left text-[13px] font-semibold text-[var(--text-primary)]"
                     >
                       {t.name}
@@ -204,50 +207,56 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
 
                   <div className="flex shrink-0 items-center gap-0.5">
                     {renaming === t.id ? (
-                      <button
-                        type="button"
-                        onClick={commitRename}
-                        className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
-                      >
-                        <Check size={14} />
-                      </button>
-                    ) : (
-                      !t.builtin && (
+                      <Tooltip label="Save">
                         <button
                           type="button"
-                          title="Rename"
-                          onClick={() => startRename(t)}
+                          onClick={commitRename}
                           className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
                         >
-                          <Pencil size={13} />
+                          <Check size={14} />
                         </button>
+                      </Tooltip>
+                    ) : (
+                      !t.builtin && (
+                        <Tooltip label="Rename">
+                          <button
+                            type="button"
+                            onClick={() => startRename(t)}
+                            className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                        </Tooltip>
                       )
                     )}
-                    <button
-                      type="button"
-                      title="Publish to gallery"
-                      onClick={() => setPublishing(t)}
-                      className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
-                    >
-                      <Share2 size={13} />
-                    </button>
-                    <button
-                      type="button"
-                      title="Export as ZIP"
-                      onClick={() => exportZip(t)}
-                      className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
-                    >
-                      <Download size={13} />
-                    </button>
-                    {!t.builtin && (
+                    <Tooltip label="Publish to gallery">
                       <button
                         type="button"
-                        title="Delete"
-                        onClick={() => deleteTemplate(t.id)}
-                        className="rounded-[6px] p-1.5 text-[var(--text-tertiary)] hover:bg-[var(--fill-2)] hover:text-[var(--danger)]"
+                        onClick={() => setPublishing(t)}
+                        className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
                       >
-                        <Trash2 size={13} />
+                        <Share2 size={13} />
                       </button>
+                    </Tooltip>
+                    <Tooltip label="Export as ZIP">
+                      <button
+                        type="button"
+                        onClick={() => exportZip(t)}
+                        className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
+                      >
+                        <Download size={13} />
+                      </button>
+                    </Tooltip>
+                    {!t.builtin && (
+                      <Tooltip label="Delete">
+                        <button
+                          type="button"
+                          onClick={() => deleteSpace(t.id)}
+                          className="rounded-[6px] p-1.5 text-[var(--text-tertiary)] hover:bg-[var(--fill-2)] hover:text-[var(--danger)]"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </Tooltip>
                     )}
                   </div>
                 </div>
@@ -258,11 +267,11 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
           <div className="mt-4 flex gap-2 border-t border-[var(--border)] pt-4">
             <button
               type="button"
-              onClick={newTemplate}
+              onClick={newSpace}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-[8px] bg-[var(--accent)] px-3 py-2 text-[13px] font-semibold text-[var(--on-accent)] transition-transform hover:scale-[1.02]"
             >
               <Plus size={15} strokeWidth={2.4} />
-              New template
+              New space
             </button>
             <button
               type="button"
@@ -278,7 +287,7 @@ export function TemplatesModal({ onClose }: { onClose: () => void }) {
 
       {publishing && (
         <PublishDialog
-          template={publishing}
+          space={publishing}
           onCancel={() => setPublishing(null)}
           onPublish={doPublish}
         />

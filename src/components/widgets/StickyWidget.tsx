@@ -4,7 +4,9 @@ import type {
   StickyColor,
 } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
+import { useUncontrolledText } from '../../hooks/useUncontrolledText'
 import { cn } from '../../lib/utils'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 const COLOR_STYLES: Record<
@@ -31,6 +33,9 @@ const COLORS: StickyColor[] = [
 function StickyRenderer({ widget }: { widget: StickyWidgetType }) {
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const palette = COLOR_STYLES[widget.color] ?? COLOR_STYLES.yellow
+  const { ref, syncKey, onChange } = useUncontrolledText(widget.text, (v) =>
+    updateWidget(widget.id, { text: v }),
+  )
   return (
     <div
       className="relative h-full w-full overflow-hidden rounded-[10px]"
@@ -40,22 +45,29 @@ function StickyRenderer({ widget }: { widget: StickyWidgetType }) {
           '0 1px 0 rgba(0,0,0,0.05), 0 6px 18px -8px rgba(0,0,0,0.25)',
       }}
     >
-      <div
+      <Tooltip
+        label="Drag to move"
+        side="top"
         className="layer-drag-handle layer-grab absolute left-0 right-0 top-0 h-5"
-        style={{ background: palette.tint }}
-        title="Drag to move"
-      />
+      >
+        <span className="h-full w-full" style={{ background: palette.tint }} />
+      </Tooltip>
       <textarea
-        value={widget.text}
-        onChange={(e) => updateWidget(widget.id, { text: e.target.value })}
+        key={syncKey}
+        ref={ref}
+        defaultValue={widget.text}
+        onChange={onChange}
         placeholder="Jot something down…"
+        spellCheck={false}
         className="absolute inset-0 mt-5 resize-none border-0 bg-transparent px-3.5 py-2.5 outline-none"
         style={{
           color: palette.ink,
+          caretColor: palette.ink,
           fontFamily: "'Caveat', 'Patrick Hand', cursive",
           fontSize: 19,
           lineHeight: 1.35,
           fontWeight: 500,
+          WebkitFontSmoothing: 'antialiased',
         }}
       />
     </div>
@@ -76,19 +88,19 @@ function StickySettings({
       </span>
       <div className="flex flex-wrap gap-1.5">
         {COLORS.map((c) => (
-          <button
-            key={c}
-            type="button"
-            onClick={() => onUpdate({ color: c })}
-            className={cn(
-              'h-7 w-7 rounded-full border-2 transition-transform',
-              widget.color === c
-                ? 'scale-110 border-[var(--text-primary)]'
-                : 'border-transparent hover:scale-110',
-            )}
-            style={{ background: COLOR_STYLES[c].bg }}
-            title={c}
-          />
+          <Tooltip key={c} label={c}>
+            <button
+              type="button"
+              onClick={() => onUpdate({ color: c })}
+              className={cn(
+                'h-7 w-7 rounded-full border-2 transition-transform',
+                widget.color === c
+                  ? 'scale-110 border-[var(--text-primary)]'
+                  : 'border-transparent hover:scale-110',
+              )}
+              style={{ background: COLOR_STYLES[c].bg }}
+            />
+          </Tooltip>
         ))}
       </div>
     </div>

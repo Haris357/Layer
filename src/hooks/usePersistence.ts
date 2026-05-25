@@ -4,14 +4,14 @@ import { useJournalStore } from '../store/journalStore'
 import {
   isTauri,
   loadJournal,
-  loadTemplates,
+  loadSpaces,
   saveJournal,
-  saveTemplates,
+  saveSpaces,
 } from '../lib/ipc'
 import { buildBuiltins } from '../lib/builtins'
-import type { JournalFile, Template, TemplatesFile } from '../types/widget'
+import type { JournalFile, Space, SpacesFile } from '../types/widget'
 
-function ensureBuiltins(loaded: Template[]): Template[] {
+function ensureBuiltins(loaded: Space[]): Space[] {
   const result = [...loaded]
   for (const b of buildBuiltins()) {
     if (!result.some((t) => t.id === b.id)) {
@@ -23,10 +23,10 @@ function ensureBuiltins(loaded: Template[]): Template[] {
 
 export function usePersistence(): void {
   const widgets = useCanvasStore((s) => s.widgets)
-  const templates = useCanvasStore((s) => s.templates)
+  const spaces = useCanvasStore((s) => s.spaces)
   const activeId = useCanvasStore((s) => s.activeId)
   const hydrated = useCanvasStore((s) => s.hydrated)
-  const hydrateTemplates = useCanvasStore((s) => s.hydrateTemplates)
+  const hydrateSpaces = useCanvasStore((s) => s.hydrateSpaces)
 
   const entries = useJournalStore((s) => s.entries)
   const journalHydrated = useJournalStore((s) => s.hydrated)
@@ -36,7 +36,7 @@ export function usePersistence(): void {
     const seed = () => {
       const builtins = buildBuiltins()
       const first = builtins[0]
-      hydrateTemplates(builtins, first ? first.id : '')
+      hydrateSpaces(builtins, first ? first.id : '')
     }
 
     if (!isTauri()) {
@@ -45,20 +45,20 @@ export function usePersistence(): void {
       return
     }
 
-    loadTemplates()
+    loadSpaces()
       .then((raw) => {
         if (!raw) {
           seed()
           return
         }
         try {
-          const parsed = JSON.parse(raw) as TemplatesFile
+          const parsed = JSON.parse(raw) as SpacesFile
           if (
             Array.isArray(parsed.templates) &&
             parsed.templates.length > 0
           ) {
             const merged = ensureBuiltins(parsed.templates)
-            hydrateTemplates(merged, parsed.activeId)
+            hydrateSpaces(merged, parsed.activeId)
           } else {
             seed()
           }
@@ -82,24 +82,25 @@ export function usePersistence(): void {
         }
       })
       .catch(() => hydrateJournal([]))
-  }, [hydrateTemplates, hydrateJournal])
+  }, [hydrateSpaces, hydrateJournal])
 
   useEffect(() => {
     if (!hydrated || !isTauri()) return
     const timer = setTimeout(() => {
-      const synced = templates.map((t) =>
+      const synced = spaces.map((t) =>
         t.id === activeId ? { ...t, widgets } : t,
       )
-      const file: TemplatesFile = {
+      const file: SpacesFile = {
         version: 1,
+        // 'templates' is the legacy on-disk key — kept so existing saves load.
         templates: synced,
         activeId,
         savedAt: new Date().toISOString(),
       }
-      saveTemplates(JSON.stringify(file, null, 2)).catch(() => {})
+      saveSpaces(JSON.stringify(file, null, 2)).catch(() => {})
     }, 500)
     return () => clearTimeout(timer)
-  }, [widgets, templates, activeId, hydrated])
+  }, [widgets, spaces, activeId, hydrated])
 
   useEffect(() => {
     if (!journalHydrated || !isTauri()) return

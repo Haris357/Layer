@@ -1,11 +1,17 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type SyntheticEvent,
+} from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   NotebookPen,
   Type,
-  Play,
-  Pause,
   Sun,
   Moon,
   Maximize2,
@@ -17,12 +23,18 @@ import {
   Pin,
   Pencil,
   Trash2,
+  Feather,
 } from 'lucide-react'
 import type { NoteWidget as NoteWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
 import { useJournalStore } from '../../store/journalStore'
 import { cn } from '../../lib/utils'
 import { notify } from '../../lib/notify'
+import { playSfx } from '../../lib/sfx'
+import { fireConfetti } from '../../lib/confetti'
+import { useToastStore } from '../../store/toastStore'
+import { useUncontrolledText } from '../../hooks/useUncontrolledText'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 const FONTS: { label: string; value: string }[] = [
@@ -75,29 +87,15 @@ function retroSeq(notes: { f: number; t: number; d: number }[]): void {
   }
 }
 
+// The completion chime is still synthesized (no recorded file for it); the
+// start/pause and light/dark sounds now use the recorded effects via playSfx.
 const SOUND = {
-  timerStart: () =>
-    retroSeq([
-      { f: 523, t: 0, d: 0.14 },
-      { f: 659, t: 0.1, d: 0.14 },
-      { f: 784, t: 0.2, d: 0.26 },
-    ]),
   timerEnd: () =>
     retroSeq([
       { f: 784, t: 0, d: 0.13 },
       { f: 659, t: 0.14, d: 0.13 },
       { f: 523, t: 0.28, d: 0.13 },
       { f: 784, t: 0.42, d: 0.32 },
-    ]),
-  lightOn: () =>
-    retroSeq([
-      { f: 587, t: 0, d: 0.1 },
-      { f: 880, t: 0.08, d: 0.22 },
-    ]),
-  lightOff: () =>
-    retroSeq([
-      { f: 587, t: 0, d: 0.1 },
-      { f: 392, t: 0.08, d: 0.22 },
     ]),
 }
 
@@ -106,6 +104,14 @@ function fmt(total: number): string {
   const s = total % 60
   return `${m}:${s.toString().padStart(2, '0')}`
 }
+
+function wordCount(text: string): number {
+  const t = text.trim()
+  return t ? t.split(/\s+/).length : 0
+}
+
+// Freewriting session lengths, in minutes.
+const FREEWRITE_PRESETS = [5, 10, 15, 20] as const
 
 interface Theme {
   bg: string
@@ -199,15 +205,70 @@ function IconBtn({
   )
 }
 
-function Journal({
-  widget,
-  fullscreen,
-  onSetFullscreen,
+// The editable surface, isolated into its own component so that each keystroke
+// only re-renders this textarea — not the whole Journal (toolbar, history, HUD).
+// Typing stays in fast local state; the journal store is updated on a debounce.
+function NoteEditor({
+  entryId,
+  content,
+  freewrite,
+  fontFamily,
+  fontSize,
+  color,
+  editorRef,
+  onMouseDown,
+  onKeyDown,
+  onCaret,
 }: {
-  widget: NoteWidgetType
-  fullscreen: boolean
-  onSetFullscreen: (v: boolean) => void
+  entryId: string
+  content: string
+  freewrite: boolean
+  fontFamily: string
+  fontSize: number
+  color: string
+  editorRef: RefObject<HTMLTextAreaElement>
+  onMouseDown: (e: { stopPropagation: () => void }) => void
+  onKeyDown: (e: ReactKeyboardEvent<HTMLTextAreaElement>) => void
+  onCaret: (e: SyntheticEvent<HTMLTextAreaElement>) => void
 }) {
+  const updateEntry = useJournalStore((s) => s.updateEntry)
+  const { syncKey, onChange } = useUncontrolledText(
+    content,
+    (v) => updateEntry(entryId, v),
+    { ref: editorRef },
+  )
+  return (
+    <textarea
+      key={syncKey}
+      ref={editorRef}
+      defaultValue={content}
+      onMouseDown={onMouseDown}
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+      onSelect={onCaret}
+      onClick={onCaret}
+      onCut={(e) => {
+        if (freewrite) e.preventDefault()
+      }}
+      placeholder="Begin writing"
+      spellCheck
+      className={cn(
+        'h-full w-full resize-none bg-transparent px-9 py-8 outline-none placeholder:opacity-40',
+        freewrite && 'pt-16',
+      )}
+      style={{
+        color,
+        caretColor: color,
+        fontFamily,
+        fontSize,
+        lineHeight: 1.75,
+        WebkitFontSmoothing: 'antialiased',
+      }}
+    />
+  )
+}
+
+function Journal({ widget }: { widget: NoteWidgetType }) {
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const entries = useJournalStore((s) => s.entries)
   const hydrated = useJournalStore((s) => s.hydrated)
@@ -216,11 +277,46 @@ function Journal({
   const deleteEntry = useJournalStore((s) => s.deleteEntry)
   const renameEntry = useJournalStore((s) => s.renameEntry)
   const togglePin = useJournalStore((s) => s.togglePin)
+  const markFreewrite = useJournalStore((s) => s.markFreewrite)
+
+  // Fullscreen lives here (not in the parent) so the render tree relocating
+  // into a portal doesn't unmount Journal — the timer/freewrite state survives
+  // toggling fullscreen.
+  const [fullscreen, setFullscreen] = useState(false)
+  // How far the desktop window extends behind the taskbar, so fullscreen
+  // controls don't slip under it.
+  const [bottomInset, setBottomInset] = useState(0)
+  useEffect(() => {
+    if (!fullscreen) {
+      setBottomInset(0)
+      return
+    }
+    const calc = () =>
+      setBottomInset(
+        Math.max(0, Math.round(window.innerHeight - window.screen.availHeight)),
+      )
+    calc()
+    window.addEventListener('resize', calc)
+    return () => window.removeEventListener('resize', calc)
+  }, [fullscreen])
 
   const [fontMenu, setFontMenu] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [timerLeft, setTimerLeft] = useState(TIMER_TOTAL)
   const [timerOn, setTimerOn] = useState(false)
+  // The countdown's full length (varies for freewrite sessions); used for
+  // reset and progress. The plain focus timer keeps TIMER_TOTAL.
+  const [timerDuration, setTimerDuration] = useState(TIMER_TOTAL)
+  // Wall-clock anchor: the timestamp the countdown should reach zero. Driving
+  // the display off this (not a decrementing counter) keeps it accurate even
+  // when the interval is throttled — e.g. the widget is occluded by a
+  // fullscreen app or the machine was briefly busy/asleep.
+  const timerEndRef = useRef<number | null>(null)
+  // Freewriting: an append-only, no-backspace session for a fixed time.
+  const [freewrite, setFreewrite] = useState(false)
+  const [fwMenu, setFwMenu] = useState(false)
+  const [showIntro, setShowIntro] = useState(false)
+  const editorRef = useRef<HTMLTextAreaElement>(null)
   const [switching, setSwitching] = useState(false)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
@@ -242,42 +338,149 @@ function Journal({
     }
   }, [hydrated, entries, widget.activeEntryId, widget.id, addEntry, updateWidget])
 
+  // Anchor the end time whenever the timer starts/resumes; clear it on pause.
+  useEffect(() => {
+    timerEndRef.current = timerOn ? Date.now() + timerLeft * 1000 : null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timerOn])
+
   useEffect(() => {
     if (!timerOn) return
-    const id = window.setInterval(() => {
-      setTimerLeft((prev) => {
-        if (prev <= 1) {
-          window.clearInterval(id)
-          setTimerOn(false)
-          SOUND.timerEnd()
-          notify({
-            kind: 'timer',
-            title: 'Focus session complete ✦',
-            body: '15 minutes of deep work — nice.',
-          })
-          return TIMER_TOTAL
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return () => window.clearInterval(id)
-  }, [timerOn])
+    const tick = () => {
+      const end = timerEndRef.current
+      if (end == null) return
+      const rem = Math.round((end - Date.now()) / 1000)
+      if (rem <= 0) {
+        timerEndRef.current = null
+        setTimerOn(false)
+        setTimerLeft(timerDuration)
+        setFreewrite(false)
+        setShowIntro(false)
+        SOUND.timerEnd()
+        fireConfetti()
+        const activeId = widget.activeEntryId
+        // Read the live editor value (the buffered draft may not be committed
+        // yet) and flush it so the saved entry has every word.
+        const content =
+          editorRef.current?.value ??
+          useJournalStore.getState().entries.find((e) => e.id === activeId)
+            ?.content ??
+          ''
+        if (activeId) updateEntry(activeId, content)
+        const words = wordCount(content)
+        const mins = Math.round(timerDuration / 60)
+        if (activeId) markFreewrite(activeId)
+        useToastStore.getState().showToast({
+          message: `Freewrite done — ${words} words in ${mins} min ✍`,
+          icon: 'focus',
+          duration: 7000,
+        })
+        notify({
+          kind: 'timer',
+          title: 'Freewrite complete ✦',
+          body: `${words} words in ${mins} minutes of unbroken flow.`,
+        })
+        return
+      }
+      setTimerLeft(rem)
+    }
+    tick()
+    const id = window.setInterval(tick, 250)
+    // Snap to the correct value the instant the widget is shown again.
+    const onVisible = () => {
+      if (!document.hidden) tick()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [timerOn, timerDuration, widget.activeEntryId, markFreewrite, updateEntry])
 
   // Close any open popovers (font menu, history) when the click lands
   // outside this note widget.
   const containerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (!fontMenu && !showHistory) return
+    if (!fontMenu && !showHistory && !fwMenu) return
     const onDown = (e: MouseEvent) => {
       const el = containerRef.current
       if (el && !el.contains(e.target as Node)) {
         setFontMenu(false)
         setShowHistory(false)
+        setFwMenu(false)
       }
     }
     document.addEventListener('mousedown', onDown, true)
     return () => document.removeEventListener('mousedown', onDown, true)
-  }, [fontMenu, showHistory])
+  }, [fontMenu, showHistory, fwMenu])
+
+  // Begin a freewriting session: go fullscreen, show a brief intro, then
+  // start the countdown only once the intro has faded out.
+  const startFreewrite = (minutes: number) => {
+    const dur = minutes * 60
+    setFwMenu(false)
+    // Always begin on a fresh entry so the session starts from a blank page.
+    const id = addEntry()
+    updateWidget(widget.id, { activeEntryId: id })
+    setTimerDuration(dur)
+    setTimerLeft(dur)
+    setFreewrite(true)
+    setShowIntro(true)
+    setFullscreen(true)
+    playSfx('timer')
+    // Fade the intro, then begin the timer once it's fully gone.
+    window.setTimeout(() => setShowIntro(false), 2400)
+    window.setTimeout(() => setTimerOn(true), 3100)
+  }
+
+  const endFreewrite = () => {
+    timerEndRef.current = null
+    setFreewrite(false)
+    setShowIntro(false)
+    setTimerOn(false)
+    setTimerLeft(timerDuration)
+  }
+
+  // Focus the editor the moment the intro clears, so the user can write.
+  useEffect(() => {
+    if (freewrite && !showIntro) editorRef.current?.focus()
+  }, [freewrite, showIntro])
+
+  // While freewriting, Esc ends the session early.
+  useEffect(() => {
+    if (!freewrite) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        endFreewrite()
+      }
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [freewrite])
+
+  // Append-only editing guards (active only during a freewrite session).
+  const blockEdit = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (!freewrite) return
+    const k = e.key
+    if (k === 'Backspace' || k === 'Delete') {
+      e.preventDefault()
+      return
+    }
+    if ((e.ctrlKey || e.metaKey) && ['z', 'y', 'x'].includes(k.toLowerCase())) {
+      e.preventDefault()
+    }
+  }
+
+  const caretToEnd = (e: SyntheticEvent<HTMLTextAreaElement>) => {
+    if (!freewrite) return
+    const el = e.currentTarget
+    const end = el.value.length
+    if (el.selectionStart !== end || el.selectionEnd !== end) {
+      el.setSelectionRange(end, end)
+    }
+  }
 
   const active = entries.find((e) => e.id === widget.activeEntryId) ?? null
 
@@ -305,7 +508,7 @@ function Journal({
 
   const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
 
-  return (
+  const body = (
     <div
       ref={containerRef}
       className={cn(
@@ -332,10 +535,8 @@ function Journal({
         className="flex shrink-0 flex-col items-center gap-1 border-r py-2.5"
         style={{ borderColor: c.line, width: 50 }}
       >
-        <div
-          className="layer-drag-handle layer-grab mb-1 flex flex-col items-center gap-[3px] py-1"
-          title="Drag to move"
-        >
+        <Tooltip label="Drag to move" side="right" className="mb-1">
+          <div className="layer-drag-handle layer-grab flex flex-col items-center gap-[3px] py-1">
           {[0, 1, 2].map((i) => (
             <span
               key={i}
@@ -343,7 +544,8 @@ function Journal({
               style={{ background: c.sub }}
             />
           ))}
-        </div>
+          </div>
+        </Tooltip>
 
         <div className="relative">
           <IconBtn
@@ -402,18 +604,21 @@ function Journal({
                   >
                     Typeface
                   </span>
-                  <button
-                    type="button"
-                    title="Random font"
-                    onClick={() => {
-                      const pick =
-                        FONTS[3 + Math.floor(Math.random() * (FONTS.length - 3))]
-                      if (pick) updateWidget(widget.id, { font: pick.value })
-                    }}
-                    style={{ color: c.sub }}
-                  >
-                    <Shuffle size={13} />
-                  </button>
+                  <Tooltip label="Random font" side="top">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pick =
+                          FONTS[
+                            3 + Math.floor(Math.random() * (FONTS.length - 3))
+                          ]
+                        if (pick) updateWidget(widget.id, { font: pick.value })
+                      }}
+                      style={{ color: c.sub }}
+                    >
+                      <Shuffle size={13} />
+                    </button>
+                  </Tooltip>
                 </div>
                 <div className="flex max-h-[230px] flex-col overflow-y-auto">
                   {FONTS.map((f) => (
@@ -439,41 +644,78 @@ function Journal({
           </AnimatePresence>
         </div>
 
-        <IconBtn
-          tip={timerOn ? 'Pause timer' : '15-minute timer'}
-          active={timerOn}
-          theme={c}
-          onClick={() => {
-            if (!timerOn) SOUND.timerStart()
-            setTimerOn((v) => !v)
-          }}
-        >
-          {timerOn || timerLeft !== TIMER_TOTAL ? (
-            <span className="tabular-nums">{fmt(timerLeft)}</span>
-          ) : (
-            <Play size={16} strokeWidth={1.8} />
-          )}
-        </IconBtn>
-        {timerOn && (
+        <div className="relative">
           <IconBtn
-            tip="Reset timer"
+            tip={freewrite ? 'End freewrite' : 'Freewrite'}
+            active={freewrite || fwMenu}
             theme={c}
             onClick={() => {
-              setTimerOn(false)
-              setTimerLeft(TIMER_TOTAL)
+              if (freewrite) endFreewrite()
+              else setFwMenu((v) => !v)
             }}
           >
-            <Pause size={15} strokeWidth={1.8} />
+            {freewrite ? (
+              <span className="tabular-nums text-[10.5px] font-bold">
+                {fmt(timerLeft)}
+              </span>
+            ) : (
+              <Feather size={16} strokeWidth={1.8} />
+            )}
           </IconBtn>
-        )}
+          <AnimatePresence>
+            {fwMenu && !freewrite && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92, x: -6 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.92, x: -6 }}
+                transition={spring}
+                onMouseDown={stop}
+                className="absolute left-full top-0 z-[60] ml-2 w-[212px] rounded-[12px] border p-3 shadow-xl"
+                style={{ background: c.panel, borderColor: c.line }}
+              >
+                <div
+                  className="text-[13px] font-bold"
+                  style={{ color: c.fg }}
+                >
+                  Freewrite
+                </div>
+                <p
+                  className="mt-1 text-[11.5px] leading-relaxed"
+                  style={{ color: c.sub }}
+                >
+                  Write without stopping. No backspace, no editing — just keep
+                  the words flowing until time’s up.
+                </p>
+                <div className="mt-2.5 grid grid-cols-4 gap-1.5">
+                  {FREEWRITE_PRESETS.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => startFreewrite(m)}
+                      className="rounded-[8px] py-1.5 text-[12px] font-semibold transition-colors"
+                      style={{ background: c.hover, color: c.fg }}
+                    >
+                      {m}
+                      <span
+                        className="ml-0.5 text-[9px] font-medium"
+                        style={{ color: c.sub }}
+                      >
+                        m
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <IconBtn
           tip={widget.theme === 'light' ? 'Dark mode' : 'Light mode'}
           theme={c}
           onClick={() => {
             const next = widget.theme === 'light' ? 'dark' : 'light'
-            if (next === 'light') SOUND.lightOn()
-            else SOUND.lightOff()
+            playSfx(next === 'light' ? 'switch-on' : 'switch-off')
             updateWidget(widget.id, { theme: next })
           }}
         >
@@ -489,7 +731,7 @@ function Journal({
         <IconBtn
           tip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           theme={c}
-          onClick={() => onSetFullscreen(!fullscreen)}
+          onClick={() => setFullscreen(!fullscreen)}
         >
           {fullscreen ? (
             <Minimize2 size={16} strokeWidth={1.8} />
@@ -532,26 +774,107 @@ function Journal({
               ))}
             </motion.div>
           ) : (
-            <motion.textarea
+            <NoteEditor
               key={active?.id ?? 'none'}
+              entryId={active?.id ?? ''}
+              content={active?.content ?? ''}
+              freewrite={freewrite}
+              fontFamily={widget.font}
+              fontSize={widget.fontSize}
+              color={c.fg}
+              editorRef={editorRef}
+              onMouseDown={stop}
+              onKeyDown={blockEdit}
+              onCaret={caretToEnd}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Freewrite HUD: progress rail, time + word count, and a calm hint. */}
+        <AnimatePresence>
+          {freewrite && (
+            <motion.div
+              key="fw-hud"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-              value={active?.content ?? ''}
-              onMouseDown={stop}
-              onChange={(e) => {
-                if (active) updateEntry(active.id, e.target.value)
-              }}
-              placeholder="Begin writing"
-              spellCheck
-              className="h-full w-full resize-none bg-transparent px-9 py-8 outline-none placeholder:opacity-40"
-              style={{
-                color: c.fg,
-                fontFamily: widget.font,
-                fontSize: widget.fontSize,
-                lineHeight: 1.75,
-              }}
-            />
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="pointer-events-none absolute inset-0 z-[40]"
+            >
+              {/* progress rail along the top */}
+              <div
+                className="absolute left-0 top-0 h-[3px] w-full"
+                style={{ background: c.line }}
+              >
+                <div
+                  className="h-full transition-[width] duration-500 ease-linear"
+                  style={{
+                    width: `${
+                      timerDuration > 0
+                        ? (1 - timerLeft / timerDuration) * 100
+                        : 0
+                    }%`,
+                    background: c.active,
+                  }}
+                />
+              </div>
+              {/* time + words, top-right */}
+              <div className="absolute right-5 top-4 flex items-center gap-2.5">
+                <span
+                  className="tabular-nums"
+                  style={{ color: c.fg, fontSize: 17, fontWeight: 700 }}
+                >
+                  {fmt(timerLeft)}
+                </span>
+                <span style={{ color: c.sub, fontSize: 12 }}>
+                  {wordCount(editorRef.current?.value ?? active?.content ?? '')}{' '}
+                  words
+                </span>
+              </div>
+              {/* bottom hint */}
+              <div
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px]"
+                style={{ color: c.sub }}
+              >
+                Keep writing — no going back · Esc to end
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* One-time intro that fades on its own a few seconds after start. */}
+        <AnimatePresence>
+          {showIntro && (
+            <motion.div
+              key="fw-intro"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.6 } }}
+              transition={{ duration: 0.35 }}
+              className="pointer-events-none absolute inset-0 z-[50] flex items-center justify-center px-8"
+              style={{ background: `${c.bg}cc`, backdropFilter: 'blur(2px)' }}
+            >
+              <div className="max-w-[420px] text-center">
+                <Feather
+                  size={26}
+                  strokeWidth={1.6}
+                  style={{ color: c.active }}
+                  className="mx-auto mb-3"
+                />
+                <div
+                  style={{ color: c.fg, fontSize: 19, fontWeight: 700 }}
+                >
+                  Just keep writing
+                </div>
+                <p
+                  className="mt-2 text-[13.5px] leading-relaxed"
+                  style={{ color: c.sub }}
+                >
+                  No backspace, no editing — let the words flow without judging
+                  them. Don’t stop until the timer runs out.
+                </p>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
 
@@ -584,6 +907,8 @@ function Journal({
               <div className="flex-1 overflow-y-auto py-1">
                 {sorted.map((e, i) => {
                   const preview = e.content.trim().replace(/\s+/g, ' ')
+                  const words = wordCount(e.content)
+                  const fw = e.freewrites ?? 0
                   const label =
                     e.title ||
                     new Date(e.createdAt).toLocaleDateString('en-US', {
@@ -653,40 +978,57 @@ function Journal({
                           >
                             {preview ? preview.slice(0, 42) : 'Empty entry'}
                           </span>
+                          <span
+                            className="mt-0.5 flex items-center gap-1.5"
+                            style={{ color: c.sub, fontSize: 10.5 }}
+                          >
+                            <span>
+                              {words} {words === 1 ? 'word' : 'words'}
+                            </span>
+                            {fw > 0 && (
+                              <span className="flex items-center gap-0.5">
+                                <Feather size={9} strokeWidth={2} />
+                                {fw}
+                              </span>
+                            )}
+                          </span>
                         </button>
                       )}
                       {!renaming && (
                         <div className="flex shrink-0 items-center opacity-0 transition-opacity group-hover/e:opacity-100">
-                          <button
-                            type="button"
-                            title={e.pinned ? 'Unpin' : 'Pin'}
-                            onClick={() => togglePin(e.id)}
-                            className="rounded-[6px] p-1.5"
-                            style={{ color: e.pinned ? c.fg : c.sub }}
-                          >
-                            <Pin size={12} />
-                          </button>
-                          <button
-                            type="button"
-                            title="Rename"
-                            onClick={() => {
-                              setRenamingId(e.id)
-                              setRenameDraft(e.title ?? '')
-                            }}
-                            className="rounded-[6px] p-1.5"
-                            style={{ color: c.sub }}
-                          >
-                            <Pencil size={12} />
-                          </button>
-                          <button
-                            type="button"
-                            title="Delete"
-                            onClick={() => deleteEntry(e.id)}
-                            className="rounded-[6px] p-1.5"
-                            style={{ color: c.sub }}
-                          >
-                            <Trash2 size={12} />
-                          </button>
+                          <Tooltip label={e.pinned ? 'Unpin' : 'Pin'} side="top">
+                            <button
+                              type="button"
+                              onClick={() => togglePin(e.id)}
+                              className="rounded-[6px] p-1.5"
+                              style={{ color: e.pinned ? c.fg : c.sub }}
+                            >
+                              <Pin size={12} />
+                            </button>
+                          </Tooltip>
+                          <Tooltip label="Rename" side="top">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRenamingId(e.id)
+                                setRenameDraft(e.title ?? '')
+                              }}
+                              className="rounded-[6px] p-1.5"
+                              style={{ color: c.sub }}
+                            >
+                              <Pencil size={12} />
+                            </button>
+                          </Tooltip>
+                          <Tooltip label="Delete" side="top">
+                            <button
+                              type="button"
+                              onClick={() => deleteEntry(e.id)}
+                              className="rounded-[6px] p-1.5"
+                              style={{ color: c.sub }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </Tooltip>
                         </div>
                       )}
                     </motion.div>
@@ -699,11 +1041,11 @@ function Journal({
       </div>
     </div>
   )
-}
 
-function NoteRenderer({ widget }: { widget: NoteWidgetType }) {
-  const [fullscreen, setFullscreen] = useState(false)
-
+  // Fullscreen relocates the same Journal subtree into a portal (so `position:
+  // fixed` escapes the canvas's transformed ancestor). Journal itself stays
+  // mounted, so timer/freewrite state is preserved across the toggle. The
+  // bottom inset keeps controls clear of the taskbar.
   if (fullscreen) {
     return createPortal(
       <motion.div
@@ -711,20 +1053,18 @@ function NoteRenderer({ widget }: { widget: NoteWidgetType }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="fixed inset-0 z-[9500]"
+        style={{ paddingBottom: bottomInset, boxSizing: 'border-box' }}
       >
-        <Journal widget={widget} fullscreen onSetFullscreen={setFullscreen} />
+        {body}
       </motion.div>,
       document.body,
     )
   }
+  return body
+}
 
-  return (
-    <Journal
-      widget={widget}
-      fullscreen={false}
-      onSetFullscreen={setFullscreen}
-    />
-  )
+function NoteRenderer({ widget }: { widget: NoteWidgetType }) {
+  return <Journal widget={widget} />
 }
 
 export const noteDefinition: WidgetDefinition<NoteWidgetType> = {

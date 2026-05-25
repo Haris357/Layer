@@ -79,6 +79,12 @@ fn enable() {
     use std::fs;
     use std::path::PathBuf;
 
+    // Never register a dev build as the screensaver: it loads its UI from the
+    // dev server (localhost) and would show an unrecoverable error page on idle.
+    if cfg!(debug_assertions) {
+        return;
+    }
+
     std::thread::spawn(|| {
         let exe = match std::env::current_exe() {
             Ok(p) => p,
@@ -165,6 +171,38 @@ pub fn preview() {
     if let Ok(exe) = std::env::current_exe() {
         let _ = std::process::Command::new(exe).arg("/s").spawn();
     }
+}
+
+// The screensaver runs as a separate process with its own webview storage, so
+// the chosen theme is persisted to a small file the main app writes and the
+// screensaver reads.
+fn theme_file() -> Option<std::path::PathBuf> {
+    let local = std::env::var("LOCALAPPDATA").ok()?;
+    let mut p = std::path::PathBuf::from(local);
+    p.push("Layer");
+    p.push("screensaver-theme.txt");
+    Some(p)
+}
+
+pub fn set_theme(theme: &str) {
+    if let Some(p) = theme_file() {
+        if let Some(dir) = p.parent() {
+            let _ = std::fs::create_dir_all(dir);
+        }
+        let _ = std::fs::write(p, theme);
+    }
+}
+
+pub fn get_theme() -> String {
+    if let Some(p) = theme_file() {
+        if let Ok(s) = std::fs::read_to_string(p) {
+            let t = s.trim().to_string();
+            if !t.is_empty() {
+                return t;
+            }
+        }
+    }
+    "ambient".into()
 }
 
 #[cfg(target_os = "windows")]

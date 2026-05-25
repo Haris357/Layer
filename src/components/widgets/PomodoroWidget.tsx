@@ -1,9 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Play, Pause, RotateCcw, Timer } from 'lucide-react'
+import { Play, Pause, RotateCcw, Timer, Volume2, VolumeX } from 'lucide-react'
 import type { PomodoroWidget as PomodoroWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
 import { notify } from '../../lib/notify'
 import { useToastStore } from '../../store/toastStore'
+import {
+  AMBIENT_SOUNDS,
+  playAmbient,
+  setAmbientVolume,
+  stopAmbient,
+  type AmbientSound,
+} from '../../lib/ambientSound'
+import { Slider } from '../ui'
+import { Tooltip } from '../Tooltip'
+import { fireConfetti } from '../../lib/confetti'
+import { playSfx } from '../../lib/sfx'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 type Phase = 'focus' | 'short' | 'long'
@@ -56,6 +67,10 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
   const [cycleIndex, setCycleIndex] = useState(0)
   const [remaining, setRemaining] = useState(() => phaseDuration('focus'))
   const [running, setRunning] = useState(false)
+  // Wall-clock anchor (timestamp the phase reaches zero). The display reads
+  // from this instead of decrementing a counter, so the countdown stays
+  // accurate even if the interval is throttled while the widget is occluded.
+  const endRef = useRef<number | null>(null)
 
   // Keep `remaining` in sync if the user edits durations while paused.
   const pausedRef = useRef(running)
@@ -66,13 +81,29 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
     }
   }, [phase, phaseDuration])
 
-  // Tick once per second while running.
+  // Anchor the end time when the timer starts/resumes; clear it on pause.
+  useEffect(() => {
+    endRef.current = running ? Date.now() + remaining * 1000 : null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running])
+
+  // Tick from the wall clock so the countdown can't drift.
   useEffect(() => {
     if (!running) return
-    const id = window.setInterval(() => {
-      setRemaining((r) => r - 1)
-    }, 1000)
-    return () => window.clearInterval(id)
+    const tick = () => {
+      if (endRef.current == null) return
+      setRemaining(Math.max(0, Math.round((endRef.current - Date.now()) / 1000)))
+    }
+    tick()
+    const id = window.setInterval(tick, 250)
+    const onVisible = () => {
+      if (!document.hidden) tick()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [running])
 
   // Phase transitions when remaining hits zero.
@@ -98,19 +129,26 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
         icon: 'focus',
         duration: 6000,
       })
+      fireConfetti()
       setPhase(nextPhase)
-      setRemaining(phaseDuration(nextPhase))
+      const dur = phaseDuration(nextPhase)
+      setRemaining(dur)
+      // Re-anchor so the auto-started break/focus counts from its full length.
+      if (running) endRef.current = Date.now() + dur * 1000
     } else {
       notify({
         kind: 'timer',
         title: 'Break over — back to focus',
       })
       setPhase('focus')
-      setRemaining(phaseDuration('focus'))
+      const dur = phaseDuration('focus')
+      setRemaining(dur)
+      if (running) endRef.current = Date.now() + dur * 1000
     }
   }, [
     remaining,
     phase,
+    running,
     cycleIndex,
     widget.cyclesUntilLong,
     widget.completedToday,
@@ -118,6 +156,28 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
     phaseDuration,
     updateWidget,
   ])
+
+  // Ambient focus sound, tied to the running state.
+  const sound = (widget.sound ?? 'none') as AmbientSound
+  useEffect(() => {
+    if (running && sound !== 'none') {
+      playAmbient(sound, widget.soundVolume ?? 0.5)
+    } else {
+      stopAmbient()
+    }
+    return () => stopAmbient()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running, sound])
+  useEffect(() => {
+    setAmbientVolume(widget.soundVolume ?? 0.5)
+  }, [widget.soundVolume])
+
+  const cycleSound = () => {
+    const i = AMBIENT_SOUNDS.findIndex((s) => s.value === sound)
+    const next = AMBIENT_SOUNDS[(i + 1) % AMBIENT_SOUNDS.length]
+    if (next) updateWidget(widget.id, { sound: next.value })
+  }
+  const soundLabel = AMBIENT_SOUNDS.find((s) => s.value === sound)?.label ?? 'Off'
 
   const reset = () => {
     setRunning(false)
@@ -192,38 +252,59 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
       </div>
 
       <div className="mt-1 flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={() => setRunning((v) => !v)}
-          title={running ? 'Pause' : 'Start'}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--on-accent)] transition-transform hover:scale-105"
-          style={{ background: tint }}
-        >
-          {running ? (
-            <Pause size={14} strokeWidth={2.5} />
-          ) : (
-            <Play size={14} strokeWidth={2.5} fill="currentColor" />
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={reset}
-          title="Reset"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-        >
-          <RotateCcw size={13} strokeWidth={2} />
-        </button>
-        {phase !== 'focus' && (
+        <Tooltip label={running ? 'Pause' : 'Start'}>
           <button
             type="button"
-            onClick={skipToFocus}
-            title="Skip break"
-            className="rounded-[6px] px-2 py-1 text-[11px] font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+            onClick={() => {
+              playSfx('timer')
+              setRunning((v) => !v)
+            }}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--on-accent)] transition-transform hover:scale-105"
+            style={{ background: tint }}
           >
-            Skip
+            {running ? (
+              <Pause size={14} strokeWidth={2.5} />
+            ) : (
+              <Play size={14} strokeWidth={2.5} fill="currentColor" />
+            )}
           </button>
+        </Tooltip>
+        <Tooltip label="Reset">
+          <button
+            type="button"
+            onClick={reset}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+          >
+            <RotateCcw size={13} strokeWidth={2} />
+          </button>
+        </Tooltip>
+        {phase !== 'focus' && (
+          <Tooltip label="Skip break">
+            <button
+              type="button"
+              onClick={skipToFocus}
+              className="rounded-[6px] px-2 py-1 text-[11px] font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+            >
+              Skip
+            </button>
+          </Tooltip>
         )}
       </div>
+
+      <Tooltip label="Focus sound">
+        <button
+          type="button"
+          onClick={cycleSound}
+          className="flex items-center gap-1.5 rounded-[7px] border border-[var(--border)] px-2 py-1 text-[11px] font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+        >
+          {sound === 'none' ? (
+            <VolumeX size={13} strokeWidth={2} />
+          ) : (
+            <Volume2 size={13} strokeWidth={2} />
+          )}
+          {soundLabel}
+        </button>
+      </Tooltip>
 
       <div
         className="text-[var(--text-tertiary)]"
@@ -288,6 +369,41 @@ function PomodoroSettings({
         2,
         12,
       )}
+
+      <div className="mt-1 flex flex-col gap-1.5">
+        <span className="text-[11px] font-medium text-[var(--text-secondary)]">
+          Focus sound
+        </span>
+        <div className="flex flex-wrap gap-1">
+          {AMBIENT_SOUNDS.map((s) => {
+            const active = (widget.sound ?? 'none') === s.value
+            return (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => onUpdate({ sound: s.value })}
+                className={`rounded-[7px] px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  active
+                    ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                    : 'border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]'
+                }`}
+              >
+                {s.label}
+              </button>
+            )
+          })}
+        </div>
+        {(widget.sound ?? 'none') !== 'none' && (
+          <div className="mt-0.5">
+            <Slider
+              value={Math.round((widget.soundVolume ?? 0.5) * 100)}
+              min={0}
+              max={100}
+              onChange={(v) => onUpdate({ soundVolume: v / 100 })}
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -312,6 +428,8 @@ export const pomodoroDefinition: WidgetDefinition<PomodoroWidgetType> = {
     cyclesUntilLong: 4,
     completedToday: 0,
     statsDate: dayKey(),
+    sound: 'none',
+    soundVolume: 0.5,
   }),
   Renderer: PomodoroRenderer,
   Settings: PomodoroSettings,

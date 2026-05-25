@@ -9,7 +9,7 @@ export function notify(opts: {
   title: string
   body?: string
   href?: string
-  templateId?: string
+  spaceId?: string
   dedupe?: string
 }): void {
   useNotificationStore.getState().add(opts)

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Timer } from 'lucide-react'
+import { Timer, Hourglass } from 'lucide-react'
 import type { CountdownWidget as CountdownWidgetType } from '../../types/widget'
 import { TextField } from '../ui'
 import { cn } from '../../lib/utils'
@@ -160,7 +160,7 @@ function CountdownSettings({
 export const countdownDefinition: WidgetDefinition<CountdownWidgetType> = {
   type: 'countdown',
   label: 'Countdown',
-  icon: Timer,
+  icon: Hourglass,
   enabled: true,
   minSize: { width: 250, height: 120 },
   maxSize: { width: 460, height: 220 },

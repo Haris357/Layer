@@ -1,7 +1,26 @@
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use tauri::{App, Manager, WebviewWindow};
+use tauri::{App, Emitter, Manager, WebviewWindow};
+
+// Hot corner: flicking to the top-left corner cycles spaces.
+static HOTCORNER: AtomicBool = AtomicBool::new(false);
+
+pub fn set_hotcorner(on: bool) {
+    HOTCORNER.store(on, Ordering::Relaxed);
+}
+
+// True while the given virtual key is physically held down.
+#[cfg(target_os = "windows")]
+fn key_down(vk: i32) -> bool {
+    use windows_sys::Win32::UI::Input::KeyboardAndMouse::GetAsyncKeyState;
+    unsafe { (GetAsyncKeyState(vk) as u16 & 0x8000) != 0 }
+}
+#[cfg(not(target_os = "windows"))]
+fn key_down(_vk: i32) -> bool {
+    false
+}
 
 #[derive(Default)]
 pub struct HitState {
@@ -165,9 +184,95 @@ pub fn setup_screensaver(app: &App) -> Result<(), Box<dyn std::error::Error>> {
         let _ = window.show();
         let _ = window.set_focus();
         bring_to_front(&window);
+        // Cover every other display too, so no monitor shows the desktop.
+        spawn_extra_screensaver_windows(app, &window);
     }
+    // OS-level failsafe: dismiss on any input even if the webview never loads,
+    // so the screensaver can never get "stuck" on screen.
+    start_screensaver_input_watch();
     Ok(())
 }
+
+// Opens a fullscreen screensaver window on each display other than the one the
+// main window already covers. All windows live in this one process, so the
+// single input watcher dismisses them all at once.
+#[cfg(target_os = "windows")]
+fn spawn_extra_screensaver_windows(app: &App, main: &WebviewWindow) {
+    let primary = main.primary_monitor().ok().flatten().map(|m| {
+        let p = m.position();
+        (p.x, p.y)
+    });
+    let monitors = match main.available_monitors() {
+        Ok(m) => m,
+        Err(_) => return,
+    };
+    for (i, m) in monitors.iter().enumerate() {
+        let pos = m.position();
+        // Skip the primary monitor — the main window already covers it.
+        if Some((pos.x, pos.y)) == primary {
+            continue;
+        }
+        let label = format!("ss-{i}");
+        let built = tauri::WebviewWindowBuilder::new(
+            app,
+            label,
+            tauri::WebviewUrl::App("index.html".into()),
+        )
+        .transparent(true)
+        .decorations(false)
+        .skip_taskbar(true)
+        .focused(false)
+        .visible(false)
+        .build();
+        if let Ok(w) = built {
+            let _ = w.set_position(tauri::PhysicalPosition::new(pos.x, pos.y));
+            let _ = w.set_fullscreen(true);
+            set_topmost(&w, true);
+            let _ = w.show();
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn spawn_extra_screensaver_windows(_app: &App, _main: &WebviewWindow) {}
+
+// Watches for any mouse movement, mouse button, or key press and exits the
+// process — independent of the webview's own dismiss handler.
+#[cfg(target_os = "windows")]
+fn start_screensaver_input_watch() {
+    use windows_sys::Win32::Foundation::POINT;
+    use windows_sys::Win32::UI::Input::KeyboardAndMouse::GetAsyncKeyState;
+    use windows_sys::Win32::UI::WindowsAndMessaging::GetCursorPos;
+    thread::spawn(|| {
+        // Grace period + baseline so the launch click/move doesn't dismiss it.
+        thread::sleep(Duration::from_millis(900));
+        let mut base = POINT { x: 0, y: 0 };
+        unsafe {
+            GetCursorPos(&mut base);
+        }
+        loop {
+            thread::sleep(Duration::from_millis(60));
+            unsafe {
+                let mut p = POINT { x: 0, y: 0 };
+                GetCursorPos(&mut p);
+                let moved = (p.x - base.x).abs() > 6 || (p.y - base.y).abs() > 6;
+                let mut key_down = false;
+                for vk in 1..=254i32 {
+                    if (GetAsyncKeyState(vk) as u16 & 0x8000) != 0 {
+                        key_down = true;
+                        break;
+                    }
+                }
+                if moved || key_down {
+                    std::process::exit(0);
+                }
+            }
+        }
+    });
+}
+
+#[cfg(not(target_os = "windows"))]
+fn start_screensaver_input_watch() {}
 
 #[cfg(target_os = "windows")]
 fn set_topmost(window: &WebviewWindow, on: bool) {
@@ -222,6 +327,8 @@ fn bring_to_front(_window: &WebviewWindow) {}
 fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
     thread::spawn(move || {
         let mut ignoring = true;
+        let mut was_corner = false;
+        let mut was_peek = false;
         loop {
             let (cx, cy) = cursor_pos();
             let (ox, oy) = match window.outer_position() {
@@ -246,10 +353,33 @@ fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
                 ignoring = want_ignore;
             }
 
-            // Re-pin to the bottom every tick — at 120 Hz this is faster
-            // than the eye can resolve, so any incidental bump above other
-            // apps is corrected before the next frame paints.
-            pin_to_bottom(&window);
+            // Peek: hold Ctrl+Shift+` to float Layer above apps; release to
+            // send it back to the desktop. Polled (not a global hotkey) so the
+            // hold/release is reliable and doesn't steal the combo from apps.
+            let peek =
+                key_down(0x11) && key_down(0x10) && key_down(0xC0); // Ctrl+Shift+`
+            if peek {
+                set_topmost(&window, true);
+            } else {
+                // Re-pin to the bottom every tick (faster than the eye can
+                // resolve). Clear topmost first when leaving a peek.
+                if was_peek {
+                    set_topmost(&window, false);
+                }
+                pin_to_bottom(&window);
+            }
+            was_peek = peek;
+
+            // Hot corner: flick into the top-left corner to cycle spaces.
+            if HOTCORNER.load(Ordering::Relaxed) {
+                let in_corner = cx <= ox + 3 && cy <= oy + 3;
+                if in_corner && !was_corner {
+                    let _ = window.emit("cycle-space", ());
+                }
+                was_corner = in_corner;
+            } else {
+                was_corner = false;
+            }
 
             thread::sleep(Duration::from_millis(8));
         }

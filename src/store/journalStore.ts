@@ -10,6 +10,7 @@ interface JournalState {
   deleteEntry: (id: string) => void
   renameEntry: (id: string, title: string) => void
   togglePin: (id: string) => void
+  markFreewrite: (id: string) => void
   hydrate: (entries: JournalEntry[]) => void
 }
 
@@ -57,6 +58,14 @@ export const useJournalStore = create<JournalState>((set) => ({
     set((state) => ({
       entries: state.entries.map((e) =>
         e.id === id ? { ...e, pinned: !e.pinned } : e,
+      ),
+    }))
+  },
+
+  markFreewrite: (id) => {
+    set((state) => ({
+      entries: state.entries.map((e) =>
+        e.id === id ? { ...e, freewrites: (e.freewrites ?? 0) + 1 } : e,
       ),
     }))
   },

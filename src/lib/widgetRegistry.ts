@@ -22,6 +22,7 @@ import { pomodoroDefinition } from '../components/widgets/PomodoroWidget'
 import { stickyDefinition } from '../components/widgets/StickyWidget'
 import { inboxDefinition } from '../components/widgets/InboxWidget'
 import { clipboardDefinition } from '../components/widgets/ClipboardWidget'
+import { webEmbedDefinition } from '../components/widgets/WebEmbedWidget'
 
 export interface WidgetSize {
   width: number
@@ -68,6 +69,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   sticky: stickyDefinition as WidgetDefinition,
   inbox: inboxDefinition as WidgetDefinition,
   clipboard: clipboardDefinition as WidgetDefinition,
+  webembed: webEmbedDefinition as WidgetDefinition,
 }
 
 export const widgetOrder: WidgetType[] = [
@@ -83,6 +85,7 @@ export const widgetOrder: WidgetType[] = [
   'search',
   'apps',
   'clipboard',
+  'webembed',
   'nowplaying',
   'notifications',
   'converter',

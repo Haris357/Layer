@@ -59,7 +59,7 @@ export function useGalleryNotifications(): void {
 
         const up = data.upvotes ?? 0
         const down = data.downvotes ?? 0
-        const name = data.name ?? 'your template'
+        const name = data.name ?? 'your space'
         const prev = baseline[id]
 
         if (prev) {
@@ -71,7 +71,7 @@ export function useGalleryNotifications(): void {
                 delta === 1
                   ? `Someone upvoted "${name}" 🎉`
                   : `${delta} new upvotes on "${name}" 🎉`,
-              templateId: id,
+              spaceId: id,
             })
           }
           const lastMile = prev.lastMilestone ?? 0
@@ -80,8 +80,8 @@ export function useGalleryNotifications(): void {
             notify({
               kind: 'milestone',
               title: `"${name}" hit ${crossed} upvotes ✦`,
-              body: 'Congrats — that template is finding its people.',
-              templateId: id,
+              body: 'Congrats — that space is finding its people.',
+              spaceId: id,
               dedupe: `milestone-${id}-${crossed}`,
             })
             baseline[id] = { up, down, name, lastMilestone: crossed }
@@ -105,7 +105,7 @@ export function useGalleryNotifications(): void {
 }
 
 // Helper called by the publish flow to register a doc for real-time tracking.
-export function rememberMyTemplate(id: string): void {
+export function rememberMySpace(id: string): void {
   try {
     const ids: string[] = JSON.parse(localStorage.getItem(KEY_IDS) || '[]')
     if (!ids.includes(id)) {

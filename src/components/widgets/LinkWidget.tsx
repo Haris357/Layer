@@ -25,6 +25,7 @@ import {
 import type { LinkWidget as LinkWidgetType } from '../../types/widget'
 import { openUrl } from '../../lib/ipc'
 import { TextField } from '../ui'
+import { Tooltip } from '../Tooltip'
 import { cn } from '../../lib/utils'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
@@ -82,29 +83,34 @@ function LinkRenderer({ widget }: { widget: LinkWidgetType }) {
   }
 
   return (
-    <div
-      onDoubleClick={handleDoubleClick}
-      title={widget.url ? `Double-click to open ${widget.url}` : undefined}
-      className={cn(
-        'group flex h-full w-full items-center gap-2.5 px-4 transition-all duration-200',
-        card &&
-          'glass border border-[var(--border)] hover:bg-[var(--surface-hover)]',
-        widget.url ? 'cursor-pointer' : 'cursor-default',
-      )}
-      style={{ borderRadius: 999 }}
+    <Tooltip
+      label={widget.url ? `Double-click to open ${widget.url}` : ''}
+      side="top"
+      className="h-full w-full"
     >
-      <Icon
-        size={20}
-        strokeWidth={1.7}
-        className="shrink-0 text-[var(--text-primary)] transition-transform duration-200 group-hover:scale-110"
-      />
-      <span
-        className="truncate text-[var(--text-primary)]"
-        style={{ fontSize: 13, fontWeight: 600 }}
+      <div
+        onDoubleClick={handleDoubleClick}
+        className={cn(
+          'group flex h-full w-full items-center gap-2.5 px-4 transition-all duration-200',
+          card &&
+            'glass border border-[var(--border)] hover:bg-[var(--surface-hover)]',
+          widget.url ? 'cursor-pointer' : 'cursor-default',
+        )}
+        style={{ borderRadius: 999 }}
       >
-        {widget.label || 'Untitled'}
-      </span>
-    </div>
+        <Icon
+          size={20}
+          strokeWidth={1.7}
+          className="shrink-0 text-[var(--text-primary)] transition-transform duration-200 group-hover:scale-110"
+        />
+        <span
+          className="truncate text-[var(--text-primary)]"
+          style={{ fontSize: 13, fontWeight: 600 }}
+        >
+          {widget.label || 'Untitled'}
+        </span>
+      </div>
+    </Tooltip>
   )
 }
 
@@ -160,19 +166,20 @@ function LinkSettings({
       />
       <div className="grid grid-cols-7 gap-1">
         {Object.entries(ICONS).map(([key, Icon]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => onUpdate({ iconKey: key })}
-            className={cn(
-              'flex items-center justify-center rounded-[6px] p-1.5 transition-colors',
-              widget.iconKey === key
-                ? 'bg-[var(--accent)] text-[var(--on-accent)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--fill-2)]',
-            )}
-          >
-            <Icon size={16} strokeWidth={1.5} />
-          </button>
+          <Tooltip key={key} label={key} side="top">
+            <button
+              type="button"
+              onClick={() => onUpdate({ iconKey: key })}
+              className={cn(
+                'flex items-center justify-center rounded-[6px] p-1.5 transition-colors',
+                widget.iconKey === key
+                  ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--fill-2)]',
+              )}
+            >
+              <Icon size={16} strokeWidth={1.5} />
+            </button>
+          </Tooltip>
         ))}
       </div>
     </div>

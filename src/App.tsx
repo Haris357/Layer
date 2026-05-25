@@ -17,6 +17,10 @@ import { useBatteryNotifications } from './hooks/useBatteryNotifications'
 import { useCalendarReminders } from './hooks/useCalendarReminders'
 import { useClipboardWatcher } from './hooks/useClipboardWatcher'
 import { useScreensaver } from './hooks/useScreensaver'
+import { useWallpaperAccent } from './hooks/useWallpaperAccent'
+import { useSpaces } from './hooks/useSpaces'
+import { useHotcorner } from './hooks/useHotcorner'
+import { AmbientBackground } from './components/AmbientBackground'
 import { useSettingsStore } from './store/settingsStore'
 
 export default function App() {
@@ -33,11 +37,15 @@ export default function App() {
   useCalendarReminders()
   useClipboardWatcher()
   useScreensaver()
+  useWallpaperAccent()
+  useSpaces()
+  useHotcorner()
 
   const onboarded = useSettingsStore((s) => s.onboarded)
 
   return (
     <div className="relative h-full w-full overflow-hidden">
+      <AmbientBackground />
       <Canvas />
       <TopIsland />
       <CommandPalette />

@@ -139,6 +139,87 @@
   margin: clamp(10px, 1.8vh, 22px) 0 0;
 }
 
+.ss-ampm {
+  font-size: 0.28em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  margin-left: 0.18em;
+  vertical-align: 0.7em;
+  opacity: 0.5;
+}
+
+/* ── Minimal theme: flat black, one huge ultra-thin clock, bottom-left ── */
+.ss-minimal {
+  background: #050507;
+}
+.ss-min {
+  position: absolute;
+  left: clamp(36px, 6vw, 120px);
+  bottom: clamp(40px, 9vh, 130px);
+  z-index: 1;
+  animation: ss-fade-in 1.6s ease both;
+}
+.ss-min-time {
+  font-size: clamp(96px, 22vw, 360px);
+  font-weight: 100;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  color: #f4f4f6;
+  font-variant-numeric: tabular-nums;
+}
+.ss-min-time .ss-colon {
+  opacity: 0.3;
+  animation: ss-blink 2s steps(1) infinite;
+}
+.ss-min-ampm {
+  font-size: 0.16em;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  margin-left: 0.25em;
+  vertical-align: 1em;
+  opacity: 0.4;
+}
+.ss-min-date {
+  margin-top: clamp(10px, 1.6vh, 22px);
+  font-size: clamp(12px, 1.5vw, 20px);
+  font-weight: 600;
+  letter-spacing: 7px;
+  text-transform: uppercase;
+  color: rgba(244, 244, 246, 0.4);
+}
+
+/* ── Quote theme: a serif line is the hero; the time sits small above ── */
+.ss-q-time {
+  font-size: clamp(15px, 1.8vw, 24px);
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: rgba(244, 244, 246, 0.5);
+  font-variant-numeric: tabular-nums;
+  animation: ss-rise 1.2s ease both;
+}
+.ss-q-text {
+  margin: clamp(18px, 3vh, 40px) auto 0;
+  max-width: 16ch;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(34px, 6.5vw, 92px);
+  line-height: 1.12;
+  letter-spacing: -0.5px;
+  color: #f6f6f8;
+  text-shadow: 0 0 50px rgba(120, 130, 255, 0.22);
+  animation: ss-rise 1.4s ease both;
+}
+.ss-q-date {
+  margin-top: clamp(16px, 2.4vh, 34px);
+  font-size: clamp(12px, 1.4vw, 18px);
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(244, 244, 246, 0.4);
+  animation: ss-rise 1.6s ease both;
+}
+
 /* Soft entrance for the live bits that arrive after a fetch. */
 @keyframes ss-rise {
   from {

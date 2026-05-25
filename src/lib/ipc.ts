@@ -22,10 +22,10 @@ export const saveJournal = (json: string) =>
 
 export const loadJournal = () => invoke<string>('load_journal')
 
-export const saveTemplates = (json: string) =>
-  invoke<void>('save_templates', { json })
+export const saveSpaces = (json: string) =>
+  invoke<void>('save_spaces', { json })
 
-export const loadTemplates = () => invoke<string>('load_templates')
+export const loadSpaces = () => invoke<string>('load_spaces')
 
 export const writeTextFile = (path: string, contents: string) =>
   invoke<void>('write_text_file', { path, contents })
@@ -120,8 +120,21 @@ export const setScreensaverEnabled = (enabled: boolean) =>
 export const previewScreensaver = () =>
   invoke<void>('preview_screensaver')
 
+export const setScreensaverTheme = (theme: string) =>
+  invoke<void>('set_screensaver_theme', { theme })
+
+export const getScreensaverTheme = () =>
+  invoke<string>('get_screensaver_theme')
+
 export const showInFolder = (path: string) =>
   invoke<void>('show_in_folder', { path })
+
+// Dominant accent colour (#rrggbb) sampled from the desktop wallpaper.
+export const getWallpaperAccent = () =>
+  invoke<string>('get_wallpaper_accent')
+
+export const setHotcorner = (enabled: boolean) =>
+  invoke<void>('set_hotcorner', { enabled })
 
 export const captureScreen = (path: string) =>
   invoke<void>('capture_screen', { path })

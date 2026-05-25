@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Mode, NewWidget, Template, Widget } from '../types/widget'
+import type { Mode, NewWidget, Space, Widget } from '../types/widget'
 import { uid } from '../lib/utils'
 import { deleteAsset, isTauri } from '../lib/ipc'
 import { useToastStore } from './toastStore'
@@ -15,7 +15,7 @@ interface CanvasState {
   mode: Mode
   selectedId: string | null
   hydrated: boolean
-  templates: Template[]
+  spaces: Space[]
   activeId: string
   past: Widget[][]
   future: Widget[][]
@@ -41,20 +41,21 @@ interface CanvasState {
   resetAll: () => void
   hydrate: (widgets: Widget[]) => void
   clampViewport: (vw: number, vh: number) => void
-  hydrateTemplates: (templates: Template[], activeId: string) => void
-  switchTemplate: (id: string) => void
-  createTemplate: (name: string) => void
-  renameTemplate: (id: string, name: string) => void
-  deleteTemplate: (id: string) => void
-  importTemplate: (name: string, widgets: Widget[]) => void
+  hydrateSpaces: (spaces: Space[], activeId: string) => void
+  switchSpace: (id: string) => void
+  cycleSpace: (dir?: number) => void
+  createSpace: (name: string) => void
+  renameSpace: (id: string, name: string) => void
+  deleteSpace: (id: string) => void
+  importSpace: (name: string, widgets: Widget[]) => void
 }
 
-function syncTemplates(
-  templates: Template[],
+function syncSpaces(
+  spaces: Space[],
   activeId: string,
   widgets: Widget[],
-): Template[] {
-  return templates.map((t) => (t.id === activeId ? { ...t, widgets } : t))
+): Space[] {
+  return spaces.map((t) => (t.id === activeId ? { ...t, widgets } : t))
 }
 
 function nextZIndex(widgets: Widget[]): number {
@@ -86,6 +87,7 @@ const KNOWN_TYPES: ReadonlySet<string> = new Set([
   'sticky',
   'inbox',
   'clipboard',
+  'webembed',
 ])
 function pruneUnknown(widgets: Widget[]): Widget[] {
   return widgets.filter((w) => KNOWN_TYPES.has(w.type))
@@ -100,7 +102,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     mode: isTauri() ? 'view' : 'edit',
     selectedId: null,
     hydrated: false,
-    templates: [],
+    spaces: [],
     activeId: '',
     past: [],
     future: [],
@@ -318,14 +320,14 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     hydrate: (widgets) =>
       set({ widgets: pruneUnknown(widgets), hydrated: true }),
 
-    hydrateTemplates: (templates, activeId) => {
-      const cleaned = templates.map((t) => ({
+    hydrateSpaces: (spaces, activeId) => {
+      const cleaned = spaces.map((t) => ({
         ...t,
         widgets: pruneUnknown(t.widgets),
       }))
       const active = cleaned.find((t) => t.id === activeId) ?? cleaned[0]
       set({
-        templates: cleaned,
+        spaces: cleaned,
         activeId: active ? active.id : '',
         widgets: active ? active.widgets : [],
         selectedId: null,
@@ -335,17 +337,33 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       })
     },
 
-    switchTemplate: (id) => {
+    cycleSpace: (dir = 1) => {
+      const { spaces, activeId } = get()
+      if (spaces.length < 2) return
+      const i = spaces.findIndex((t) => t.id === activeId)
+      const base = i < 0 ? 0 : i
+      const next =
+        spaces[(base + dir + spaces.length) % spaces.length]
+      if (!next) return
+      get().switchSpace(next.id)
+      useToastStore.getState().showToast({
+        message: `Space · ${next.name}`,
+        icon: 'success',
+        duration: 1800,
+      })
+    },
+
+    switchSpace: (id) => {
       set((state) => {
-        const synced = syncTemplates(
-          state.templates,
+        const synced = syncSpaces(
+          state.spaces,
           state.activeId,
           state.widgets,
         )
         const target = synced.find((t) => t.id === id)
-        if (!target) return { templates: synced }
+        if (!target) return { spaces: synced }
         return {
-          templates: synced,
+          spaces: synced,
           activeId: id,
           widgets: target.widgets,
           selectedId: null,
@@ -355,18 +373,18 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       })
     },
 
-    createTemplate: (name) => {
+    createSpace: (name) => {
       set((state) => {
-        const synced = syncTemplates(
-          state.templates,
+        const synced = syncSpaces(
+          state.spaces,
           state.activeId,
           state.widgets,
         )
         const id = uid()
         const widgets = state.widgets.map((w) => ({ ...w, id: uid() }))
-        const template: Template = { id, name, builtin: false, widgets }
+        const space: Space = { id, name, builtin: false, widgets }
         return {
-          templates: [...synced, template],
+          spaces: [...synced, space],
           activeId: id,
           widgets,
           selectedId: null,
@@ -376,26 +394,26 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       })
     },
 
-    renameTemplate: (id, name) => {
+    renameSpace: (id, name) => {
       set((state) => ({
-        templates: state.templates.map((t) =>
+        spaces: state.spaces.map((t) =>
           t.id === id && !t.builtin ? { ...t, name } : t,
         ),
       }))
     },
 
-    deleteTemplate: (id) => {
+    deleteSpace: (id) => {
       set((state) => {
-        const target = state.templates.find((t) => t.id === id)
+        const target = state.spaces.find((t) => t.id === id)
         if (!target || target.builtin) return {}
-        const remaining = state.templates.filter((t) => t.id !== id)
+        const remaining = state.spaces.filter((t) => t.id !== id)
         if (remaining.length === 0) return {}
         const next = remaining[0]
         if (state.activeId !== id || !next) {
-          return { templates: remaining }
+          return { spaces: remaining }
         }
         return {
-          templates: remaining,
+          spaces: remaining,
           activeId: next.id,
           widgets: next.widgets,
           selectedId: null,
@@ -405,23 +423,23 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       })
     },
 
-    importTemplate: (name, widgets) => {
+    importSpace: (name, widgets) => {
       set((state) => {
-        const synced = syncTemplates(
-          state.templates,
+        const synced = syncSpaces(
+          state.spaces,
           state.activeId,
           state.widgets,
         )
         const id = uid()
         const fresh = pruneUnknown(widgets).map((w) => ({ ...w, id: uid() }))
-        const template: Template = {
+        const space: Space = {
           id,
           name,
           builtin: false,
           widgets: fresh,
         }
         return {
-          templates: [...synced, template],
+          spaces: [...synced, space],
           activeId: id,
           widgets: fresh,
           selectedId: null,
