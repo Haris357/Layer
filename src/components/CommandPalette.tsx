@@ -5,6 +5,7 @@ import { useCanvasStore } from '../store/canvasStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { widgetList, type WidgetDefinition } from '../lib/widgetRegistry'
 import { cn } from '../lib/utils'
+import { MonitorLayer } from './MonitorLayer'
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false)
@@ -52,10 +53,11 @@ export function CommandPalette() {
       {open && (
         <div
           data-hit
-          className="fixed inset-0 z-[10000] flex items-start justify-center pt-[16vh]"
+          className="fixed inset-0 z-[10000]"
           style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
           onMouseDown={() => setOpen(false)}
         >
+          <MonitorLayer align="start" className="pt-[14vh]">
           <motion.div
             initial={{ opacity: 0, y: -12, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -123,6 +125,7 @@ export function CommandPalette() {
               ))}
             </div>
           </motion.div>
+          </MonitorLayer>
         </div>
       )}
     </AnimatePresence>

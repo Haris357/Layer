@@ -329,7 +329,21 @@ fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
         let mut ignoring = true;
         let mut was_corner = false;
         let mut was_peek = false;
+        // Track the virtual desktop so we can re-cover it when a monitor is
+        // plugged in / removed / rearranged — no app restart needed.
+        let mut last_vrect = virtual_screen_rect();
+        let mut tick: u32 = 0;
         loop {
+            tick = tick.wrapping_add(1);
+            // ~once a second, re-fit the window to the virtual desktop if it
+            // changed (cheap; mirrors the SetWindowPos we already do here).
+            if tick % 125 == 0 {
+                let v = virtual_screen_rect();
+                if v != last_vrect {
+                    last_vrect = v;
+                    resize_to_virtual_desktop(&window);
+                }
+            }
             let (cx, cy) = cursor_pos();
             let (ox, oy) = match window.outer_position() {
                 Ok(p) => (p.x, p.y),

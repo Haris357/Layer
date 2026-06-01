@@ -4,6 +4,7 @@ import { listen } from '@tauri-apps/api/event'
 import { Inbox } from 'lucide-react'
 import { useInboxStore } from '../store/inboxStore'
 import { useToastStore } from '../store/toastStore'
+import { MonitorLayer } from './MonitorLayer'
 
 // Listens for the Ctrl+Shift+N global hotkey (emitted from Rust as
 // "quick-capture") and pops a centred input. Anything saved drops into
@@ -54,10 +55,11 @@ export function QuickCaptureModal() {
       {open && (
         <div
           data-hit
-          className="fixed inset-0 z-[10003] flex items-center justify-center"
+          className="fixed inset-0 z-[10003]"
           style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)' }}
           onMouseDown={cancel}
         >
+          <MonitorLayer>
           <motion.div
             initial={{ opacity: 0, y: -12, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -100,6 +102,7 @@ export function QuickCaptureModal() {
               </span>
             </div>
           </motion.div>
+          </MonitorLayer>
         </div>
       )}
     </AnimatePresence>

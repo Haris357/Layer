@@ -20,6 +20,7 @@ import {
   type NotificationKind,
 } from '../store/notificationStore'
 import { relTime } from '../lib/notify'
+import { useMonitorStore } from '../store/monitorStore'
 import { Tooltip } from './Tooltip'
 import { cn } from '../lib/utils'
 
@@ -130,15 +131,25 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const markAllRead = useNotificationStore((s) => s.markAllRead)
   const clearAll = useNotificationStore((s) => s.clearAll)
   const hasUnread = items.some((i) => !i.read)
+  const primary = useMonitorStore((s) => s.primary)
 
   // Pick the right icon for the empty state.
   return (
     <div
       data-hit
-      className="fixed inset-0 z-[10000] flex items-center justify-center"
+      className="fixed inset-0 z-[10000]"
       style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
       onMouseDown={onClose}
     >
+      <div
+        className="absolute flex items-center justify-center"
+        style={{
+          left: primary ? primary.x : 0,
+          top: primary ? primary.y : 0,
+          width: primary ? primary.w : '100%',
+          height: primary ? primary.h : '100%',
+        }}
+      >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: -8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -201,6 +212,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </motion.div>
+      </div>
     </div>
   )
 }

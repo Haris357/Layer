@@ -23,6 +23,9 @@ import { stickyDefinition } from '../components/widgets/StickyWidget'
 import { inboxDefinition } from '../components/widgets/InboxWidget'
 import { clipboardDefinition } from '../components/widgets/ClipboardWidget'
 import { webEmbedDefinition } from '../components/widgets/WebEmbedWidget'
+import { diskInfoDefinition } from '../components/widgets/DiskInfoWidget'
+import { greetingDefinition } from '../components/widgets/GreetingWidget'
+import { shelfDefinition } from '../components/widgets/ShelfWidget'
 
 export interface WidgetSize {
   width: number
@@ -70,11 +73,16 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   inbox: inboxDefinition as WidgetDefinition,
   clipboard: clipboardDefinition as WidgetDefinition,
   webembed: webEmbedDefinition as WidgetDefinition,
+  diskinfo: diskInfoDefinition as WidgetDefinition,
+  greeting: greetingDefinition as WidgetDefinition,
+  shelf: shelfDefinition as WidgetDefinition,
 }
 
 export const widgetOrder: WidgetType[] = [
   'note',
   'sticky',
+  'shelf',
+  'greeting',
   'inbox',
   'todo',
   'pomodoro',
@@ -95,6 +103,7 @@ export const widgetOrder: WidgetType[] = [
   'gallery',
   'weather',
   'stats',
+  'diskinfo',
 ]
 
 export const widgetList: WidgetDefinition[] = widgetOrder.map(

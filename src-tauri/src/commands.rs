@@ -70,9 +70,10 @@ pub fn read_text_file(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn quit_app(app: AppHandle) -> Result<(), String> {
-    app.exit(0);
-    Ok(())
+pub fn quit_app() {
+    // Hard-exit: never wait on teardown (a stuck thread/COM call could
+    // otherwise leave the window "not responding" instead of closing).
+    std::process::exit(0);
 }
 
 #[tauri::command]
@@ -247,7 +248,7 @@ pub fn delete_asset(asset_path: String) -> Result<(), String> {
     Ok(())
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SystemStats {
     cpu: f32,
@@ -283,33 +284,39 @@ fn battery_status() -> (i32, bool) {
 }
 
 #[tauri::command]
-pub fn get_system_stats() -> SystemStats {
-    use sysinfo::{Disks, System};
-    let mut sys = System::new();
-    sys.refresh_cpu_usage();
-    std::thread::sleep(std::time::Duration::from_millis(220));
-    sys.refresh_cpu_usage();
-    sys.refresh_memory();
+pub async fn get_system_stats() -> SystemStats {
+    // Runs on a blocking pool thread — it samples CPU with a 220ms sleep, which
+    // must never run on the main thread (would stall the UI every poll).
+    tauri::async_runtime::spawn_blocking(|| {
+        use sysinfo::{Disks, System};
+        let mut sys = System::new();
+        sys.refresh_cpu_usage();
+        std::thread::sleep(std::time::Duration::from_millis(220));
+        sys.refresh_cpu_usage();
+        sys.refresh_memory();
 
-    let disks = Disks::new_with_refreshed_list();
-    let mut disk_total = 0u64;
-    let mut disk_avail = 0u64;
-    for disk in &disks {
-        disk_total += disk.total_space();
-        disk_avail += disk.available_space();
-    }
+        let disks = Disks::new_with_refreshed_list();
+        let mut disk_total = 0u64;
+        let mut disk_avail = 0u64;
+        for disk in &disks {
+            disk_total += disk.total_space();
+            disk_avail += disk.available_space();
+        }
 
-    let (battery, charging) = battery_status();
+        let (battery, charging) = battery_status();
 
-    SystemStats {
-        cpu: sys.global_cpu_usage(),
-        mem_used: sys.used_memory(),
-        mem_total: sys.total_memory(),
-        disk_used: disk_total.saturating_sub(disk_avail),
-        disk_total,
-        battery,
-        charging,
-    }
+        SystemStats {
+            cpu: sys.global_cpu_usage(),
+            mem_used: sys.used_memory(),
+            mem_total: sys.total_memory(),
+            disk_used: disk_total.saturating_sub(disk_avail),
+            disk_total,
+            battery,
+            charging,
+        }
+    })
+    .await
+    .unwrap_or_default()
 }
 
 #[derive(serde::Serialize)]
@@ -344,25 +351,31 @@ fn scan_lnks(dir: &Path, out: &mut Vec<AppEntry>) {
 }
 
 #[tauri::command]
-pub fn list_apps() -> Vec<AppEntry> {
-    let mut out: Vec<AppEntry> = Vec::new();
-    if let Ok(program_data) = std::env::var("ProgramData") {
-        scan_lnks(
-            &Path::new(&program_data)
-                .join("Microsoft\\Windows\\Start Menu\\Programs"),
-            &mut out,
-        );
-    }
-    if let Ok(app_data) = std::env::var("APPDATA") {
-        scan_lnks(
-            &Path::new(&app_data)
-                .join("Microsoft\\Windows\\Start Menu\\Programs"),
-            &mut out,
-        );
-    }
-    out.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
-    out.dedup_by(|a, b| a.name.eq_ignore_ascii_case(&b.name));
-    out
+pub async fn list_apps() -> Vec<AppEntry> {
+    // Recursive Start-Menu directory scan — off the main thread so the disk
+    // walk never stalls the UI.
+    tauri::async_runtime::spawn_blocking(|| {
+        let mut out: Vec<AppEntry> = Vec::new();
+        if let Ok(program_data) = std::env::var("ProgramData") {
+            scan_lnks(
+                &Path::new(&program_data)
+                    .join("Microsoft\\Windows\\Start Menu\\Programs"),
+                &mut out,
+            );
+        }
+        if let Ok(app_data) = std::env::var("APPDATA") {
+            scan_lnks(
+                &Path::new(&app_data)
+                    .join("Microsoft\\Windows\\Start Menu\\Programs"),
+                &mut out,
+            );
+        }
+        out.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+        out.dedup_by(|a, b| a.name.eq_ignore_ascii_case(&b.name));
+        out
+    })
+    .await
+    .unwrap_or_default()
 }
 
 #[tauri::command]
@@ -605,10 +618,14 @@ pub fn read_binary_file(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn get_app_icon(path: String) -> Option<String> {
+pub async fn get_app_icon(path: String) -> Option<String> {
     #[cfg(target_os = "windows")]
     {
-        return extract_icon(&path);
+        // Shell icon extraction is blocking I/O — keep it off the main thread.
+        tauri::async_runtime::spawn_blocking(move || extract_icon(&path))
+            .await
+            .ok()
+            .flatten()
     }
     #[cfg(not(target_os = "windows"))]
     {
@@ -625,6 +642,29 @@ fn ensure_com() {
     }
 }
 
+// Drive a WinRT async op to completion via its completion handler + a channel
+// with a timeout — instead of `IAsyncOperation::get()`, whose internal blocking
+// wait never wakes in this process (the request just hangs forever). Returns
+// None on timeout/error so a stuck media app can never freeze us.
+#[cfg(target_os = "windows")]
+fn await_op<T>(op: windows::Foundation::IAsyncOperation<T>, ms: u64) -> Option<T>
+where
+    T: windows::core::RuntimeType + Send + 'static,
+{
+    use windows::Foundation::AsyncOperationCompletedHandler;
+    let (tx, rx) = std::sync::mpsc::channel::<windows::core::Result<T>>();
+    let handler = AsyncOperationCompletedHandler::<T>::new(move |op, _status| {
+        if let Ok(o) = op.ok() {
+            let _ = tx.send(o.GetResults());
+        }
+        Ok(())
+    });
+    if op.SetCompleted(&handler).is_err() {
+        return None;
+    }
+    rx.recv_timeout(std::time::Duration::from_millis(ms)).ok()?.ok()
+}
+
 // The system's current coordinates via the Windows Geolocator, when location
 // access is enabled. Runs on a worker thread with a timeout so it can never
 // hang the app if the location service is slow or blocked. Returns [lat, lon].
@@ -634,14 +674,18 @@ pub async fn get_system_location() -> Result<(f64, f64), String> {
     {
         tauri::async_runtime::spawn_blocking(|| -> Result<(f64, f64), String> {
             ensure_com();
-            (|| -> windows::core::Result<(f64, f64)> {
-                use windows::Devices::Geolocation::Geolocator;
-                let locator = Geolocator::new()?;
-                let pos = locator.GetGeopositionAsync()?.get()?;
-                let basic = pos.Coordinate()?.Point()?.Position()?;
-                Ok((basic.Latitude, basic.Longitude))
+            use windows::Devices::Geolocation::Geolocator;
+            let locator = Geolocator::new().map_err(|e| e.to_string())?;
+            let op = locator.GetGeopositionAsync().map_err(|e| e.to_string())?;
+            // Bound the await (GPS can be slow) so a blocked location service
+            // can never hang this worker thread forever.
+            let pos =
+                await_op(op, 8000).ok_or_else(|| "location timed out".to_string())?;
+            let basic = (|| -> windows::core::Result<_> {
+                Ok(pos.Coordinate()?.Point()?.Position()?)
             })()
-            .map_err(|e| e.to_string())
+            .map_err(|e| e.to_string())?;
+            Ok((basic.Latitude, basic.Longitude))
         })
         .await
         .map_err(|e| e.to_string())?
@@ -652,7 +696,7 @@ pub async fn get_system_location() -> Result<(f64, f64), String> {
     }
 }
 
-#[derive(serde::Serialize, Default)]
+#[derive(serde::Serialize, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct NowPlaying {
     has_session: bool,
@@ -661,42 +705,172 @@ pub struct NowPlaying {
     playing: bool,
 }
 
+// ── Now Playing via a long-lived SMTC worker ────────────────────────────────
+// The session manager is NOT a stateless query object: after RequestAsync it
+// populates its session list asynchronously, so creating + dropping one per
+// poll always reads empty. Instead we own ONE manager for the app's lifetime
+// on a dedicated MTA thread, keep a snapshot, and serve reads from that.
+
+#[cfg(target_os = "windows")]
+enum Cmd {
+    Next,
+    Prev,
+    Toggle,
+}
+
+#[cfg(target_os = "windows")]
+struct Smtc {
+    np: std::sync::Arc<std::sync::Mutex<NowPlaying>>,
+    tx: std::sync::mpsc::Sender<Cmd>,
+}
+
+#[cfg(target_os = "windows")]
+static SMTC: std::sync::OnceLock<Smtc> = std::sync::OnceLock::new();
+
+#[cfg(target_os = "windows")]
+fn smtc() -> &'static Smtc {
+    SMTC.get_or_init(|| {
+        let np = std::sync::Arc::new(std::sync::Mutex::new(NowPlaying::default()));
+        let (tx, rx) = std::sync::mpsc::channel::<Cmd>();
+        let worker = np.clone();
+        let _ = std::thread::Builder::new()
+            .name("smtc".into())
+            .spawn(move || media_thread(worker, rx));
+        Smtc { np, tx }
+    })
+}
+
+#[cfg(target_os = "windows")]
+fn media_thread(
+    np: std::sync::Arc<std::sync::Mutex<NowPlaying>>,
+    rx: std::sync::mpsc::Receiver<Cmd>,
+) {
+    use std::sync::mpsc::RecvTimeoutError;
+    use std::time::Duration;
+    use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager as Mgr;
+    use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
+
+    unsafe {
+        let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
+    }
+
+    // Self-healing: (re)create the manager whenever it's missing or has gone
+    // bad, and NEVER exit. If the OS media service wedges (completions stop
+    // firing — a Windows state a reboot clears) await_op just times out, so we
+    // never hang; we keep retrying and auto-recover once it comes back, instead
+    // of staying dead until an app restart.
+    let mut mgr: Option<Mgr> = None;
+    let mut fails = 0u32;
+    loop {
+        if mgr.is_none() {
+            mgr = Mgr::RequestAsync().ok().and_then(|op| await_op(op, 4000));
+            if mgr.is_none() {
+                if let Ok(mut g) = np.lock() {
+                    *g = NowPlaying::default();
+                }
+                // Back off, then retry — unless the app is shutting down.
+                match rx.recv_timeout(Duration::from_secs(3)) {
+                    Err(RecvTimeoutError::Disconnected) => break,
+                    _ => continue,
+                }
+            }
+        }
+        let m = match mgr.as_ref() {
+            Some(m) => m,
+            None => continue,
+        };
+        match rx.recv_timeout(Duration::from_millis(1000)) {
+            Ok(cmd) => apply(m, cmd),
+            Err(RecvTimeoutError::Timeout) => {}
+            Err(RecvTimeoutError::Disconnected) => break,
+        }
+        match read_session(m) {
+            Ok(snap) => {
+                fails = 0;
+                if let Ok(mut g) = np.lock() {
+                    *g = snap;
+                }
+            }
+            Err(_) => {
+                // Manager/COM looks broken — drop it so we rebuild next loop.
+                fails += 1;
+                if fails >= 3 {
+                    fails = 0;
+                    mgr = None;
+                }
+            }
+        }
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn read_session(
+    mgr: &windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager,
+) -> windows::core::Result<NowPlaying> {
+    use windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus as Status;
+
+    let list = mgr.GetSessions()?;
+    let mut sessions: Vec<_> = (&list).into_iter().collect();
+
+    // Prefer a session that's actually playing; else the OS "current" one;
+    // else just the first session that exists.
+    let playing_idx = sessions.iter().position(|s| {
+        s.GetPlaybackInfo()
+            .and_then(|i| i.PlaybackStatus())
+            .map(|st| st == Status::Playing)
+            .unwrap_or(false)
+    });
+
+    let session = match playing_idx {
+        Some(i) => sessions.swap_remove(i),
+        None => match mgr.GetCurrentSession() {
+            Ok(s) => s,
+            Err(_) if !sessions.is_empty() => sessions.swap_remove(0),
+            Err(e) => return Err(e),
+        },
+    };
+
+    let mut np = NowPlaying {
+        has_session: true,
+        ..Default::default()
+    };
+    if let Some(props) = await_op(session.TryGetMediaPropertiesAsync()?, 1500) {
+        np.title = props.Title().map(|s| s.to_string()).unwrap_or_default();
+        np.artist = props.Artist().map(|s| s.to_string()).unwrap_or_default();
+    }
+    if let Ok(info) = session.GetPlaybackInfo() {
+        np.playing = info
+            .PlaybackStatus()
+            .map(|s| s == Status::Playing)
+            .unwrap_or(false);
+    }
+    Ok(np)
+}
+
+#[cfg(target_os = "windows")]
+fn apply(
+    mgr: &windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager,
+    cmd: Cmd,
+) {
+    let session = match mgr.GetCurrentSession() {
+        Ok(s) => s,
+        Err(_) => return,
+    };
+    let op = match cmd {
+        Cmd::Next => session.TrySkipNextAsync(),
+        Cmd::Prev => session.TrySkipPreviousAsync(),
+        Cmd::Toggle => session.TryTogglePlayPauseAsync(),
+    };
+    if let Ok(op) = op {
+        let _ = await_op(op, 2000);
+    }
+}
+
 #[tauri::command]
-pub async fn get_now_playing() -> NowPlaying {
+pub fn get_now_playing() -> NowPlaying {
     #[cfg(target_os = "windows")]
     {
-        // Run the WinRT calls on a blocking MTA worker thread. Their .get()
-        // deadlocks on the STA main thread (it needs a message pump), which
-        // would freeze the whole app; on an MTA thread it just blocks safely.
-        tauri::async_runtime::spawn_blocking(|| {
-            use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager as Mgr;
-            use windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus as Status;
-            ensure_com();
-            (|| -> windows::core::Result<NowPlaying> {
-                let mgr = Mgr::RequestAsync()?.get()?;
-                let session = mgr.GetCurrentSession()?;
-                let mut np = NowPlaying {
-                    has_session: true,
-                    ..Default::default()
-                };
-                if let Ok(props) = session.TryGetMediaPropertiesAsync()?.get() {
-                    np.title =
-                        props.Title().map(|s| s.to_string()).unwrap_or_default();
-                    np.artist =
-                        props.Artist().map(|s| s.to_string()).unwrap_or_default();
-                }
-                if let Ok(info) = session.GetPlaybackInfo() {
-                    np.playing = info
-                        .PlaybackStatus()
-                        .map(|s| s == Status::Playing)
-                        .unwrap_or(false);
-                }
-                Ok(np)
-            })()
-            .unwrap_or_default()
-        })
-        .await
-        .unwrap_or_default()
+        smtc().np.lock().map(|g| g.clone()).unwrap_or_default()
     }
     #[cfg(not(target_os = "windows"))]
     {
@@ -705,30 +879,17 @@ pub async fn get_now_playing() -> NowPlaying {
 }
 
 #[tauri::command]
-pub async fn media_control(action: String) {
+pub fn media_control(action: String) {
     #[cfg(target_os = "windows")]
     {
-        let _ = tauri::async_runtime::spawn_blocking(move || {
-            use windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager as Mgr;
-            ensure_com();
-            let _ = (|| -> windows::core::Result<()> {
-                let mgr = Mgr::RequestAsync()?.get()?;
-                let session = mgr.GetCurrentSession()?;
-                match action.as_str() {
-                    "next" => {
-                        session.TrySkipNextAsync()?.get()?;
-                    }
-                    "prev" => {
-                        session.TrySkipPreviousAsync()?.get()?;
-                    }
-                    _ => {
-                        session.TryTogglePlayPauseAsync()?.get()?;
-                    }
-                }
-                Ok(())
-            })();
-        })
-        .await;
+        // Hand the command to the SMTC worker so it runs on the same thread
+        // that owns the live session manager (no cross-thread COM proxying).
+        let cmd = match action.as_str() {
+            "next" => Cmd::Next,
+            "prev" => Cmd::Prev,
+            _ => Cmd::Toggle,
+        };
+        let _ = smtc().tx.send(cmd);
     }
     #[cfg(not(target_os = "windows"))]
     let _ = action;
@@ -748,66 +909,21 @@ pub async fn get_notifications() -> Vec<NotificationItem> {
     #[cfg(target_os = "windows")]
     {
         tauri::async_runtime::spawn_blocking(|| {
-        use windows::UI::Notifications::Management::UserNotificationListener;
-        use windows::UI::Notifications::{
-            KnownNotificationBindings, NotificationKinds,
-        };
-        ensure_com();
-        (|| -> windows::core::Result<Vec<NotificationItem>> {
-            let listener = UserNotificationListener::Current()?;
-            let _ = listener.RequestAccessAsync()?.get();
-            let list = listener
-                .GetNotificationsAsync(NotificationKinds::Toast)?
-                .get()?;
-            let mut out = Vec::new();
-            for un in &list {
-                let id = un.Id().unwrap_or(0);
-                let app = un
-                    .AppInfo()
-                    .and_then(|ai| ai.DisplayInfo())
-                    .and_then(|di| di.DisplayName())
-                    .map(|s| s.to_string())
-                    .unwrap_or_default();
-                let mut title = String::new();
-                let mut body = String::new();
-                if let Ok(notif) = un.Notification() {
-                    if let Ok(visual) = notif.Visual() {
-                        if let Ok(template) =
-                            KnownNotificationBindings::ToastGeneric()
-                        {
-                            if let Ok(binding) = visual.GetBinding(&template) {
-                                if let Ok(texts) = binding.GetTextElements() {
-                                    for (i, t) in
-                                        (&texts).into_iter().enumerate()
-                                    {
-                                        let s = t
-                                            .Text()
-                                            .map(|x| x.to_string())
-                                            .unwrap_or_default();
-                                        if i == 0 {
-                                            title = s;
-                                        } else if !s.is_empty() {
-                                            if !body.is_empty() {
-                                                body.push(' ');
-                                            }
-                                            body.push_str(&s);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                out.push(NotificationItem {
-                    id,
-                    app,
-                    title,
-                    body,
-                })
+            use windows::UI::Notifications::Management::UserNotificationListener;
+            use windows::UI::Notifications::NotificationKinds;
+            ensure_com();
+            let listener = match UserNotificationListener::Current() {
+                Ok(l) => l,
+                Err(_) => return Vec::new(),
+            };
+            // Access status is a Send enum, so await_op is fine here.
+            if let Ok(op) = listener.RequestAccessAsync() {
+                let _ = await_op(op, 2000);
             }
-            Ok(out)
-        })()
-        .unwrap_or_default()
+            match listener.GetNotificationsAsync(NotificationKinds::Toast) {
+                Ok(op) => await_notifications(op, 2000),
+                Err(_) => Vec::new(),
+            }
         })
         .await
         .unwrap_or_default()
@@ -818,15 +934,90 @@ pub async fn get_notifications() -> Vec<NotificationItem> {
     }
 }
 
+// The notification list (IVectorView<UserNotification>) is a non-agile COM type
+// that can't cross threads, so we extract the plain fields INSIDE the completion
+// handler and send only the Send-safe Vec out — bounded by a timeout so a
+// wedged notification service can never hang us.
+#[cfg(target_os = "windows")]
+fn await_notifications(
+    op: windows::Foundation::IAsyncOperation<
+        windows::Foundation::Collections::IVectorView<
+            windows::UI::Notifications::UserNotification,
+        >,
+    >,
+    ms: u64,
+) -> Vec<NotificationItem> {
+    use windows::Foundation::Collections::IVectorView;
+    use windows::Foundation::AsyncOperationCompletedHandler;
+    use windows::UI::Notifications::{KnownNotificationBindings, UserNotification};
+    let (tx, rx) = std::sync::mpsc::channel::<Vec<NotificationItem>>();
+    let handler = AsyncOperationCompletedHandler::<IVectorView<UserNotification>>::new(
+        move |op, _status| {
+        let mut out = Vec::new();
+        if let Ok(o) = op.ok() {
+            if let Ok(list) = o.GetResults() {
+                for un in &list {
+                    let id = un.Id().unwrap_or(0);
+                    let app = un
+                        .AppInfo()
+                        .and_then(|ai| ai.DisplayInfo())
+                        .and_then(|di| di.DisplayName())
+                        .map(|s| s.to_string())
+                        .unwrap_or_default();
+                    let mut title = String::new();
+                    let mut body = String::new();
+                    if let Ok(notif) = un.Notification() {
+                        if let Ok(visual) = notif.Visual() {
+                            if let Ok(template) =
+                                KnownNotificationBindings::ToastGeneric()
+                            {
+                                if let Ok(binding) = visual.GetBinding(&template) {
+                                    if let Ok(texts) = binding.GetTextElements() {
+                                        for (i, t) in (&texts).into_iter().enumerate() {
+                                            let s = t
+                                                .Text()
+                                                .map(|x| x.to_string())
+                                                .unwrap_or_default();
+                                            if i == 0 {
+                                                title = s;
+                                            } else if !s.is_empty() {
+                                                if !body.is_empty() {
+                                                    body.push(' ');
+                                                }
+                                                body.push_str(&s);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    out.push(NotificationItem { id, app, title, body });
+                }
+            }
+        }
+        let _ = tx.send(out);
+        Ok(())
+    });
+    if op.SetCompleted(&handler).is_err() {
+        return Vec::new();
+    }
+    rx.recv_timeout(std::time::Duration::from_millis(ms))
+        .unwrap_or_default()
+}
+
 #[tauri::command]
-pub fn clear_notification(id: u32) {
+pub async fn clear_notification(id: u32) {
     #[cfg(target_os = "windows")]
     {
-        use windows::UI::Notifications::Management::UserNotificationListener;
-        ensure_com();
-        if let Ok(listener) = UserNotificationListener::Current() {
-            let _ = listener.RemoveNotification(id);
-        }
+        let _ = tauri::async_runtime::spawn_blocking(move || {
+            use windows::UI::Notifications::Management::UserNotificationListener;
+            ensure_com();
+            if let Ok(listener) = UserNotificationListener::Current() {
+                let _ = listener.RemoveNotification(id);
+            }
+        })
+        .await;
     }
     #[cfg(not(target_os = "windows"))]
     let _ = id;
@@ -848,48 +1039,63 @@ unsafe fn endpoint_volume(
 }
 
 #[tauri::command]
-pub fn get_volume() -> f32 {
+pub async fn get_volume() -> f32 {
     #[cfg(target_os = "windows")]
     {
-        ensure_com();
-        unsafe {
-            if let Ok(vol) = endpoint_volume() {
-                if let Ok(level) = vol.GetMasterVolumeLevelScalar() {
-                    return level;
+        // COM audio calls off the main thread so a slow endpoint can't stall UI.
+        tauri::async_runtime::spawn_blocking(|| {
+            ensure_com();
+            unsafe {
+                if let Ok(vol) = endpoint_volume() {
+                    if let Ok(level) = vol.GetMasterVolumeLevelScalar() {
+                        return level;
+                    }
                 }
             }
-        }
+            -1.0
+        })
+        .await
+        .unwrap_or(-1.0)
     }
-    -1.0
+    #[cfg(not(target_os = "windows"))]
+    {
+        -1.0
+    }
 }
 
 #[tauri::command]
-pub fn set_volume(level: f32) {
+pub async fn set_volume(level: f32) {
     #[cfg(target_os = "windows")]
     {
-        ensure_com();
-        unsafe {
-            if let Ok(vol) = endpoint_volume() {
-                let _ = vol.SetMasterVolumeLevelScalar(
-                    level.clamp(0.0, 1.0),
-                    std::ptr::null(),
-                );
+        let _ = tauri::async_runtime::spawn_blocking(move || {
+            ensure_com();
+            unsafe {
+                if let Ok(vol) = endpoint_volume() {
+                    let _ = vol.SetMasterVolumeLevelScalar(
+                        level.clamp(0.0, 1.0),
+                        std::ptr::null(),
+                    );
+                }
             }
-        }
+        })
+        .await;
     }
     #[cfg(not(target_os = "windows"))]
     let _ = level;
 }
 
 #[tauri::command]
-pub fn clear_all_notifications() {
+pub async fn clear_all_notifications() {
     #[cfg(target_os = "windows")]
     {
-        use windows::UI::Notifications::Management::UserNotificationListener;
-        ensure_com();
-        if let Ok(listener) = UserNotificationListener::Current() {
-            let _ = listener.ClearNotifications();
-        }
+        let _ = tauri::async_runtime::spawn_blocking(|| {
+            use windows::UI::Notifications::Management::UserNotificationListener;
+            ensure_com();
+            if let Ok(listener) = UserNotificationListener::Current() {
+                let _ = listener.ClearNotifications();
+            }
+        })
+        .await;
     }
 }
 
@@ -906,5 +1112,248 @@ pub fn register_hotkey(app: AppHandle, accelerator: String) -> Result<(), String
     let _ = shortcut.register("CmdOrControl+Shift+N");
     let _ = shortcut.register("CmdOrControl+Shift+S");
     let _ = shortcut.register("CmdOrControl+Shift+E");
+    Ok(())
+}
+
+// ── DiskInfo widget ─────────────────────────────────────────────────────────
+
+#[derive(serde::Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DiskInfo {
+    name: String,
+    mount: String,
+    fs: String,
+    kind: String, // "ssd" | "hdd" | "unknown"
+    total: u64,
+    available: u64,
+    removable: bool,
+}
+
+#[tauri::command]
+pub async fn get_disks() -> Vec<DiskInfo> {
+    // sysinfo disk enumeration off the main thread.
+    tauri::async_runtime::spawn_blocking(|| {
+        use sysinfo::{DiskKind, Disks};
+        let disks = Disks::new_with_refreshed_list();
+        disks
+            .iter()
+            .map(|d| DiskInfo {
+                name: d.name().to_string_lossy().trim().to_string(),
+                mount: d.mount_point().to_string_lossy().to_string(),
+                fs: d.file_system().to_string_lossy().to_string(),
+                kind: match d.kind() {
+                    DiskKind::SSD => "ssd",
+                    DiskKind::HDD => "hdd",
+                    _ => "unknown",
+                }
+                .to_string(),
+                total: d.total_space(),
+                available: d.available_space(),
+                removable: d.is_removable(),
+            })
+            .collect()
+    })
+    .await
+    .unwrap_or_default()
+}
+
+// Live per-physical-disk I/O (read/write bytes/sec + % active time), like Task
+// Manager. Pulled from Windows performance counters via PDH — no admin needed.
+#[derive(serde::Serialize, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DiskIo {
+    name: String, // PDH instance, e.g. "0 C:" or "_Total"
+    read_bps: f64,
+    write_bps: f64,
+    active_pct: f64,
+}
+
+#[tauri::command]
+pub async fn get_disk_io() -> Vec<DiskIo> {
+    #[cfg(target_os = "windows")]
+    {
+        tauri::async_runtime::spawn_blocking(pdh_disk_io)
+            .await
+            .unwrap_or_default()
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Vec::new()
+    }
+}
+
+#[cfg(target_os = "windows")]
+unsafe fn pdh_add(
+    query: windows::Win32::System::Performance::PDH_HQUERY,
+    path: windows::core::PCWSTR,
+) -> windows::Win32::System::Performance::PDH_HCOUNTER {
+    use windows::Win32::System::Performance::{
+        PdhAddEnglishCounterW, PDH_HCOUNTER,
+    };
+    let mut c = PDH_HCOUNTER::default();
+    let _ = PdhAddEnglishCounterW(query, path, 0, &mut c);
+    c
+}
+
+#[cfg(target_os = "windows")]
+unsafe fn pdh_array(
+    counter: windows::Win32::System::Performance::PDH_HCOUNTER,
+) -> Vec<(String, f64)> {
+    use windows::Win32::System::Performance::{
+        PdhGetFormattedCounterArrayW, PDH_FMT_COUNTERVALUE_ITEM_W, PDH_FMT_DOUBLE,
+    };
+    let mut size = 0u32;
+    let mut count = 0u32;
+    // First call sizes the buffer (returns PDH_MORE_DATA).
+    let _ =
+        PdhGetFormattedCounterArrayW(counter, PDH_FMT_DOUBLE, &mut size, &mut count, None);
+    if size == 0 {
+        return Vec::new();
+    }
+    let mut buf = vec![0u8; size as usize];
+    let items = buf.as_mut_ptr() as *mut PDH_FMT_COUNTERVALUE_ITEM_W;
+    if PdhGetFormattedCounterArrayW(
+        counter,
+        PDH_FMT_DOUBLE,
+        &mut size,
+        &mut count,
+        Some(items),
+    ) != 0
+    {
+        return Vec::new();
+    }
+    let slice = std::slice::from_raw_parts(items, count as usize);
+    slice
+        .iter()
+        .filter_map(|it| {
+            let name = it.szName.to_string().ok()?;
+            Some((name, it.FmtValue.Anonymous.doubleValue))
+        })
+        .collect()
+}
+
+#[cfg(target_os = "windows")]
+fn pdh_disk_io() -> Vec<DiskIo> {
+    use std::collections::HashMap;
+    use windows::core::{w, PCWSTR};
+    use windows::Win32::System::Performance::{
+        PdhCloseQuery, PdhCollectQueryData, PdhOpenQueryW, PDH_HQUERY,
+    };
+    unsafe {
+        let mut query = PDH_HQUERY::default();
+        if PdhOpenQueryW(PCWSTR::null(), 0, &mut query) != 0 {
+            return Vec::new();
+        }
+        let read = pdh_add(query, w!("\\PhysicalDisk(*)\\Disk Read Bytes/sec"));
+        let write = pdh_add(query, w!("\\PhysicalDisk(*)\\Disk Write Bytes/sec"));
+        let active = pdh_add(query, w!("\\PhysicalDisk(*)\\% Disk Time"));
+
+        // Rate counters need two samples a moment apart.
+        if PdhCollectQueryData(query) != 0 {
+            let _ = PdhCloseQuery(query);
+            return Vec::new();
+        }
+        std::thread::sleep(std::time::Duration::from_millis(500));
+        if PdhCollectQueryData(query) != 0 {
+            let _ = PdhCloseQuery(query);
+            return Vec::new();
+        }
+
+        let mut map: HashMap<String, DiskIo> = HashMap::new();
+        for (n, v) in pdh_array(read) {
+            let e = map.entry(n.clone()).or_default();
+            e.name = n;
+            e.read_bps = v;
+        }
+        for (n, v) in pdh_array(write) {
+            let e = map.entry(n.clone()).or_default();
+            e.name = n;
+            e.write_bps = v;
+        }
+        for (n, v) in pdh_array(active) {
+            let e = map.entry(n.clone()).or_default();
+            e.name = n;
+            e.active_pct = v;
+        }
+        let _ = PdhCloseQuery(query);
+        map.into_values().collect()
+    }
+}
+
+// ── Shelf widget ────────────────────────────────────────────────────────────
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ShelfFile {
+    name: String,
+    path: String,
+    size: u64,
+    kind: String, // "image" | "video" | "audio" | "file"
+}
+
+#[cfg(target_os = "windows")]
+fn kind_for_ext(ext: &str) -> &'static str {
+    match ext {
+        "png" | "jpg" | "jpeg" | "gif" | "webp" | "bmp" | "svg" | "avif" => "image",
+        "mp4" | "mov" | "webm" | "mkv" | "avi" | "m4v" => "video",
+        "mp3" | "wav" | "ogg" | "flac" | "m4a" | "aac" => "audio",
+        _ => "file",
+    }
+}
+
+// Copy a dropped/picked file into the hidden shelf folder and return its
+// metadata. Runs off the main thread since the copy can be large/slow.
+#[tauri::command]
+pub async fn shelf_import(
+    app: AppHandle,
+    source_path: String,
+) -> Result<ShelfFile, String> {
+    tauri::async_runtime::spawn_blocking(move || -> Result<ShelfFile, String> {
+        let dir = storage::shelf_dir(&app)?;
+        let source = Path::new(&source_path);
+        let orig = source
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("file")
+            .to_string();
+        let ext = source
+            .extension()
+            .and_then(|s| s.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+        let stored_name = if ext.is_empty() {
+            format!("{}", uuid::Uuid::new_v4())
+        } else {
+            format!("{}.{}", uuid::Uuid::new_v4(), ext)
+        };
+        let dest = dir.join(&stored_name);
+        std::fs::copy(source, &dest).map_err(|e| e.to_string())?;
+        let size = std::fs::metadata(&dest).map(|m| m.len()).unwrap_or(0);
+        #[cfg(target_os = "windows")]
+        let kind = kind_for_ext(&ext).to_string();
+        #[cfg(not(target_os = "windows"))]
+        let kind = "file".to_string();
+        Ok(ShelfFile {
+            name: orig,
+            path: dest.to_string_lossy().to_string(),
+            size,
+            kind,
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+// Delete a shelved file — guarded so only files inside the shelf folder can go.
+#[tauri::command]
+pub fn shelf_remove(app: AppHandle, path: String) -> Result<(), String> {
+    let dir = storage::shelf_dir(&app)?;
+    let target = Path::new(&path);
+    if !target.starts_with(&dir) {
+        return Err("refused: not a shelf file".into());
+    }
+    if target.exists() {
+        std::fs::remove_file(target).map_err(|e| e.to_string())?;
+    }
     Ok(())
 }

@@ -139,7 +139,9 @@ pub fn run() {
                     "check-updates" => {
                         let _ = app.emit("check-updates", ());
                     }
-                    "quit" => app.exit(0),
+                    // Hard-exit so quit can never hang on teardown if a
+                    // background thread or COM call is mid-flight.
+                    "quit" => std::process::exit(0),
                     _ => {}
                 })
                 .on_tray_icon_event(|tray, event| {
@@ -199,6 +201,10 @@ pub fn run() {
             commands::get_volume,
             commands::set_volume,
             commands::register_hotkey,
+            commands::get_disks,
+            commands::get_disk_io,
+            commands::shelf_import,
+            commands::shelf_remove,
             commands::capture_screen,
             commands::capture_screen_base64,
             commands::write_binary_file,

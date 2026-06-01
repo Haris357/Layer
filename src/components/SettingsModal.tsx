@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useDragControls } from 'framer-motion'
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart'
 import { save } from '@tauri-apps/plugin-dialog'
 import {
   Loader2,
   X,
+  GripVertical,
   SlidersHorizontal,
   Palette,
   MonitorPlay,
@@ -24,6 +25,7 @@ import {
   resetAll as resetAllFiles,
 } from '../lib/ipc'
 import { useCanvasStore } from '../store/canvasStore'
+import { useMonitorStore } from '../store/monitorStore'
 import { useToastStore } from '../store/toastStore'
 import { getUpdate } from '../lib/updater'
 import { runUpdate } from '../lib/updateFlow'
@@ -96,6 +98,8 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const setHotCorner = useSettingsStore((s) => s.setHotCorner)
   const wallpaperLoading = useThemeStatus((s) => s.wallpaperLoading)
   const resetCanvas = useCanvasStore((s) => s.resetAll)
+  const primary = useMonitorStore((s) => s.primary)
+  const dragControls = useDragControls()
 
   const [tab, setTab] = useState<TabId>('general')
   const [confirmReset, setConfirmReset] = useState(false)
@@ -198,21 +202,36 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   return (
     <div
       data-hit
-      className="fixed inset-0 z-[10000] flex items-center justify-center"
+      className="fixed inset-0 z-[10000]"
       style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
       onMouseDown={onClose}
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
-        className="glass flex h-[min(560px,90vh)] w-[min(720px,94vw)] overflow-hidden rounded-[18px] border border-[var(--border)]"
-        onMouseDown={(e) => e.stopPropagation()}
+      {/* Centre the modal within the primary monitor (not the whole virtual
+          desktop) so it never opens in the gap between monitors. */}
+      <div
+        className="absolute flex items-center justify-center"
+        style={{
+          left: primary ? primary.x : 0,
+          top: primary ? primary.y : 0,
+          width: primary ? primary.w : '100%',
+          height: primary ? primary.h : '100%',
+        }}
       >
+        <motion.div
+          drag
+          dragListener={false}
+          dragControls={dragControls}
+          dragMomentum={false}
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="glass flex h-[min(560px,90vh)] w-[min(720px,94vw)] overflow-hidden rounded-[18px] border border-[var(--border)]"
+          onMouseDown={(e) => e.stopPropagation()}
+        >
         {/* sidebar */}
         <div className="flex w-[176px] shrink-0 flex-col gap-1 border-r border-[var(--border)] bg-[var(--fill-1)] p-3">
           <div
-            className="px-2 pb-3 pt-1 text-[var(--text-primary)]"
+            className="select-none px-2 pb-3 pt-1 text-[var(--text-primary)]"
             style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.8px' }}
           >
             Settings
@@ -241,15 +260,29 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* content */}
-        <div className="relative flex flex-1 flex-col overflow-y-auto p-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-4 top-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-          >
-            <X size={18} />
-          </button>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* header bar: drag handle pinned left, close pinned right, divider
+              underneath so the settings below can never collide with them */}
+          <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-3 py-2">
+            <button
+              type="button"
+              onPointerDown={(e) => dragControls.start(e)}
+              title="Drag to move"
+              className="flex h-7 w-7 cursor-grab items-center justify-center rounded-[7px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-secondary)] active:cursor-grabbing"
+            >
+              <GripVertical size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              title="Close"
+              className="flex h-7 w-7 items-center justify-center rounded-[7px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
+            >
+              <X size={17} />
+            </button>
+          </div>
 
+          <div className="flex flex-1 flex-col overflow-y-auto p-6">
           {tab === 'general' && (
             <div className="flex flex-col gap-5">
               <FieldRow label="Snap widgets to grid">
@@ -470,8 +503,10 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               </button>
             </div>
           )}
+          </div>
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   )
 }

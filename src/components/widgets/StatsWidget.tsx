@@ -99,7 +99,7 @@ function StatsRenderer() {
       />
       <Bar
         icon={HardDrive}
-        label="Disk"
+        label="Storage"
         pct={
           stats ? (stats.diskUsed / Math.max(1, stats.diskTotal)) * 100 : 0
         }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   Copy,
@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
+import { useMonitorStore } from '../store/monitorStore'
 import { Slider, Toggle } from './ui'
 
 interface ContextMenuProps {
@@ -47,6 +48,32 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
     }
   }, [onClose])
 
+  // Position the menu so the whole thing stays inside the work area (the
+  // monitor under the cursor, minus the taskbar). Measured after render so it
+  // accounts for the real height — which varies by widget type — and flips/
+  // shifts up or left near an edge instead of spilling off-screen or behind
+  // the taskbar.
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState({ left: x, top: y })
+  useLayoutEffect(() => {
+    const el = menuRef.current
+    if (!el) return
+    const w = el.offsetWidth
+    const h = el.offsetHeight
+    const { work } = useMonitorStore.getState()
+    const area =
+      work.find(
+        (a) => x >= a.x && x < a.x + a.w && y >= a.y && y < a.y + a.h,
+      ) ??
+      work[0] ?? { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight }
+    const clamp = (v: number, lo: number, hi: number) =>
+      Math.max(lo, Math.min(v, Math.max(lo, hi)))
+    setPos({
+      left: clamp(x, area.x, area.x + area.w - w),
+      top: clamp(y, area.y, area.y + area.h - h),
+    })
+  }, [x, y])
+
   if (!widget) return null
 
   const run = (fn: () => void) => () => {
@@ -79,19 +106,18 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
     },
   ]
 
-  const left = Math.min(x, window.innerWidth - 190)
-  const top = Math.min(y, window.innerHeight - 270)
   const opacity = widget.opacity ?? 1
   const hasBg = widget.background !== false
 
   return (
     <motion.div
+      ref={menuRef}
       data-hit
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.12, ease: 'easeOut' }}
       className="glass fixed z-[9999] min-w-[170px] rounded-[10px] border border-[var(--border)] p-1"
-      style={{ left, top }}
+      style={{ left: pos.left, top: pos.top }}
       onMouseDown={(e) => e.stopPropagation()}
       onContextMenu={(e) => e.preventDefault()}
     >

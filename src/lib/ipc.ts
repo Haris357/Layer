@@ -108,6 +108,38 @@ export const openUrl = (url: string) => invoke<void>('open_url', { url })
 export const importAsset = (sourcePath: string) =>
   invoke<string>('import_asset', { sourcePath })
 
+// ── DiskInfo ──
+export interface DiskInfo {
+  name: string
+  mount: string
+  fs: string
+  kind: 'ssd' | 'hdd' | 'unknown'
+  total: number
+  available: number
+  removable: boolean
+}
+export const getDisks = () => invoke<DiskInfo[]>('get_disks')
+
+export interface DiskIo {
+  name: string // PDH instance, e.g. "0 C:" or "_Total"
+  readBps: number
+  writeBps: number
+  activePct: number
+}
+export const getDiskIo = () => invoke<DiskIo[]>('get_disk_io')
+
+// ── Shelf ──
+export interface ShelfFile {
+  name: string
+  path: string
+  size: number
+  kind: 'image' | 'video' | 'audio' | 'file'
+}
+export const shelfImport = (sourcePath: string) =>
+  invoke<ShelfFile>('shelf_import', { sourcePath })
+export const shelfRemove = (path: string) =>
+  invoke<void>('shelf_remove', { path })
+
 export const deleteAsset = (assetPath: string) =>
   invoke<void>('delete_asset', { assetPath })
 

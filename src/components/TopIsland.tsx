@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useSettingsStore } from '../store/settingsStore'
+import { useMonitorStore } from '../store/monitorStore'
 import { useNotificationStore } from '../store/notificationStore'
 import { notify } from '../lib/notify'
 import { getUpdate } from '../lib/updater'
@@ -93,6 +94,7 @@ export function TopIsland() {
   const setBackgroundAll = useCanvasStore((s) => s.setBackgroundAll)
   const snapEnabled = useSettingsStore((s) => s.snapEnabled)
   const gridSize = useSettingsStore((s) => s.gridSize)
+  const primary = useMonitorStore((s) => s.primary)
 
   const [hovered, setHovered] = useState(false)
   const [notchHov, setNotchHov] = useState(false)
@@ -186,8 +188,15 @@ export function TopIsland() {
     <>
       <div
         data-hit
-        className="fixed left-1/2 top-0 z-[5000] -translate-x-1/2"
-        style={{ height: 60 }}
+        className="fixed z-[5000] -translate-x-1/2"
+        style={{
+          height: 60,
+          // Anchor to the primary monitor's top-centre so the dock always sits
+          // on a real screen — not the centre of the combined virtual desktop,
+          // which can fall in the empty gap between mismatched monitors.
+          left: primary ? primary.x + primary.w / 2 : '50%',
+          top: primary ? primary.y : 0,
+        }}
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
       >

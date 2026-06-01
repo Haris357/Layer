@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useToastStore } from '../store/toastStore'
+import { useMonitorStore } from '../store/monitorStore'
 import { isTauri } from '../lib/ipc'
 import {
   captureCanvas,
@@ -38,6 +39,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
   const [renaming, setRenaming] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const [publishing, setPublishing] = useState<Space | null>(null)
+  const primary = useMonitorStore((s) => s.primary)
 
   const startRename = (t: Space) => {
     setRenaming(t.id)
@@ -110,10 +112,19 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
     <>
       <div
         data-hit
-        className="fixed inset-0 z-[10000] flex items-center justify-center"
+        className="fixed inset-0 z-[10000]"
         style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
         onMouseDown={onClose}
       >
+        <div
+          className="absolute flex items-center justify-center"
+          style={{
+            left: primary ? primary.x : 0,
+            top: primary ? primary.y : 0,
+            width: primary ? primary.w : '100%',
+            height: primary ? primary.h : '100%',
+          }}
+        >
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -283,6 +294,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
             </button>
           </div>
         </motion.div>
+        </div>
       </div>
 
       {publishing && (

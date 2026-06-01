@@ -20,6 +20,7 @@ import { useScreensaver } from './hooks/useScreensaver'
 import { useWallpaperAccent } from './hooks/useWallpaperAccent'
 import { useSpaces } from './hooks/useSpaces'
 import { useHotcorner } from './hooks/useHotcorner'
+import { useMonitors } from './hooks/useMonitors'
 import { AmbientBackground } from './components/AmbientBackground'
 import { useSettingsStore } from './store/settingsStore'
 
@@ -40,6 +41,7 @@ export default function App() {
   useWallpaperAccent()
   useSpaces()
   useHotcorner()
+  useMonitors()
 
   const onboarded = useSettingsStore((s) => s.onboarded)
 

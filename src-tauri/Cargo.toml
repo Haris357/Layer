@@ -1,6 +1,6 @@
 [package]
 name = "layer"
-version = "1.4.1"
+version = "1.4.2"
 description = "A quiet layer on your desktop"
 authors = ["Layer"]
 edition = "2021"
@@ -52,6 +52,7 @@ windows = { version = "0.59", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_Graphics_Gdi",
     "Win32_Storage_FileSystem",
+    "Win32_System_Performance",
 ] }
 png = "0.17"
 base64 = "0.22"

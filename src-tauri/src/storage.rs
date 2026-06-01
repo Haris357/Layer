@@ -56,6 +56,13 @@ pub fn assets_dir(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(dir)
 }
 
+// Hidden store for the Shelf widget — dropped files are copied here.
+pub fn shelf_dir(app: &AppHandle) -> Result<PathBuf, String> {
+    let dir = layer_dir(app)?.join("shelf");
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir)
+}
+
 pub fn read_canvas(app: &AppHandle) -> Result<String, String> {
     let path = canvas_file(app)?;
     if !path.exists() {

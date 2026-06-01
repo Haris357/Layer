@@ -21,6 +21,9 @@ export type WidgetType =
   | 'inbox'
   | 'clipboard'
   | 'webembed'
+  | 'diskinfo'
+  | 'greeting'
+  | 'shelf'
 
 export type Mode = 'edit' | 'view'
 
@@ -228,6 +231,22 @@ export interface WebEmbedWidget extends BaseWidget {
   refreshSec: number // 0 = no auto-refresh
 }
 
+export interface DiskInfoWidget extends BaseWidget {
+  type: 'diskinfo'
+}
+
+export type GreetingStyle = 'classic' | 'serif' | 'gradient'
+
+export interface GreetingWidget extends BaseWidget {
+  type: 'greeting'
+  name: string
+  style: GreetingStyle
+}
+
+export interface ShelfWidget extends BaseWidget {
+  type: 'shelf'
+}
+
 export type Widget =
   | NoteWidget
   | LinkWidget
@@ -251,6 +270,9 @@ export type Widget =
   | InboxWidget
   | ClipboardWidget
   | WebEmbedWidget
+  | DiskInfoWidget
+  | GreetingWidget
+  | ShelfWidget
 
 export type NewWidget = Omit<Widget, 'id' | 'zIndex'>
 
