@@ -5,6 +5,7 @@ import {
   getCurrentWindow,
 } from '@tauri-apps/api/window'
 import { isTauri } from '../lib/ipc'
+import { useSettingsStore } from './settingsStore'
 
 // A monitor's rectangle in the canvas's CSS pixel space (i.e. relative to the
 // Layer window's top-left, which spans the whole virtual desktop).
@@ -62,3 +63,13 @@ export const useMonitorStore = create<MonitorState>((set) => ({
     }
   },
 }))
+
+// The monitor the pill + modals should sit on: the user's chosen one if set
+// (Settings → Display), otherwise the primary. Falls back gracefully.
+export function useAnchorMonitor(): MonitorRect | null {
+  const monitors = useMonitorStore((s) => s.monitors)
+  const primary = useMonitorStore((s) => s.primary)
+  const idx = useSettingsStore((s) => s.uiMonitor)
+  if (idx >= 0 && monitors[idx]) return monitors[idx]!
+  return primary
+}

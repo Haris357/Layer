@@ -25,7 +25,7 @@ import {
   resetAll as resetAllFiles,
 } from '../lib/ipc'
 import { useCanvasStore } from '../store/canvasStore'
-import { useMonitorStore } from '../store/monitorStore'
+import { useMonitorStore, useAnchorMonitor } from '../store/monitorStore'
 import { useToastStore } from '../store/toastStore'
 import { getUpdate } from '../lib/updater'
 import { runUpdate } from '../lib/updateFlow'
@@ -98,7 +98,10 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const setHotCorner = useSettingsStore((s) => s.setHotCorner)
   const wallpaperLoading = useThemeStatus((s) => s.wallpaperLoading)
   const resetCanvas = useCanvasStore((s) => s.resetAll)
-  const primary = useMonitorStore((s) => s.primary)
+  const primary = useAnchorMonitor()
+  const monitors = useMonitorStore((s) => s.monitors)
+  const uiMonitor = useSettingsStore((s) => s.uiMonitor)
+  const setUiMonitor = useSettingsStore((s) => s.setUiMonitor)
   const dragControls = useDragControls()
 
   const [tab, setTab] = useState<TabId>('general')
@@ -365,6 +368,56 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               <FieldRow label="Ambient background & weather">
                 <Toggle checked={ambientEffects} onChange={setAmbientEffects} />
               </FieldRow>
+
+              {monitors.length > 1 && (
+                <div className="flex flex-col gap-2">
+                  <SectionTitle>Show Layer on</SectionTitle>
+                  <span className="text-[11.5px] text-[var(--text-tertiary)]">
+                    Which monitor the pill, Settings and pop‑ups appear on.
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setUiMonitor(-1)}
+                      className={`rounded-[8px] px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                        uiMonitor < 0
+                          ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                          : 'border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]'
+                      }`}
+                    >
+                      Auto (primary)
+                    </button>
+                    {monitors.map((m, i) => {
+                      const active = uiMonitor === i
+                      const dpr = window.devicePixelRatio || 1
+                      const w = Math.round(m.w * dpr)
+                      const h = Math.round(m.h * dpr)
+                      return (
+                        <button
+                          key={`${m.x},${m.y},${i}`}
+                          type="button"
+                          onClick={() => setUiMonitor(i)}
+                          className={`flex flex-col items-start rounded-[8px] px-3 py-1.5 text-left transition-colors ${
+                            active
+                              ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                              : 'border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]'
+                          }`}
+                        >
+                          <span className="text-[12px] font-semibold">
+                            Display {i + 1}
+                          </span>
+                          <span
+                            className="text-[10px]"
+                            style={{ opacity: active ? 0.85 : 0.6 }}
+                          >
+                            {w}×{h}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

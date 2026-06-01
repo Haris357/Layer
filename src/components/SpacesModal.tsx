@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useToastStore } from '../store/toastStore'
-import { useMonitorStore } from '../store/monitorStore'
+import { useAnchorMonitor } from '../store/monitorStore'
 import { isTauri } from '../lib/ipc'
 import {
   captureCanvas,
@@ -39,7 +39,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
   const [renaming, setRenaming] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const [publishing, setPublishing] = useState<Space | null>(null)
-  const primary = useMonitorStore((s) => s.primary)
+  const primary = useAnchorMonitor()
 
   const startRename = (t: Space) => {
     setRenaming(t.id)

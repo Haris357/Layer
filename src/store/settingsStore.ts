@@ -16,6 +16,8 @@ interface SettingsState {
   wallpaperAccent: boolean
   ambientEffects: boolean
   hotCorner: boolean
+  // Which monitor the pill + modals anchor to. -1 = auto (primary monitor).
+  uiMonitor: number
   onboarded: boolean
   setGridSize: (size: number) => void
   setSnapEnabled: (enabled: boolean) => void
@@ -28,6 +30,7 @@ interface SettingsState {
   setWallpaperAccent: (value: boolean) => void
   setAmbientEffects: (value: boolean) => void
   setHotCorner: (value: boolean) => void
+  setUiMonitor: (value: number) => void
   setOnboarded: (value: boolean) => void
 }
 
@@ -45,6 +48,7 @@ export const useSettingsStore = create<SettingsState>()(
       wallpaperAccent: false,
       ambientEffects: false,
       hotCorner: false,
+      uiMonitor: -1,
       onboarded: false,
       setGridSize: (gridSize) => set({ gridSize }),
       setSnapEnabled: (snapEnabled) => set({ snapEnabled }),
@@ -58,6 +62,7 @@ export const useSettingsStore = create<SettingsState>()(
       setWallpaperAccent: (wallpaperAccent) => set({ wallpaperAccent }),
       setAmbientEffects: (ambientEffects) => set({ ambientEffects }),
       setHotCorner: (hotCorner) => set({ hotCorner }),
+      setUiMonitor: (uiMonitor) => set({ uiMonitor }),
       setOnboarded: (onboarded) => set({ onboarded }),
     }),
     { name: 'layer-settings' },

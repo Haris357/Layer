@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useMonitorStore } from '../store/monitorStore'
+import { useAnchorMonitor } from '../store/monitorStore'
 
 // Positions its children within the primary monitor's rectangle, so overlays
 // (modals, palettes) open on a real screen instead of the empty gap that can
@@ -14,7 +14,7 @@ export function MonitorLayer({
   align?: 'center' | 'start'
   className?: string
 }) {
-  const primary = useMonitorStore((s) => s.primary)
+  const primary = useAnchorMonitor()
   return (
     <div
       className={`absolute flex justify-center ${

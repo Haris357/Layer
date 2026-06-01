@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useSettingsStore } from '../store/settingsStore'
-import { useMonitorStore } from '../store/monitorStore'
+import { useAnchorMonitor } from '../store/monitorStore'
 import { useNotificationStore } from '../store/notificationStore'
 import { notify } from '../lib/notify'
 import { getUpdate } from '../lib/updater'
@@ -94,7 +94,7 @@ export function TopIsland() {
   const setBackgroundAll = useCanvasStore((s) => s.setBackgroundAll)
   const snapEnabled = useSettingsStore((s) => s.snapEnabled)
   const gridSize = useSettingsStore((s) => s.gridSize)
-  const primary = useMonitorStore((s) => s.primary)
+  const primary = useAnchorMonitor()
 
   const [hovered, setHovered] = useState(false)
   const [notchHov, setNotchHov] = useState(false)

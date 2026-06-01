@@ -20,7 +20,7 @@ import {
   type NotificationKind,
 } from '../store/notificationStore'
 import { relTime } from '../lib/notify'
-import { useMonitorStore } from '../store/monitorStore'
+import { useAnchorMonitor } from '../store/monitorStore'
 import { Tooltip } from './Tooltip'
 import { cn } from '../lib/utils'
 
@@ -131,7 +131,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const markAllRead = useNotificationStore((s) => s.markAllRead)
   const clearAll = useNotificationStore((s) => s.clearAll)
   const hasUnread = items.some((i) => !i.read)
-  const primary = useMonitorStore((s) => s.primary)
+  const primary = useAnchorMonitor()
 
   // Pick the right icon for the empty state.
   return (
