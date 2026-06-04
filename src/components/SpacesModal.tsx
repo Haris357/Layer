@@ -7,6 +7,7 @@ import {
   Share2,
   Pencil,
   Trash2,
+  RotateCcw,
   Check,
   X,
 } from 'lucide-react'
@@ -33,10 +34,12 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
   const createSpace = useCanvasStore((s) => s.createSpace)
   const renameSpace = useCanvasStore((s) => s.renameSpace)
   const deleteSpace = useCanvasStore((s) => s.deleteSpace)
+  const resetSpace = useCanvasStore((s) => s.resetSpace)
   const importSpace = useCanvasStore((s) => s.importSpace)
   const toast = useToastStore((s) => s.show)
 
   const [renaming, setRenaming] = useState<string | null>(null)
+  const [confirmReset, setConfirmReset] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const [publishing, setPublishing] = useState<Space | null>(null)
   const primary = useAnchorMonitor()
@@ -258,6 +261,39 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
                         <Download size={13} />
                       </button>
                     </Tooltip>
+                    {!t.builtin && (
+                      <Tooltip
+                        label={
+                          confirmReset === t.id
+                            ? 'Click again to clear'
+                            : 'Reset space'
+                        }
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirmReset === t.id) {
+                              resetSpace(t.id)
+                              setConfirmReset(null)
+                              toast(`Reset “${t.name}”`)
+                            } else {
+                              setConfirmReset(t.id)
+                            }
+                          }}
+                          onMouseLeave={() =>
+                            setConfirmReset((c) => (c === t.id ? null : c))
+                          }
+                          className={cn(
+                            'rounded-[6px] p-1.5 transition-colors',
+                            confirmReset === t.id
+                              ? 'text-[var(--danger)] bg-[var(--fill-2)]'
+                              : 'text-[var(--text-secondary)] hover:bg-[var(--fill-2)]',
+                          )}
+                        >
+                          <RotateCcw size={13} />
+                        </button>
+                      </Tooltip>
+                    )}
                     {!t.builtin && (
                       <Tooltip label="Delete">
                         <button

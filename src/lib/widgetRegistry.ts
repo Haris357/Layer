@@ -32,6 +32,14 @@ export interface WidgetSize {
   height: number
 }
 
+// A selectable style for a widget, shown as a dropdown in the top bar when you
+// add it. `patch` is merged onto the freshly-created widget.
+export interface WidgetStyle {
+  key: string
+  label: string
+  patch?: Record<string, unknown>
+}
+
 export interface WidgetDefinition<T extends Widget = Widget> {
   type: WidgetType
   label: string
@@ -39,6 +47,9 @@ export interface WidgetDefinition<T extends Widget = Widget> {
   enabled: boolean
   minSize?: WidgetSize
   maxSize?: WidgetSize
+  // If present, adding from the bar opens a style dropdown instead of adding
+  // the default straight away.
+  styles?: WidgetStyle[]
   create: (
     x: number,
     y: number,
@@ -48,6 +59,9 @@ export interface WidgetDefinition<T extends Widget = Widget> {
     widget: T
     onUpdate: (patch: Partial<T>) => void
   }) => ReactNode
+  // Optional gate: when it returns false for a given instance, the in-canvas
+  // settings popover is hidden (e.g. an analog clock has no options).
+  hasSettings?: (widget: T) => boolean
 }
 
 export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {

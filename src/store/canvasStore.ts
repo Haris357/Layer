@@ -24,6 +24,9 @@ interface CanvasState {
   setGuides: (guides: { v: number[]; h: number[] }) => void
   addWidget: (widget: NewWidget) => string
   updateWidget: (id: string, patch: Partial<Widget>) => void
+  // Like updateWidget but skips the undo snapshot — for high-frequency live
+  // edits (e.g. dragging the colour picker). Commit once with updateWidget.
+  liveUpdateWidget: (id: string, patch: Partial<Widget>) => void
   deleteWidget: (id: string) => void
   duplicateWidget: (id: string) => void
   copyWidget: (id: string) => void
@@ -47,6 +50,7 @@ interface CanvasState {
   createSpace: (name: string) => void
   renameSpace: (id: string, name: string) => void
   deleteSpace: (id: string) => void
+  resetSpace: (id: string) => void
   importSpace: (name: string, widgets: Widget[]) => void
 }
 
@@ -88,6 +92,9 @@ const KNOWN_TYPES: ReadonlySet<string> = new Set([
   'inbox',
   'clipboard',
   'webembed',
+  'diskinfo',
+  'greeting',
+  'shelf',
 ])
 function pruneUnknown(widgets: Widget[]): Widget[] {
   return widgets.filter((w) => KNOWN_TYPES.has(w.type))
@@ -126,6 +133,14 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     updateWidget: (id, patch) => {
       pushHistory()
+      set((state) => ({
+        widgets: state.widgets.map((w) =>
+          w.id === id ? ({ ...w, ...patch } as Widget) : w,
+        ),
+      }))
+    },
+
+    liveUpdateWidget: (id, patch) => {
       set((state) => ({
         widgets: state.widgets.map((w) =>
           w.id === id ? ({ ...w, ...patch } as Widget) : w,
@@ -400,6 +415,25 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
           t.id === id && !t.builtin ? { ...t, name } : t,
         ),
       }))
+    },
+
+    resetSpace: (id) => {
+      set((state) => {
+        const synced = syncSpaces(state.spaces, state.activeId, state.widgets)
+        const spaces = synced.map((t) =>
+          t.id === id ? { ...t, widgets: [] } : t,
+        )
+        if (id === state.activeId) {
+          return {
+            spaces,
+            widgets: [],
+            selectedId: null,
+            past: [...state.past, state.widgets].slice(-60),
+            future: [],
+          }
+        }
+        return { spaces }
+      })
     },
 
     deleteSpace: (id) => {

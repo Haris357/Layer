@@ -19,6 +19,14 @@ interface SettingsState {
   // Which monitor the pill + modals anchor to. -1 = auto (primary monitor).
   uiMonitor: number
   onboarded: boolean
+  // Cloud sync. `cloudSyncConsented` gates the whole feature behind explicit
+  // permission; `cloudSyncEnabled` reflects a signed-in, syncing session.
+  cloudSyncConsented: boolean
+  cloudSyncEnabled: boolean
+  autoSync: boolean
+  syncEmail: string | null
+  deviceId: string
+  lastSyncedAt: string | null
   setGridSize: (size: number) => void
   setSnapEnabled: (enabled: boolean) => void
   setHotkey: (hotkey: string) => void
@@ -32,6 +40,12 @@ interface SettingsState {
   setHotCorner: (value: boolean) => void
   setUiMonitor: (value: number) => void
   setOnboarded: (value: boolean) => void
+  setCloudSyncConsented: (value: boolean) => void
+  setCloudSyncEnabled: (value: boolean) => void
+  setAutoSync: (value: boolean) => void
+  setSyncEmail: (value: string | null) => void
+  setDeviceId: (value: string) => void
+  setLastSyncedAt: (value: string | null) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -50,6 +64,12 @@ export const useSettingsStore = create<SettingsState>()(
       hotCorner: false,
       uiMonitor: -1,
       onboarded: false,
+      cloudSyncConsented: false,
+      cloudSyncEnabled: false,
+      autoSync: true,
+      syncEmail: null,
+      deviceId: '',
+      lastSyncedAt: null,
       setGridSize: (gridSize) => set({ gridSize }),
       setSnapEnabled: (snapEnabled) => set({ snapEnabled }),
       setHotkey: (hotkey) => set({ hotkey }),
@@ -64,6 +84,13 @@ export const useSettingsStore = create<SettingsState>()(
       setHotCorner: (hotCorner) => set({ hotCorner }),
       setUiMonitor: (uiMonitor) => set({ uiMonitor }),
       setOnboarded: (onboarded) => set({ onboarded }),
+      setCloudSyncConsented: (cloudSyncConsented) =>
+        set({ cloudSyncConsented }),
+      setCloudSyncEnabled: (cloudSyncEnabled) => set({ cloudSyncEnabled }),
+      setAutoSync: (autoSync) => set({ autoSync }),
+      setSyncEmail: (syncEmail) => set({ syncEmail }),
+      setDeviceId: (deviceId) => set({ deviceId }),
+      setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),
     }),
     { name: 'layer-settings' },
   ),

@@ -1,5 +1,15 @@
 @import 'tailwindcss';
 
+/* Anurati — the headline face for the display clock. Bundled locally (it isn't
+   on Google Fonts) so it works offline. Uppercase-only by design. */
+@font-face {
+  font-family: 'Anurati';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/Anurati-Regular.woff') format('woff');
+  font-display: swap;
+}
+
 /* Toast countdown bar — GPU-composited so it animates smoothly even when the
    click-through window isn't actively repainting the main thread. */
 @keyframes toast-countdown {
@@ -167,6 +177,45 @@
   --fill-3: rgba(0, 0, 0, 0.14);
 }
 
+/* Per-widget theme override. Unlike the :root[data-theme] blocks above, these
+   are attribute-scoped so an individual widget subtree can re-resolve the
+   tokens regardless of the global theme (see WidgetWrapper's data-widget-theme).
+   Keep these values in sync with the :root blocks above. */
+[data-widget-theme='dark'] {
+  --surface: rgba(23, 23, 27, 0.9);
+  --surface-hover: rgba(33, 33, 39, 0.94);
+  --surface-active: rgba(42, 42, 49, 0.96);
+  --border: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.24);
+  --text-primary: rgba(255, 255, 255, 0.96);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+  --accent: rgba(255, 255, 255, 1);
+  --on-accent: #141416;
+  --danger: rgba(248, 113, 113, 0.9);
+  --grid-dot: rgba(255, 255, 255, 0.08);
+  --fill-1: rgba(255, 255, 255, 0.05);
+  --fill-2: rgba(255, 255, 255, 0.1);
+  --fill-3: rgba(255, 255, 255, 0.16);
+}
+[data-widget-theme='light'] {
+  --surface: rgba(249, 249, 247, 0.93);
+  --surface-hover: rgba(236, 236, 233, 0.96);
+  --surface-active: rgba(226, 226, 222, 0.97);
+  --border: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.22);
+  --text-primary: rgba(20, 20, 22, 0.96);
+  --text-secondary: rgba(20, 20, 22, 0.62);
+  --text-tertiary: rgba(20, 20, 22, 0.42);
+  --accent: rgba(20, 20, 22, 1);
+  --on-accent: #fafafa;
+  --danger: rgba(220, 70, 70, 0.95);
+  --grid-dot: rgba(0, 0, 0, 0.1);
+  --fill-1: rgba(0, 0, 0, 0.045);
+  --fill-2: rgba(0, 0, 0, 0.08);
+  --fill-3: rgba(0, 0, 0, 0.14);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -209,6 +258,22 @@ body {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
+}
+
+/* Per-widget accent. The chosen colour drives the widget's own accent token,
+   so its highlights/toggles/active states/icons pick it up — not just the
+   card. Plus a soft surface tint and a clear coloured ring. rgba values are
+   precomputed on the wrapper (no CSS color-mix, for WebView2 compatibility). */
+[data-accent] {
+  --accent: var(--widget-accent);
+}
+[data-accent] .glass:not([data-popover]) {
+  background:
+    linear-gradient(var(--widget-accent-tint), var(--widget-accent-tint)),
+    var(--surface);
+  box-shadow:
+    0 0 0 1px var(--widget-accent-ring),
+    0 14px 40px -10px rgba(0, 0, 0, 0.55);
 }
 
 .layer-pop {

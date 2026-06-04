@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSIX manifest for the Microsoft Store build of Layer.
+
+  Placeholders ( __NAME__ ) are filled in by scripts/build-msix.ps1 from
+  src-tauri/msix/identity.json (which you populate from Partner Center →
+  Product identity after reserving the app name). Layer is a full-trust Win32
+  (Desktop Bridge) app, so it declares runFullTrust and runs the normal exe.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  IgnorableNamespaces="uap rescap desktop">
+
+  <Identity
+    Name="__IDENTITY_NAME__"
+    Publisher="__PUBLISHER__"
+    Version="__VERSION__"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <!-- Must match the reserved Store name exactly. The Start-menu/tile name
+         is the friendly "Layer" set in VisualElements below. -->
+    <DisplayName>Layer-Desktop</DisplayName>
+    <PublisherDisplayName>__PUBLISHER_DISPLAY__</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily
+      Name="Windows.Desktop"
+      MinVersion="10.0.17763.0"
+      MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application
+      Id="Layer"
+      Executable="Layer.exe"
+      EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Layer"
+        Description="A quiet layer of widgets that lives on your desktop."
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile
+          Wide310x150Logo="Assets\Square150x150Logo.png"
+          Square71x71Logo="Assets\Square71x71Logo.png"
+          Square310x310Logo="Assets\Square310x310Logo.png" />
+      </uap:VisualElements>
+
+      <Extensions>
+        <!-- "Launch on startup" toggle in the Store build flips this task. -->
+        <desktop:Extension
+          Category="windows.startupTask"
+          Executable="Layer.exe"
+          EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask
+            TaskId="LayerAutostart"
+            Enabled="false"
+            DisplayName="Layer" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

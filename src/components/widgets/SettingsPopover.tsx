@@ -8,6 +8,7 @@ export function SettingsPopover({ widget }: { widget: Widget }) {
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const def = widgetRegistry[widget.type]
   if (!def || !def.Settings) return null
+  if (def.hasSettings && !def.hasSettings(widget)) return null
   const Settings = def.Settings
 
   const viewportW =

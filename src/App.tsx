@@ -6,6 +6,7 @@ import { Toast } from './components/Toast'
 import { QuickCaptureModal } from './components/QuickCaptureModal'
 import { useHotkey } from './hooks/useHotkey'
 import { usePersistence } from './hooks/usePersistence'
+import { useSync } from './hooks/useSync'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { useHitRegions } from './hooks/useHitRegions'
 import { useResponsive } from './hooks/useResponsive'
@@ -27,6 +28,7 @@ import { useSettingsStore } from './store/settingsStore'
 export default function App() {
   useHotkey()
   usePersistence()
+  useSync()
   useKeyboardShortcuts()
   useHitRegions()
   useResponsive()

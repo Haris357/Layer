@@ -1,8 +1,12 @@
 import { check, type Update } from '@tauri-apps/plugin-updater'
 import { relaunch } from '@tauri-apps/plugin-process'
+import { IS_STORE } from './dist'
 
-// Returns the pending update, or null when already up to date.
+// Returns the pending update, or null when already up to date. Store builds
+// never self-update — the Microsoft Store delivers updates — so this is a
+// no-op there (disables update toasts and the Settings check alike).
 export async function getUpdate(): Promise<Update | null> {
+  if (IS_STORE) return null
   return await check()
 }
 

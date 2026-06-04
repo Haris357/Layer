@@ -11,7 +11,18 @@ import {
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useMonitorStore } from '../store/monitorStore'
-import { Slider, Toggle } from './ui'
+import { hexToRgba } from '../lib/utils'
+import { Segmented, Slider, Toggle } from './ui'
+
+// Quick-pick accent swatches; users can still pick any colour via the picker.
+const PRESET_ACCENTS = [
+  '#ef4444',
+  '#f59e0b',
+  '#10b981',
+  '#3b82f6',
+  '#8b5cf6',
+  '#ec4899',
+]
 
 interface ContextMenuProps {
   x: number
@@ -38,13 +49,70 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
   const sendToBack = useCanvasStore((s) => s.sendToBack)
   const deleteWidget = useCanvasStore((s) => s.deleteWidget)
 
+  // Smooth colour picking: while dragging the picker, write the accent CSS
+  // variables straight to the widget's DOM node (no store update = no React
+  // re-render = no lag). We persist once to the store on release (or if the
+  // menu closes mid-drag), which is the only step that snapshots undo history.
+  const rafRef = useRef(0)
+  const pendingRef = useRef<string | null>(null)
+  const applyLive = (hex: string) => {
+    const el = document.querySelector<HTMLElement>(
+      `[data-widget-id="${widgetId}"]`,
+    )
+    if (!el) return
+    el.setAttribute('data-accent', '')
+    el.style.setProperty('--widget-accent', hex)
+    el.style.setProperty('--widget-accent-tint', hexToRgba(hex, 0.18))
+    el.style.setProperty('--widget-accent-ring', hexToRgba(hex, 0.7))
+  }
+  const onAccentInput = (hex: string) => {
+    pendingRef.current = hex
+    if (rafRef.current) return
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0
+      if (pendingRef.current) applyLive(pendingRef.current)
+    })
+  }
+  const onAccentCommit = (hex: string) => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = 0
+    }
+    pendingRef.current = null
+    applyLive(hex)
+    updateWidget(widgetId, { accent: hex })
+  }
+  useEffect(
+    () => () => {
+      cancelAnimationFrame(rafRef.current)
+      if (pendingRef.current) {
+        updateWidget(widgetId, { accent: pendingRef.current })
+      }
+    },
+    [widgetId, updateWidget],
+  )
+
   useEffect(() => {
-    const close = () => onClose()
-    window.addEventListener('mousedown', close)
-    window.addEventListener('blur', close)
+    // Close on any pointer-down or right-click that lands outside the menu.
+    // Use the CAPTURE phase: widgets and react-rnd call stopPropagation on
+    // mousedown, which would otherwise stop a bubble-phase listener from ever
+    // firing — so clicking another widget left the menu stuck open. Capture
+    // runs before those handlers, so it always fires; we just ignore clicks
+    // inside the menu (which keeps the colour picker working).
+    // We intentionally do NOT close on window blur — opening the native colour
+    // picker blurs the window and would unmount the menu mid-pick.
+    const onDown = (e: Event) => {
+      const target = e.target as Node | null
+      if (target && menuRef.current?.contains(target)) return
+      onClose()
+    }
+    window.addEventListener('mousedown', onDown, true)
+    window.addEventListener('contextmenu', onDown, true)
+    window.addEventListener('wheel', onDown, true)
     return () => {
-      window.removeEventListener('mousedown', close)
-      window.removeEventListener('blur', close)
+      window.removeEventListener('mousedown', onDown, true)
+      window.removeEventListener('contextmenu', onDown, true)
+      window.removeEventListener('wheel', onDown, true)
     }
   }, [onClose])
 
@@ -108,6 +176,7 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
 
   const opacity = widget.opacity ?? 1
   const hasBg = widget.background !== false
+  const canTheme = widget.type !== 'note' && widget.type !== 'sticky'
 
   return (
     <motion.div
@@ -165,6 +234,86 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
           onChange={(v) => updateWidget(widgetId, { opacity: v })}
         />
       </div>
+
+      {/* Notes and sticky notes carry their own theming, so skip them. */}
+      {canTheme && (
+        <>
+          <div className="my-1 h-px bg-[var(--border)]" />
+          <div className="flex flex-col gap-1.5 px-2.5 py-1.5">
+            <span
+              className="text-[var(--text-secondary)]"
+              style={{ fontSize: 11, fontWeight: 600 }}
+            >
+              Color
+            </span>
+            <div className="flex items-center gap-1.5">
+              {PRESET_ACCENTS.map((hex) => (
+                <button
+                  key={hex}
+                  type="button"
+                  aria-label={`Accent ${hex}`}
+                  onClick={() => updateWidget(widgetId, { accent: hex })}
+                  className="h-[18px] w-[18px] rounded-full transition-transform hover:scale-110"
+                  style={{
+                    background: hex,
+                    outline:
+                      widget.accent?.toLowerCase() === hex
+                        ? '2px solid var(--text-primary)'
+                        : '1px solid var(--border)',
+                    outlineOffset: 1,
+                  }}
+                />
+              ))}
+              <label
+                className="relative h-[18px] w-[18px] cursor-pointer overflow-hidden rounded-full"
+                style={{
+                  background:
+                    'conic-gradient(#ef4444,#f59e0b,#10b981,#3b82f6,#8b5cf6,#ec4899,#ef4444)',
+                  outline: '1px solid var(--border)',
+                  outlineOffset: 1,
+                }}
+                title="Custom color"
+              >
+                <input
+                  type="color"
+                  value={widget.accent || '#3b82f6'}
+                  onInput={(e) =>
+                    onAccentInput((e.target as HTMLInputElement).value)
+                  }
+                  onChange={(e) => onAccentCommit(e.target.value)}
+                  className="absolute inset-0 cursor-pointer opacity-0"
+                />
+              </label>
+              {widget.accent && (
+                <button
+                  type="button"
+                  onClick={() => updateWidget(widgetId, { accent: undefined })}
+                  className="ml-auto text-[11px] font-medium text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)]"
+                >
+                  reset
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 px-2.5 py-1.5">
+            <span
+              className="text-[var(--text-secondary)]"
+              style={{ fontSize: 11, fontWeight: 600 }}
+            >
+              Theme
+            </span>
+            <Segmented
+              value={widget.appearance ?? 'auto'}
+              options={[
+                { value: 'auto', label: 'Auto' },
+                { value: 'light', label: 'Light' },
+                { value: 'dark', label: 'Dark' },
+              ]}
+              onChange={(v) => updateWidget(widgetId, { appearance: v })}
+            />
+          </div>
+        </>
+      )}
     </motion.div>
   )
 }

@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
+import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth'
 
 // Firebase web config — public by design (Firestore rules guard access).
 const firebaseConfig = {
@@ -13,3 +14,8 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
+export const auth = getAuth(app)
+
+// Keep the sign-in session across app restarts (WebView2 persists local
+// storage per app-data dir). Best effort — never block startup.
+setPersistence(auth, browserLocalPersistence).catch(() => {})

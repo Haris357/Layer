@@ -1,0 +1,6 @@
+{
+  "_comment": "From Partner Center → Layer-Desktop → Product management → Product identity. The publisher MUST match exactly or the Store rejects the upload.",
+  "identityName": "HarisDevStuffs.Layer-Desktop",
+  "publisher": "CN=7E156AAF-EB4A-4A70-BB88-5C37B635561F",
+  "publisherDisplayName": "HarisDevStuffs"
+}

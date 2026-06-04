@@ -38,6 +38,11 @@ export interface BaseWidget {
   locked: boolean
   opacity?: number
   background?: boolean
+  // Per-widget theming. `accent` is a hex tint exposed as --widget-accent;
+  // `appearance` overrides the global light/dark for this widget only.
+  // Both are optional (older saved files simply lack them) and sync to cloud.
+  accent?: string
+  appearance?: 'auto' | 'light' | 'dark'
 }
 
 export interface NoteWidget extends BaseWidget {
@@ -73,13 +78,22 @@ export interface LinkWidget extends BaseWidget {
   background: boolean
 }
 
+export type ClockFont =
+  | 'anurati'
+  | 'oxanium'
+  | 'wallpoet'
+  | 'zendots'
+  | 'audiowide'
+
 export interface ClockWidget extends BaseWidget {
   type: 'clock'
-  variant: 'digital' | 'analog'
+  variant: 'digital' | 'analog' | 'display'
   format: '12h' | '24h'
   showSeconds: boolean
   showDate: boolean
   background: boolean
+  // Display style only: which futuristic font to use.
+  font?: ClockFont
 }
 
 export interface ImageWidget extends BaseWidget {
@@ -235,12 +249,22 @@ export interface DiskInfoWidget extends BaseWidget {
   type: 'diskinfo'
 }
 
-export type GreetingStyle = 'classic' | 'serif' | 'gradient'
+export type GreetingStyle =
+  | 'classic'
+  | 'serif'
+  | 'gradient'
+  | 'mono'
+  | 'script'
+  | 'playfair'
+  | 'modern'
+
+export type GreetingAlign = 'left' | 'center' | 'right'
 
 export interface GreetingWidget extends BaseWidget {
   type: 'greeting'
   name: string
   style: GreetingStyle
+  align?: GreetingAlign
 }
 
 export interface ShelfWidget extends BaseWidget {

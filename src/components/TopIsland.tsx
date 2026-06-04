@@ -10,10 +10,13 @@ import {
   Square,
   SquareDashed,
   BellRing,
+  RotateCcw,
+  AlertTriangle,
   X,
 } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useSettingsStore } from '../store/settingsStore'
+import { useToastStore } from '../store/toastStore'
 import { useAnchorMonitor } from '../store/monitorStore'
 import { useNotificationStore } from '../store/notificationStore'
 import { notify } from '../lib/notify'
@@ -25,6 +28,12 @@ import { SpacesModal } from './SpacesModal'
 import { NotificationsPanel } from './NotificationsPanel'
 
 const spring = { type: 'spring', stiffness: 380, damping: 34 } as const
+
+// Dividers fade with the rest of the row (no instant pop).
+const dividerVariants = {
+  hidden: { opacity: 0, transition: { duration: 0.12 } },
+  shown: { opacity: 1, transition: { duration: 0.22 } },
+}
 
 // Small, instant, good-looking tooltip shown below a dock button (the dock
 // hugs the top edge, so tooltips drop downward).
@@ -47,13 +56,12 @@ function Tip({ label, show }: { label: string; show: boolean }) {
 }
 
 function ToolButton({
-  index,
   label,
   danger,
   onClick,
   children,
 }: {
-  index: number
+  index?: number
   label: string
   danger?: boolean
   onClick: () => void
@@ -66,11 +74,22 @@ function ToolButton({
       onClick={onClick}
       onHoverStart={() => setHov(true)}
       onHoverEnd={() => setHov(false)}
-      initial={{ opacity: 0, scale: 0.5, y: -8 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.5, y: -8 }}
-      transition={{ ...spring, delay: index * 0.028 }}
-      whileHover={{ scale: 1.15 }}
+      // Clean reveal: the icons just fade in place (no fly-in / slide) while
+      // the bar expands around them. variants are driven by the parent so the
+      // whole row appears and disappears together, smoothly.
+      variants={{
+        hidden: {
+          opacity: 0,
+          scale: 0.8,
+          transition: { duration: 0.13, ease: 'easeOut' },
+        },
+        shown: {
+          opacity: 1,
+          scale: 1,
+          transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+        },
+      }}
+      whileHover={{ scale: 1.12 }}
       whileTap={{ scale: 0.9 }}
       className={cn(
         'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-150',
@@ -92,12 +111,19 @@ export function TopIsland() {
   const widgets = useCanvasStore((s) => s.widgets)
   const lockAll = useCanvasStore((s) => s.lockAll)
   const setBackgroundAll = useCanvasStore((s) => s.setBackgroundAll)
+  const resetSpace = useCanvasStore((s) => s.resetSpace)
+  const activeId = useCanvasStore((s) => s.activeId)
+  const toast = useToastStore((s) => s.show)
   const snapEnabled = useSettingsStore((s) => s.snapEnabled)
   const gridSize = useSettingsStore((s) => s.gridSize)
   const primary = useAnchorMonitor()
 
   const [hovered, setHovered] = useState(false)
   const [notchHov, setNotchHov] = useState(false)
+  // Which widget type's style dropdown is open (e.g. the clock).
+  const [styleMenu, setStyleMenu] = useState<string | null>(null)
+  // Reset-this-space needs a confirming second click.
+  const [confirmReset, setConfirmReset] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showSpaces, setShowSpaces] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
@@ -153,7 +179,29 @@ export function TopIsland() {
 
   const open = mode === 'edit'
   const down =
-    hovered || open || showSettings || showSpaces || showNotifications
+    hovered ||
+    open ||
+    showSettings ||
+    showSpaces ||
+    showNotifications ||
+    styleMenu !== null
+
+  // Close the style dropdown on any click outside it, and when leaving edit
+  // mode. It is NOT tied to dock hover, so hovering its items never closes it.
+  useEffect(() => {
+    if (!styleMenu) return
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Element | null
+      if (t && t.closest('[data-style-dd]')) return
+      setStyleMenu(null)
+    }
+    window.addEventListener('mousedown', onDown, true)
+    return () => window.removeEventListener('mousedown', onDown, true)
+  }, [styleMenu])
+
+  useEffect(() => {
+    if (!open) setStyleMenu(null)
+  }, [open])
   const allLocked = widgets.length > 0 && widgets.every((w) => w.locked)
   const anyBg = widgets.some(
     (w) => w.type !== 'note' && w.background !== false,
@@ -171,17 +219,25 @@ export function TopIsland() {
     if (leaveTimer.current !== undefined) {
       window.clearTimeout(leaveTimer.current)
     }
-    leaveTimer.current = window.setTimeout(() => setHovered(false), 260)
+    leaveTimer.current = window.setTimeout(() => {
+      setHovered(false)
+      setConfirmReset(false)
+    }, 260)
   }
 
-  const handleAdd = async (def: WidgetDefinition) => {
+  const handleAdd = async (
+    def: WidgetDefinition,
+    patch?: Record<string, unknown>,
+  ) => {
+    setStyleMenu(null)
     const created = await def.create(0, 0)
     if (!created) return
+    const merged = (patch ? { ...created, ...patch } : created) as typeof created
     const snap = (v: number) =>
       snapEnabled ? Math.round(v / gridSize) * gridSize : v
-    const x = snap((window.innerWidth - created.width) / 2)
-    const y = snap((window.innerHeight - created.height) / 2)
-    addWidget({ ...created, x, y })
+    const x = snap((window.innerWidth - merged.width) / 2)
+    const y = snap((window.innerHeight - merged.height) / 2)
+    addWidget({ ...merged, x, y })
   }
 
   return (
@@ -267,11 +323,75 @@ export function TopIsland() {
                 <motion.div
                   key="tools"
                   layout
+                  initial="hidden"
+                  animate="shown"
+                  exit="hidden"
+                  variants={{
+                    // Gentle, quick cascade — opens left→right, closes right→left.
+                    shown: {
+                      transition: { staggerChildren: 0.012, delayChildren: 0.03 },
+                    },
+                    hidden: {
+                      transition: { staggerChildren: 0.01, staggerDirection: -1 },
+                    },
+                  }}
                   className="flex items-center gap-1"
                 >
-                  <div className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
+                  <motion.div variants={dividerVariants} className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
                   {widgetList.map((def, i) => {
                     const Icon = def.icon
+                    if (def.styles && def.styles.length > 0) {
+                      const isOpen = styleMenu === def.type
+                      return (
+                        <div
+                          key={def.type}
+                          className="relative"
+                          data-style-dd
+                        >
+                          <ToolButton
+                            index={i}
+                            label={`${def.label} · styles`}
+                            onClick={() =>
+                              setStyleMenu(isOpen ? null : def.type)
+                            }
+                          >
+                            <Icon size={18} strokeWidth={1.5} />
+                          </ToolButton>
+                          <AnimatePresence>
+                            {isOpen && (
+                              <motion.div
+                                data-hit
+                                initial={{ opacity: 0, y: -6, x: '-50%' }}
+                                animate={{ opacity: 1, y: 0, x: '-50%' }}
+                                exit={{ opacity: 0, y: -6, x: '-50%' }}
+                                transition={{ duration: 0.14, ease: 'easeOut' }}
+                                // data-hit makes the transparent window capture
+                                // clicks here (it renders below the dock's hit
+                                // region). pt-2 is padding, not margin, so the
+                                // gap to the dock stays interactive.
+                                className="absolute left-1/2 top-full z-[60] pt-2"
+                              >
+                                <div className="glass flex w-[150px] flex-col gap-0.5 rounded-[10px] border border-[var(--border)] p-1">
+                                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
+                                    {def.label} style
+                                  </div>
+                                  {def.styles.map((s) => (
+                                    <button
+                                      key={s.key}
+                                      type="button"
+                                      onClick={() => handleAdd(def, s.patch)}
+                                      className="cursor-pointer rounded-[7px] px-2.5 py-2 text-left text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)] focus:bg-[var(--fill-2)] focus:text-[var(--text-primary)] focus:outline-none active:scale-[0.98]"
+                                    >
+                                      {s.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )
+                    }
                     return (
                       <ToolButton
                         key={def.type}
@@ -283,7 +403,7 @@ export function TopIsland() {
                       </ToolButton>
                     )
                   })}
-                  <div className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
+                  <motion.div variants={dividerVariants} className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
                   <ToolButton
                     index={widgetList.length}
                     label={allLocked ? 'Unlock all' : 'Lock all'}
@@ -306,16 +426,40 @@ export function TopIsland() {
                       <SquareDashed size={18} strokeWidth={1.5} />
                     )}
                   </ToolButton>
-                  <div className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
+                  <motion.div variants={dividerVariants} className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
                   <ToolButton
                     index={widgetList.length + 2}
+                    danger={confirmReset}
+                    label={
+                      confirmReset
+                        ? 'Click again to reset this space'
+                        : 'Reset this space'
+                    }
+                    onClick={() => {
+                      if (confirmReset) {
+                        resetSpace(activeId)
+                        setConfirmReset(false)
+                        toast('Space reset')
+                      } else {
+                        setConfirmReset(true)
+                      }
+                    }}
+                  >
+                    {confirmReset ? (
+                      <AlertTriangle size={18} strokeWidth={2} />
+                    ) : (
+                      <RotateCcw size={18} strokeWidth={1.5} />
+                    )}
+                  </ToolButton>
+                  <ToolButton
+                    index={widgetList.length + 3}
                     label="Spaces"
                     onClick={() => setShowSpaces(true)}
                   >
                     <LayoutTemplate size={18} strokeWidth={1.5} />
                   </ToolButton>
                   <ToolButton
-                    index={widgetList.length + 3}
+                    index={widgetList.length + 4}
                     label={
                       unreadCount > 0
                         ? `Notifications · ${unreadCount} new`
@@ -334,7 +478,7 @@ export function TopIsland() {
                     </span>
                   </ToolButton>
                   <ToolButton
-                    index={widgetList.length + 4}
+                    index={widgetList.length + 5}
                     label="Settings"
                     onClick={() => setShowSettings(true)}
                   >

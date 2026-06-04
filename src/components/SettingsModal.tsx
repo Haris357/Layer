@@ -11,6 +11,7 @@ import {
   MonitorPlay,
   Keyboard,
   Info,
+  Cloud,
   type LucideIcon,
 } from 'lucide-react'
 import { useSettingsStore } from '../store/settingsStore'
@@ -22,7 +23,6 @@ import {
   quitApp,
   registerHotkey,
   showInFolder,
-  resetAll as resetAllFiles,
 } from '../lib/ipc'
 import { useCanvasStore } from '../store/canvasStore'
 import { useMonitorStore, useAnchorMonitor } from '../store/monitorStore'
@@ -30,13 +30,22 @@ import { useToastStore } from '../store/toastStore'
 import { getUpdate } from '../lib/updater'
 import { runUpdate } from '../lib/updateFlow'
 import { Toggle, Slider, FieldRow, Segmented } from './ui'
+import { SyncTab } from './SyncTab'
+import { IS_STORE } from '../lib/dist'
 
-type TabId = 'general' | 'appearance' | 'screensaver' | 'shortcuts' | 'about'
+type TabId =
+  | 'general'
+  | 'appearance'
+  | 'screensaver'
+  | 'sync'
+  | 'shortcuts'
+  | 'about'
 
 const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'general', label: 'General', icon: SlidersHorizontal },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'screensaver', label: 'Screensaver', icon: MonitorPlay },
+  { id: 'sync', label: 'Cloud Sync', icon: Cloud },
   { id: 'shortcuts', label: 'Shortcuts', icon: Keyboard },
   { id: 'about', label: 'About', icon: Info },
 ]
@@ -97,7 +106,11 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const setAmbientEffects = useSettingsStore((s) => s.setAmbientEffects)
   const setHotCorner = useSettingsStore((s) => s.setHotCorner)
   const wallpaperLoading = useThemeStatus((s) => s.wallpaperLoading)
-  const resetCanvas = useCanvasStore((s) => s.resetAll)
+  const resetSpace = useCanvasStore((s) => s.resetSpace)
+  const activeId = useCanvasStore((s) => s.activeId)
+  const activeSpaceName = useCanvasStore(
+    (s) => s.spaces.find((t) => t.id === s.activeId)?.name ?? 'this space',
+  )
   const primary = useAnchorMonitor()
   const monitors = useMonitorStore((s) => s.monitors)
   const uiMonitor = useSettingsStore((s) => s.uiMonitor)
@@ -193,8 +206,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   }
 
   const handleReset = () => {
-    resetCanvas()
-    resetAllFiles().catch(() => {})
+    resetSpace(activeId)
     setConfirmReset(false)
     onClose()
   }
@@ -301,9 +313,17 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   />
                 </div>
               </FieldRow>
-              <FieldRow label="Launch Layer on startup">
-                <Toggle checked={autostart} onChange={toggleAutostart} />
-              </FieldRow>
+              {IS_STORE ? (
+                <FieldRow label="Launch Layer on startup">
+                  <span className="text-[11.5px] text-[var(--text-tertiary)]">
+                    Windows Settings → Startup apps
+                  </span>
+                </FieldRow>
+              ) : (
+                <FieldRow label="Launch Layer on startup">
+                  <Toggle checked={autostart} onChange={toggleAutostart} />
+                </FieldRow>
+              )}
               <FieldRow label="Hot corner switches spaces">
                 <Toggle checked={hotCorner} onChange={setHotCorner} />
               </FieldRow>
@@ -329,8 +349,8 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   }
                 >
                   {confirmReset
-                    ? 'Click again to clear every widget'
-                    : 'Reset canvas'}
+                    ? `Click again to clear “${activeSpaceName}”`
+                    : 'Reset this space'}
                 </button>
               </div>
             </div>
@@ -423,12 +443,21 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
           {tab === 'screensaver' && (
             <div className="flex flex-col gap-5">
-              <FieldRow label="Use Layer as my screensaver">
-                <Toggle
-                  checked={screensaverEnabled}
-                  onChange={setScreensaverEnabled}
-                />
-              </FieldRow>
+              {IS_STORE ? (
+                <div className="rounded-[10px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2.5 text-[12px] leading-relaxed text-[var(--text-secondary)]">
+                  Setting Layer as your Windows screensaver isn’t available in
+                  the Microsoft Store version (the sandbox can’t register a
+                  system screensaver). You can still preview the styles with{' '}
+                  <strong>Ctrl+Shift+S</strong>.
+                </div>
+              ) : (
+                <FieldRow label="Use Layer as my screensaver">
+                  <Toggle
+                    checked={screensaverEnabled}
+                    onChange={setScreensaverEnabled}
+                  />
+                </FieldRow>
+              )}
 
               <div className="flex flex-col gap-2">
                 <SectionTitle>Style</SectionTitle>
@@ -531,21 +560,27 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   a quiet layer on your desktop
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  disabled={updateBusy}
-                  onClick={() => checkUpdates()}
-                  className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] disabled:opacity-50"
-                >
-                  Check for updates
-                </button>
-                {updateMsg && (
-                  <span className="text-[12px] text-[var(--text-secondary)]">
-                    {updateMsg}
-                  </span>
-                )}
-              </div>
+              {IS_STORE ? (
+                <span className="text-[12px] text-[var(--text-secondary)]">
+                  Updates are delivered automatically by the Microsoft Store.
+                </span>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    disabled={updateBusy}
+                    onClick={() => checkUpdates()}
+                    className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] disabled:opacity-50"
+                  >
+                    Check for updates
+                  </button>
+                  {updateMsg && (
+                    <span className="text-[12px] text-[var(--text-secondary)]">
+                      {updateMsg}
+                    </span>
+                  )}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => quitApp().catch(() => {})}
@@ -556,6 +591,8 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               </button>
             </div>
           )}
+
+          {tab === 'sync' && <SyncTab />}
           </div>
         </div>
         </motion.div>

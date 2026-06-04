@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import type {
   GreetingWidget as GreetingWidgetType,
   GreetingStyle,
+  GreetingAlign,
 } from '../../types/widget'
 import {
   timeGreeting,
@@ -11,6 +12,57 @@ import {
   fillName,
 } from '../../lib/greetings'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
+
+interface StyleSpec {
+  label: string
+  family?: string
+  weight: number
+  letterSpacing?: string
+  serifSub?: boolean
+  gradient?: boolean
+  // Size multiplier for faces with a smaller visual weight (e.g. Caveat).
+  scale?: number
+}
+
+const GREETING_STYLES: Record<GreetingStyle, StyleSpec> = {
+  classic: { label: 'Classic', weight: 700, letterSpacing: '-1px' },
+  serif: {
+    label: 'Serif',
+    family: "'Lora', Georgia, serif",
+    weight: 600,
+    serifSub: true,
+  },
+  gradient: {
+    label: 'Gradient',
+    weight: 700,
+    letterSpacing: '-1px',
+    gradient: true,
+  },
+  mono: {
+    label: 'Mono',
+    family: "'JetBrains Mono', monospace",
+    weight: 600,
+    letterSpacing: '-0.5px',
+  },
+  script: {
+    label: 'Script',
+    family: "'Caveat', cursive",
+    weight: 700,
+    scale: 1.35,
+  },
+  playfair: {
+    label: 'Display',
+    family: "'Playfair Display', Georgia, serif",
+    weight: 600,
+    serifSub: true,
+  },
+  modern: {
+    label: 'Modern',
+    family: "'Space Grotesk', sans-serif",
+    weight: 700,
+    letterSpacing: '-0.5px',
+  },
+}
 
 function GreetingRenderer({ widget }: { widget: GreetingWidgetType }) {
   const [now, setNow] = useState(() => new Date())
@@ -28,6 +80,8 @@ function GreetingRenderer({ widget }: { widget: GreetingWidgetType }) {
 
   const name = widget.name.trim()
   const style = widget.style ?? 'classic'
+  const spec = GREETING_STYLES[style] ?? GREETING_STYLES.classic
+  const align = widget.align ?? 'left'
   const line = pickLine(Math.floor(now.getTime() / 60000))
 
   // The main line rotates through 100+ greetings, with the live time-of-day
@@ -36,7 +90,7 @@ function GreetingRenderer({ widget }: { widget: GreetingWidgetType }) {
   const template = pool[seed % pool.length] ?? GREETING_MAIN[0] ?? 'Welcome back'
 
   const renderMain = () => {
-    if (style === 'gradient' || !name) return fillName(template, name)
+    if (spec.gradient || !name) return fillName(template, name)
     const parts = template.split('{name}')
     return parts.map((part, i) => (
       <span key={i}>
@@ -48,14 +102,14 @@ function GreetingRenderer({ widget }: { widget: GreetingWidgetType }) {
     ))
   }
 
-  const serif = style === 'serif'
+  const baseFs = spec.scale ?? 1
   const greetingStyle: React.CSSProperties = {
-    fontSize: 'clamp(20px, 9cqw, 52px)',
-    fontWeight: serif ? 600 : 700,
-    letterSpacing: serif ? '0' : '-1px',
+    fontSize: `clamp(${20 * baseFs}px, ${9 * baseFs}cqw, ${52 * baseFs}px)`,
+    fontWeight: spec.weight,
+    letterSpacing: spec.letterSpacing ?? '0',
     lineHeight: 1.05,
-    fontFamily: serif ? "'Lora', Georgia, serif" : undefined,
-    ...(style === 'gradient'
+    fontFamily: spec.family,
+    ...(spec.gradient
       ? {
           background:
             'linear-gradient(110deg, var(--accent), color-mix(in srgb, var(--accent) 45%, var(--text-primary)))',
@@ -67,10 +121,13 @@ function GreetingRenderer({ widget }: { widget: GreetingWidgetType }) {
       : { color: 'var(--text-primary)' }),
   }
 
+  const alignItems =
+    align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start'
+
   return (
     <div
       className="glass flex h-full w-full flex-col justify-center gap-2 overflow-hidden rounded-[12px] border border-[var(--border)] px-5 py-4"
-      style={{ containerType: 'inline-size' }}
+      style={{ containerType: 'inline-size', alignItems, textAlign: align }}
     >
       <div style={greetingStyle}>{renderMain()}</div>
       <div
@@ -79,8 +136,8 @@ function GreetingRenderer({ widget }: { widget: GreetingWidgetType }) {
           fontSize: 'clamp(11px, 3.4cqw, 16px)',
           fontWeight: 450,
           letterSpacing: '0.2px',
-          fontStyle: serif ? 'italic' : 'normal',
-          fontFamily: serif ? "'Lora', Georgia, serif" : undefined,
+          fontStyle: spec.serifSub ? 'italic' : 'normal',
+          fontFamily: spec.serifSub ? spec.family : undefined,
         }}
       >
         {line}
@@ -96,13 +153,15 @@ function GreetingSettings({
   widget: GreetingWidgetType
   onUpdate: (patch: Partial<GreetingWidgetType>) => void
 }) {
-  const styles: { id: GreetingStyle; label: string }[] = [
-    { id: 'classic', label: 'Classic' },
-    { id: 'serif', label: 'Serif' },
-    { id: 'gradient', label: 'Gradient' },
+  const styles = Object.entries(GREETING_STYLES) as [GreetingStyle, StyleSpec][]
+  const aligns: { id: GreetingAlign; Icon: typeof AlignLeft }[] = [
+    { id: 'left', Icon: AlignLeft },
+    { id: 'center', Icon: AlignCenter },
+    { id: 'right', Icon: AlignRight },
   ]
+  const activeAlign = widget.align ?? 'left'
   return (
-    <div className="flex w-[220px] flex-col gap-3">
+    <div className="flex w-[230px] flex-col gap-3">
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] font-medium text-[var(--text-tertiary)]">
           Your name
@@ -119,13 +178,13 @@ function GreetingSettings({
           Style
         </span>
         <div className="flex flex-wrap gap-1.5">
-          {styles.map((s) => {
-            const active = (widget.style ?? 'classic') === s.id
+          {styles.map(([id, s]) => {
+            const active = (widget.style ?? 'classic') === id
             return (
               <button
-                key={s.id}
+                key={id}
                 type="button"
-                onClick={() => onUpdate({ style: s.id })}
+                onClick={() => onUpdate({ style: id })}
                 className={`rounded-[7px] px-2.5 py-1 text-[11.5px] font-medium transition-colors ${
                   active
                     ? 'bg-[var(--accent)] text-[var(--on-accent)]'
@@ -133,6 +192,30 @@ function GreetingSettings({
                 }`}
               >
                 {s.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <span className="text-[11px] font-medium text-[var(--text-tertiary)]">
+          Alignment
+        </span>
+        <div className="flex gap-1.5">
+          {aligns.map(({ id, Icon }) => {
+            const active = activeAlign === id
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onUpdate({ align: id })}
+                className={`flex flex-1 items-center justify-center rounded-[7px] py-1.5 transition-colors ${
+                  active
+                    ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                    : 'border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]'
+                }`}
+              >
+                <Icon size={15} strokeWidth={2} />
               </button>
             )
           })}

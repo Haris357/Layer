@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { Rnd } from 'react-rnd'
 import { AnimatePresence, motion } from 'framer-motion'
 import { GripVertical } from 'lucide-react'
 import type { Widget } from '../../types/widget'
+import { hexToRgba } from '../../lib/utils'
 import { useCanvasStore } from '../../store/canvasStore'
 import { useSnapToGrid } from '../../hooks/useSnapToGrid'
 import { setForceInteractive } from '../../lib/ipc'
@@ -25,11 +26,13 @@ const resizeHandleStyles: Record<string, React.CSSProperties> = {
   bottomLeft: { cursor: `${RESIZE}, nesw-resize` },
 }
 
-export function WidgetWrapper({ widget }: { widget: Widget }) {
-  const selectedId = useCanvasStore((s) => s.selectedId)
+function WidgetWrapperBase({ widget }: { widget: Widget }) {
+  // Subscribe to a boolean, not the whole selectedId/widgets — so a wrapper
+  // only re-renders when ITS own selected state flips, not on every selection
+  // or edit elsewhere. The full array is read non-reactively during drag.
+  const isSelected = useCanvasStore((s) => s.selectedId === widget.id)
   const setSelected = useCanvasStore((s) => s.setSelected)
   const updateWidget = useCanvasStore((s) => s.updateWidget)
-  const widgets = useCanvasStore((s) => s.widgets)
   const setGuides = useCanvasStore((s) => s.setGuides)
   const { grid } = useSnapToGrid()
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
@@ -39,7 +42,6 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
   // data referencing a widget we've since removed) — never crash the canvas.
   if (!def) return null
   const Renderer = def.Renderer
-  const isSelected = selectedId === widget.id
   const canDrag = !widget.locked
   const canResize = !widget.locked
   const lockAspect =
@@ -88,7 +90,9 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
           setForceInteractive(true).catch(() => {})
         }}
         onDrag={(_, d) => {
-          const others = widgets.filter((w) => w.id !== widget.id)
+          const others = useCanvasStore
+            .getState()
+            .widgets.filter((w) => w.id !== widget.id)
           const s = computeSnap(
             widget.width,
             widget.height,
@@ -104,7 +108,9 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
         onDragStop={(_, d) => {
           setForceInteractive(false).catch(() => {})
           setGuides({ v: [], h: [] })
-          const others = widgets.filter((w) => w.id !== widget.id)
+          const others = useCanvasStore
+            .getState()
+            .widgets.filter((w) => w.id !== widget.id)
           const s = computeSnap(
             widget.width,
             widget.height,
@@ -126,7 +132,14 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
       >
         <motion.div
           data-hit
+          data-widget-id={widget.id}
           data-nobg={widget.background === false ? '' : undefined}
+          data-accent={widget.accent ? '' : undefined}
+          data-widget-theme={
+            widget.appearance && widget.appearance !== 'auto'
+              ? widget.appearance
+              : undefined
+          }
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: widget.opacity ?? 1, scale: 1 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
@@ -137,6 +150,13 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
                 ? '2px solid var(--border-strong)'
                 : 'none',
             outlineOffset: 4,
+            ['--widget-accent' as string]: widget.accent || 'var(--accent)',
+            ['--widget-accent-tint' as string]: widget.accent
+              ? hexToRgba(widget.accent, 0.18)
+              : 'transparent',
+            ['--widget-accent-ring' as string]: widget.accent
+              ? hexToRgba(widget.accent, 0.7)
+              : 'transparent',
           }}
           onMouseDown={handleMouseDown}
           onContextMenu={handleContextMenu}
@@ -175,3 +195,5 @@ export function WidgetWrapper({ widget }: { widget: Widget }) {
     </>
   )
 }
+
+export const WidgetWrapper = memo(WidgetWrapperBase)

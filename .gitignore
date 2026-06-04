@@ -34,3 +34,9 @@ notes.md
 
 # Raw sound downloads staging folder (used ones live in public/sounds)
 sound-effects/
+
+# MSIX build artifacts
+src-tauri/msix/staging/
+src-tauri/msix/out/
+src-tauri/msix/priconfig.xml
+src-tauri/msix/*.pfx
