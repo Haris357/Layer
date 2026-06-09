@@ -103,6 +103,20 @@ export const getVolume = () => invoke<number>('get_volume')
 export const setVolume = (level: number) =>
   invoke<void>('set_volume', { level })
 
+// ── Audio devices ──
+export interface AudioDevice {
+  id: string
+  name: string
+  direction: 'output' | 'input'
+  isDefault: boolean
+}
+
+export const listAudioDevices = () =>
+  invoke<AudioDevice[]>('list_audio_devices')
+
+export const setAudioDevice = (id: string) =>
+  invoke<boolean>('set_audio_device', { id })
+
 export const openUrl = (url: string) => invoke<void>('open_url', { url })
 
 export const importAsset = (sourcePath: string) =>
@@ -179,3 +193,21 @@ export const writeBinaryFile = (path: string, dataBase64: string) =>
 
 export const readBinaryFile = (path: string) =>
   invoke<string>('read_binary_file', { path })
+
+// ---------- Layer Notch ----------
+export const createNotchWindow = (monitor: number) =>
+  invoke<void>('create_notch_window', { monitor })
+
+export const closeNotchWindow = () => invoke<void>('close_notch_window')
+
+export const repositionNotch = (monitor: number) =>
+  invoke<void>('reposition_notch', { monitor })
+
+export const setNotchSize = (width: number, height: number) =>
+  invoke<void>('set_notch_size', { width, height })
+
+export const setNotchHitbox = (rect: [number, number, number, number]) =>
+  invoke<void>('set_notch_hitbox', { rect })
+
+export const isDesktopForeground = () =>
+  invoke<boolean>('is_desktop_foreground')

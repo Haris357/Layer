@@ -24,6 +24,7 @@ export type WidgetType =
   | 'diskinfo'
   | 'greeting'
   | 'shelf'
+  | 'audio'
 
 export type Mode = 'edit' | 'view'
 
@@ -271,6 +272,13 @@ export interface ShelfWidget extends BaseWidget {
   type: 'shelf'
 }
 
+export interface AudioWidget extends BaseWidget {
+  type: 'audio'
+  // Which device lists to show.
+  show: 'both' | 'output' | 'input'
+  background: boolean
+}
+
 export type Widget =
   | NoteWidget
   | LinkWidget
@@ -297,6 +305,7 @@ export type Widget =
   | DiskInfoWidget
   | GreetingWidget
   | ShelfWidget
+  | AudioWidget
 
 export type NewWidget = Omit<Widget, 'id' | 'zIndex'>
 

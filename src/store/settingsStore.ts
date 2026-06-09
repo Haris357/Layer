@@ -27,6 +27,9 @@ interface SettingsState {
   syncEmail: string | null
   deviceId: string
   lastSyncedAt: string | null
+  // Layer Notch (separate top-center window).
+  notchEnabled: boolean
+  notchMonitor: number
   setGridSize: (size: number) => void
   setSnapEnabled: (enabled: boolean) => void
   setHotkey: (hotkey: string) => void
@@ -46,6 +49,8 @@ interface SettingsState {
   setSyncEmail: (value: string | null) => void
   setDeviceId: (value: string) => void
   setLastSyncedAt: (value: string | null) => void
+  setNotchEnabled: (value: boolean) => void
+  setNotchMonitor: (value: number) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -70,6 +75,8 @@ export const useSettingsStore = create<SettingsState>()(
       syncEmail: null,
       deviceId: '',
       lastSyncedAt: null,
+      notchEnabled: false,
+      notchMonitor: -1,
       setGridSize: (gridSize) => set({ gridSize }),
       setSnapEnabled: (snapEnabled) => set({ snapEnabled }),
       setHotkey: (hotkey) => set({ hotkey }),
@@ -91,6 +98,8 @@ export const useSettingsStore = create<SettingsState>()(
       setSyncEmail: (syncEmail) => set({ syncEmail }),
       setDeviceId: (deviceId) => set({ deviceId }),
       setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),
+      setNotchEnabled: (notchEnabled) => set({ notchEnabled }),
+      setNotchMonitor: (notchMonitor) => set({ notchMonitor }),
     }),
     { name: 'layer-settings' },
   ),

@@ -390,3 +390,14 @@ input {
 .layer-eq-bar.playing {
   animation: layer-eq 0.9s ease-in-out infinite;
 }
+
+/* Layer Notch — live-activity equalizer bars. */
+@keyframes notch-eq {
+  0%,
+  100% {
+    height: 35%;
+  }
+  50% {
+    height: 100%;
+  }
+}

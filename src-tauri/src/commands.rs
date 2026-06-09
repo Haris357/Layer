@@ -1084,6 +1084,23 @@ pub async fn set_volume(level: f32) {
     let _ = level;
 }
 
+// List active output + input audio devices (COM runs off the main thread).
+#[tauri::command]
+pub async fn list_audio_devices() -> Vec<crate::audio::AudioDevice> {
+    tauri::async_runtime::spawn_blocking(crate::audio::list_devices)
+        .await
+        .unwrap_or_default()
+}
+
+// Make the given device the system default (for all roles). Returns whether it
+// succeeded so the UI can refresh / show an error.
+#[tauri::command]
+pub async fn set_audio_device(id: String) -> bool {
+    tauri::async_runtime::spawn_blocking(move || crate::audio::set_default_device(&id))
+        .await
+        .unwrap_or(false)
+}
+
 #[tauri::command]
 pub async fn clear_all_notifications() {
     #[cfg(target_os = "windows")]
@@ -1356,4 +1373,42 @@ pub fn shelf_remove(app: AppHandle, path: String) -> Result<(), String> {
         std::fs::remove_file(target).map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+// ---------- Layer Notch ----------
+
+#[tauri::command]
+pub fn create_notch_window(
+    app: AppHandle,
+    state: State<crate::notch::SharedNotchHit>,
+    monitor: i32,
+) {
+    crate::notch::create_notch_window(&app, state.inner().clone(), monitor);
+}
+
+#[tauri::command]
+pub fn close_notch_window(app: AppHandle) {
+    crate::notch::close_notch_window(&app);
+}
+
+#[tauri::command]
+pub fn reposition_notch(app: AppHandle, monitor: i32) {
+    crate::notch::reposition_notch(&app, monitor);
+}
+
+#[tauri::command]
+pub fn set_notch_size(app: AppHandle, width: f64, height: f64) {
+    crate::notch::set_notch_size(&app, width, height);
+}
+
+#[tauri::command]
+pub fn set_notch_hitbox(state: State<crate::notch::SharedNotchHit>, rect: [i32; 4]) {
+    if let Ok(mut h) = state.lock() {
+        *h = rect;
+    }
+}
+
+#[tauri::command]
+pub fn is_desktop_foreground() -> bool {
+    crate::notch::is_desktop_foreground()
 }

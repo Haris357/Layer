@@ -1,4 +1,6 @@
+mod audio;
 mod commands;
+mod notch;
 mod screensaver;
 mod storage;
 mod window;
@@ -78,6 +80,11 @@ pub fn run() {
             }
 
             window::setup_window(app)?;
+            // Shared pill rect for the optional Notch window (created on demand
+            // by the frontend when enabled in Settings).
+            let notch_hit: notch::SharedNotchHit =
+                std::sync::Arc::new(std::sync::Mutex::new([0i32; 4]));
+            app.manage(notch_hit);
             let _ = app.global_shortcut().register("CmdOrControl+Shift+Space");
             let _ = app.global_shortcut().register("CmdOrControl+Shift+N");
             let _ = app.global_shortcut().register("CmdOrControl+Shift+S");
@@ -209,6 +216,14 @@ pub fn run() {
             commands::capture_screen_base64,
             commands::write_binary_file,
             commands::read_binary_file,
+            commands::create_notch_window,
+            commands::close_notch_window,
+            commands::reposition_notch,
+            commands::set_notch_size,
+            commands::set_notch_hitbox,
+            commands::is_desktop_foreground,
+            commands::list_audio_devices,
+            commands::set_audio_device,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Layer");

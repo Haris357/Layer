@@ -23,6 +23,7 @@ import { useSpaces } from './hooks/useSpaces'
 import { useHotcorner } from './hooks/useHotcorner'
 import { useMonitors } from './hooks/useMonitors'
 import { AmbientBackground } from './components/AmbientBackground'
+import { Dock } from './dock/Dock'
 import { useSettingsStore } from './store/settingsStore'
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
   useMonitors()
 
   const onboarded = useSettingsStore((s) => s.onboarded)
+  const dockEnabled = useSettingsStore((s) => s.notchEnabled)
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -55,6 +57,7 @@ export default function App() {
       <CommandPalette />
       <QuickCaptureModal />
       <Toast />
+      {dockEnabled && <Dock />}
       {!onboarded && <Onboarding />}
     </div>
   )

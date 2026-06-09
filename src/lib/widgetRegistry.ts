@@ -26,6 +26,7 @@ import { webEmbedDefinition } from '../components/widgets/WebEmbedWidget'
 import { diskInfoDefinition } from '../components/widgets/DiskInfoWidget'
 import { greetingDefinition } from '../components/widgets/GreetingWidget'
 import { shelfDefinition } from '../components/widgets/ShelfWidget'
+import { audioDefinition } from '../components/widgets/AudioWidget'
 
 export interface WidgetSize {
   width: number
@@ -90,6 +91,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   diskinfo: diskInfoDefinition as WidgetDefinition,
   greeting: greetingDefinition as WidgetDefinition,
   shelf: shelfDefinition as WidgetDefinition,
+  audio: audioDefinition as WidgetDefinition,
 }
 
 export const widgetOrder: WidgetType[] = [
@@ -110,6 +112,7 @@ export const widgetOrder: WidgetType[] = [
   'webembed',
   'nowplaying',
   'notifications',
+  'audio',
   'converter',
   'link',
   'image',

@@ -1,6 +1,6 @@
 [package]
 name = "layer"
-version = "1.4.4"
+version = "1.5.0"
 description = "A quiet layer on your desktop"
 authors = ["Layer"]
 edition = "2021"
@@ -34,6 +34,7 @@ windows-sys = { version = "0.60", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_UI_Input_KeyboardAndMouse",
     "Win32_System_Power",
+    "Win32_Graphics_Gdi",
 ] }
 windows = { version = "0.59", features = [
     "Foundation",
@@ -49,6 +50,8 @@ windows = { version = "0.59", features = [
     "Win32_Media_Audio",
     "Win32_Media_Audio_Endpoints",
     "Win32_UI_Shell",
+    "Win32_UI_Shell_PropertiesSystem",
+    "Win32_Devices_FunctionDiscovery",
     "Win32_UI_WindowsAndMessaging",
     "Win32_Graphics_Gdi",
     "Win32_Storage_FileSystem",
@@ -62,3 +65,14 @@ codegen-units = 16
 lto = false
 opt-level = 2
 strip = true
+
+# Keep the dev build (`tauri dev`) from ballooning to 10–15 GB. The bulk of
+# target/ is debug symbols (huge .pdb files on Windows). We don't attach a
+# Rust debugger here, so drop them — the app builds and runs identically, just
+# with less detailed panic backtraces. This typically cuts the dev target by
+# more than half.
+[profile.dev]
+debug = false
+# Dependencies are most of the compiled code and never need debug info.
+[profile.dev.package."*"]
+debug = false

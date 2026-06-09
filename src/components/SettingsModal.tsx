@@ -19,6 +19,7 @@ import { useThemeStatus } from '../store/themeStatusStore'
 import {
   captureScreen,
   getAppVersion,
+  openUrl,
   previewScreensaver,
   quitApp,
   registerHotkey,
@@ -31,12 +32,26 @@ import { getUpdate } from '../lib/updater'
 import { runUpdate } from '../lib/updateFlow'
 import { Toggle, Slider, FieldRow, Segmented } from './ui'
 import { SyncTab } from './SyncTab'
+import { useNotchStore, type NotchModuleId } from '../notch/notchStore'
 import { IS_STORE } from '../lib/dist'
+
+const NOTCH_MODULE_LABELS: Record<NotchModuleId, string> = {
+  nowplaying: 'Now Playing',
+  shortcuts: 'Shortcuts',
+  timer: 'Timer',
+  system: 'System',
+  weather: 'Weather',
+  calendar: 'Calendar',
+  notifications: 'Notifications',
+  clipboard: 'Clipboard',
+  toggles: 'Quick toggles',
+}
 
 type TabId =
   | 'general'
   | 'appearance'
   | 'screensaver'
+  | 'notch'
   | 'sync'
   | 'shortcuts'
   | 'about'
@@ -45,6 +60,9 @@ const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'general', label: 'General', icon: SlidersHorizontal },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'screensaver', label: 'Screensaver', icon: MonitorPlay },
+  // Notch/Dock is parked — its tab is hidden from release builds while the
+  // feature is finished. The panel code below stays so re-enabling is one line.
+  // { id: 'notch', label: 'Notch', icon: PanelTop },
   { id: 'sync', label: 'Cloud Sync', icon: Cloud },
   { id: 'shortcuts', label: 'Shortcuts', icon: Keyboard },
   { id: 'about', label: 'About', icon: Info },
@@ -115,6 +133,12 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const monitors = useMonitorStore((s) => s.monitors)
   const uiMonitor = useSettingsStore((s) => s.uiMonitor)
   const setUiMonitor = useSettingsStore((s) => s.setUiMonitor)
+  const notchEnabled = useSettingsStore((s) => s.notchEnabled)
+  const setNotchEnabled = useSettingsStore((s) => s.setNotchEnabled)
+  const notchMonitor = useSettingsStore((s) => s.notchMonitor)
+  const setNotchMonitor = useSettingsStore((s) => s.setNotchMonitor)
+  const notchModules = useNotchStore((s) => s.modules)
+  const toggleNotchModule = useNotchStore((s) => s.toggleModule)
   const dragControls = useDragControls()
 
   const [tab, setTab] = useState<TabId>('general')
@@ -581,6 +605,37 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   )}
                 </div>
               )}
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    openUrl(
+                      'https://apps.microsoft.com/detail/9NL577X16L1N',
+                    ).catch(() => {})
+                  }
+                  className="inline-flex items-center gap-2 rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
+                >
+                  <span className="grid grid-cols-2 grid-rows-2 gap-[2px]">
+                    <i className="h-[7px] w-[7px] rounded-[1px]" style={{ background: '#f25022' }} />
+                    <i className="h-[7px] w-[7px] rounded-[1px]" style={{ background: '#7fba00' }} />
+                    <i className="h-[7px] w-[7px] rounded-[1px]" style={{ background: '#00a4ef' }} />
+                    <i className="h-[7px] w-[7px] rounded-[1px]" style={{ background: '#ffb900' }} />
+                  </span>
+                  {IS_STORE ? 'Rate Layer on the Store' : 'Microsoft Store'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openUrl('https://github.com/Haris357/Layer-releases').catch(
+                      () => {},
+                    )
+                  }
+                  className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
+                >
+                  GitHub
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={() => quitApp().catch(() => {})}
@@ -589,6 +644,48 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               >
                 Quit Layer
               </button>
+            </div>
+          )}
+
+          {tab === 'notch' && (
+            <div className="flex flex-col gap-5">
+              <FieldRow label="Enable Layer Notch">
+                <Toggle checked={notchEnabled} onChange={setNotchEnabled} />
+              </FieldRow>
+              <p className="text-[11.5px] leading-relaxed text-[var(--text-tertiary)]">
+                A macOS-style notch pinned to the top of your screen — a
+                dynamic island for media, timers and quick shortcuts. It runs
+                as its own window, separate from your desktop widgets.
+              </p>
+
+              {monitors.length > 1 && (
+                <div className="flex flex-col gap-2">
+                  <SectionTitle>Show notch on</SectionTitle>
+                  <Segmented
+                    value={String(notchMonitor)}
+                    options={[
+                      { value: '-1', label: 'Primary' },
+                      ...monitors.map((_, i) => ({
+                        value: String(i),
+                        label: `Display ${i + 1}`,
+                      })),
+                    ]}
+                    onChange={(v) => setNotchMonitor(Number(v))}
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2">
+                <SectionTitle>Modules</SectionTitle>
+                {notchModules.map((m) => (
+                  <FieldRow key={m.id} label={NOTCH_MODULE_LABELS[m.id]}>
+                    <Toggle
+                      checked={m.enabled}
+                      onChange={() => toggleNotchModule(m.id)}
+                    />
+                  </FieldRow>
+                ))}
+              </div>
             </div>
           )}
 

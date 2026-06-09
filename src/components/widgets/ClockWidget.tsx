@@ -127,24 +127,49 @@ function DigitalClock({
     day: 'numeric',
   })
 
+  // Scale the time to the widget so resizing actually resizes the clock.
+  // Constrain by both the available width (so it never overflows the longest
+  // time string) and the height (so it stays vertically balanced).
+  const timeStr = `${is12 ? hours : pad(hours)}:${minutes}`
+  // Approx. advance width of the main + seconds + am/pm run, in em.
+  const runEm =
+    timeStr.length * 0.58 +
+    (widget.showSeconds ? 3 * 0.58 * 0.57 : 0) +
+    (is12 ? 0.6 : 0)
+  const mainFs = Math.max(
+    16,
+    Math.min(
+      Math.round((widget.width - 32) / runEm),
+      Math.round(widget.height * (widget.showDate ? 0.5 : 0.64)),
+    ),
+  )
+  const secFs = Math.round(mainFs * 0.57)
+  const ampmFs = Math.max(10, Math.round(mainFs * 0.25))
+  const dateFs = Math.max(10, Math.round(mainFs * 0.25))
+
   return (
     <div
       className={cn(
-        'flex h-full w-full flex-col items-center justify-center rounded-[12px] px-4',
+        'flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[12px] px-4',
         card && 'glass border border-[var(--border)]',
       )}
     >
       <div className="flex items-baseline gap-1">
         <span
-          className="text-[var(--text-primary)]"
-          style={{ fontSize: 56, fontWeight: 700, letterSpacing: '-2.1px' }}
+          className="whitespace-nowrap text-[var(--text-primary)]"
+          style={{
+            fontSize: mainFs,
+            fontWeight: 700,
+            letterSpacing: `${(mainFs * -0.0375).toFixed(2)}px`,
+            lineHeight: 1,
+          }}
         >
-          {is12 ? hours : pad(hours)}:{minutes}
+          {timeStr}
         </span>
         {widget.showSeconds && (
           <span
             className="text-[var(--text-secondary)]"
-            style={{ fontSize: 32, fontWeight: 500 }}
+            style={{ fontSize: secFs, fontWeight: 500 }}
           >
             :{seconds}
           </span>
@@ -152,7 +177,7 @@ function DigitalClock({
         {is12 && (
           <span
             className="ml-1 text-[var(--text-secondary)]"
-            style={{ fontSize: 14, fontWeight: 500 }}
+            style={{ fontSize: ampmFs, fontWeight: 500 }}
           >
             {ampm}
           </span>
@@ -161,7 +186,7 @@ function DigitalClock({
       {widget.showDate && (
         <span
           className="mt-1 text-[var(--text-tertiary)]"
-          style={{ fontSize: 14, fontWeight: 500 }}
+          style={{ fontSize: dateFs, fontWeight: 500 }}
         >
           {dateStr}
         </span>
