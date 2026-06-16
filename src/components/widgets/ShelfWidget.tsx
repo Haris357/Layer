@@ -2,7 +2,16 @@ import { useEffect, useRef, useState } from 'react'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { open } from '@tauri-apps/plugin-dialog'
-import { Layers3, Plus, X, FolderOpen, Film, Music, FileText } from 'lucide-react'
+import {
+  Layers3,
+  Plus,
+  X,
+  FolderOpen,
+  Folder,
+  Film,
+  Music,
+  FileText,
+} from 'lucide-react'
 import {
   isTauri,
   openUrl,
@@ -44,12 +53,15 @@ function Tile({ item }: { item: ShelfItem }) {
     if (path) shelfRemove(path).catch(() => {})
   }
   const src = item.kind === 'image' ? convertFileSrc(item.path) : null
+  const isFolder = item.kind === 'folder'
+  const open = () =>
+    (isFolder ? showInFolder(item.path) : openUrl(item.path)).catch(() => {})
 
   return (
     <div className="group/t relative flex flex-col gap-1">
       <button
         type="button"
-        onClick={() => openUrl(item.path).catch(() => {})}
+        onClick={open}
         title={`Open ${item.name}`}
         className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-[9px] border border-[var(--border)] bg-[var(--fill-2)] transition-colors hover:border-[var(--border-strong)]"
       >
@@ -60,6 +72,8 @@ function Tile({ item }: { item: ShelfItem }) {
             className="h-full w-full object-cover"
             draggable={false}
           />
+        ) : item.kind === 'folder' ? (
+          <Folder size={22} strokeWidth={1.5} className="text-[var(--text-secondary)]" />
         ) : item.kind === 'video' ? (
           <Film size={22} strokeWidth={1.5} className="text-[var(--text-secondary)]" />
         ) : item.kind === 'audio' ? (
@@ -97,7 +111,7 @@ function Tile({ item }: { item: ShelfItem }) {
 
       <span
         className="truncate px-0.5 text-[10px] text-[var(--text-secondary)]"
-        title={`${item.name} · ${fmtSize(item.size)}`}
+        title={isFolder ? item.name : `${item.name} · ${fmtSize(item.size)}`}
       >
         {item.name}
       </span>
@@ -157,6 +171,16 @@ function ShelfRenderer() {
     }
   }
 
+  const pickFolders = async () => {
+    try {
+      const sel = await open({ directory: true, multiple: true })
+      if (!sel) return
+      await importPaths(Array.isArray(sel) ? sel : [sel])
+    } catch {
+      /* cancelled */
+    }
+  }
+
   return (
     <div
       ref={rootRef}
@@ -181,9 +205,17 @@ function ShelfRenderer() {
         )}
         <button
           type="button"
+          onClick={pickFolders}
+          title="Add folder"
+          className="ml-auto flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+        >
+          <Folder size={13} strokeWidth={2.2} />
+        </button>
+        <button
+          type="button"
           onClick={pickFiles}
           title="Add files"
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+          className="flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
         >
           <Plus size={14} strokeWidth={2.2} />
         </button>

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Music, Play, Pause, SkipBack, SkipForward } from 'lucide-react'
 import {
   getNowPlaying,
@@ -9,7 +10,82 @@ import {
   type NowPlaying,
 } from '../../lib/ipc'
 import type { NowPlayingWidget as NowPlayingWidgetType } from '../../types/widget'
+import { Toggle, FieldRow } from '../ui'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
+
+// Pull a representative colour from the album art (saturation-weighted average)
+// for a Spotify-style colour wash. Data URLs are same-origin, so reading the
+// canvas isn't tainted. Returns "r, g, b" for use in rgba().
+function useArtColor(thumb: string): string | null {
+  const [rgb, setRgb] = useState<string | null>(null)
+  useEffect(() => {
+    if (!thumb) {
+      setRgb(null)
+      return
+    }
+    let cancelled = false
+    const img = new Image()
+    img.onload = () => {
+      if (cancelled) return
+      const s = 24
+      const c = document.createElement('canvas')
+      c.width = s
+      c.height = s
+      const ctx = c.getContext('2d', { willReadFrequently: true })
+      if (!ctx) return
+      try {
+        ctx.drawImage(img, 0, 0, s, s)
+        const { data } = ctx.getImageData(0, 0, s, s)
+        let r = 0
+        let g = 0
+        let b = 0
+        let wsum = 0
+        for (let i = 0; i < data.length; i += 4) {
+          const R = data[i] ?? 0
+          const G = data[i + 1] ?? 0
+          const B = data[i + 2] ?? 0
+          const mx = Math.max(R, G, B)
+          const mn = Math.min(R, G, B)
+          const sat = mx === 0 ? 0 : (mx - mn) / mx
+          const w = 0.15 + sat // favour vivid pixels over greys
+          r += R * w
+          g += G * w
+          b += B * w
+          wsum += w
+        }
+        if (wsum > 0 && !cancelled) {
+          setRgb(
+            `${Math.round(r / wsum)}, ${Math.round(g / wsum)}, ${Math.round(b / wsum)}`,
+          )
+        }
+      } catch {
+        /* tainted/again — ignore */
+      }
+    }
+    img.src = thumb
+    return () => {
+      cancelled = true
+    }
+  }, [thumb])
+  return rgb
+}
+
+const SOURCE_NAMES: [RegExp, string][] = [
+  [/spotify/i, 'Spotify'],
+  [/chrome/i, 'Chrome'],
+  [/msedge|edge/i, 'Edge'],
+  [/firefox/i, 'Firefox'],
+  [/vlc/i, 'VLC'],
+  [/itunes|apple/i, 'Apple Music'],
+  [/groove|zune/i, 'Groove'],
+  [/foobar/i, 'foobar2000'],
+]
+function sourceName(id: string): string {
+  if (!id) return ''
+  for (const [re, name] of SOURCE_NAMES) if (re.test(id)) return name
+  const tail = id.split('!').pop() || id
+  return tail.replace(/\.exe$/i, '')
+}
 
 const KNOB = 90
 const KC = KNOB / 2
@@ -22,11 +98,13 @@ function polar(cx: number, cy: number, r: number, deg: number) {
   return [cx + r * Math.cos(a), cy + r * Math.sin(a)] as const
 }
 
-function Waveform({ playing }: { playing: boolean }) {
+function Waveform({ playing, color: colorProp }: { playing: boolean; color?: string }) {
   const ref = useRef<HTMLCanvasElement>(null)
   const ampRef = useRef(0.04)
   const playingRef = useRef(playing)
   playingRef.current = playing
+  const colorPropRef = useRef(colorProp)
+  colorPropRef.current = colorProp
 
   useEffect(() => {
     const canvas = ref.current
@@ -39,7 +117,9 @@ function Waveform({ playing }: { playing: boolean }) {
     let color = 'rgba(255,255,255,0.6)'
 
     const draw = () => {
-      if (frame % 40 === 0) {
+      if (colorPropRef.current) {
+        color = colorPropRef.current
+      } else if (frame % 40 === 0) {
         const c = getComputedStyle(document.documentElement)
           .getPropertyValue('--text-secondary')
           .trim()
@@ -200,9 +280,10 @@ function VolumeKnob({
   )
 }
 
-function NowPlayingRenderer() {
+function NowPlayingRenderer({ widget }: { widget: NowPlayingWidgetType }) {
   const [np, setNp] = useState<NowPlaying | null>(null)
   const [volume, setVol] = useState(-1)
+  const color = useArtColor(np?.thumb ?? '')
 
   useEffect(() => {
     if (!isTauri()) return
@@ -225,11 +306,14 @@ function NowPlayingRenderer() {
 
   const control = (action: 'playpause' | 'next' | 'prev') => {
     mediaControl(action).catch(() => {})
-    window.setTimeout(() => {
+    // Re-sync from the OS media session (the single source of truth). A couple
+    // of staggered reads catch it whether the OS updates fast or takes a beat.
+    const refetch = () =>
       getNowPlaying()
-        .then(setNp)
+        .then((d) => setNp(d))
         .catch(() => {})
-    }, 350)
+    window.setTimeout(refetch, 300)
+    window.setTimeout(refetch, 900)
   }
 
   const changeVolume = (v: number) => {
@@ -246,65 +330,148 @@ function NowPlayingRenderer() {
     )
   }
 
+  const src = sourceName(np.source)
+  // The album-art background theme is opt-out via settings (default on).
+  const hasArt = !!np.thumb && widget.artBackground !== false
+  // Spotify-style: over artwork go dark with white text + the album's colour as
+  // a wash; otherwise keep the themed glass card.
+  const textVars: CSSProperties | undefined = hasArt
+    ? ({
+        ['--text-primary']: '#fff',
+        ['--text-secondary']: 'rgba(255,255,255,0.82)',
+        ['--text-tertiary']: 'rgba(255,255,255,0.6)',
+      } as CSSProperties)
+    : undefined
+
   return (
-    <div className="glass flex h-full w-full flex-col gap-2 overflow-hidden rounded-[12px] border border-[var(--border)] p-4">
-      <div className="flex items-center gap-1.5 text-[var(--text-tertiary)]">
-        <Music size={12} strokeWidth={1.8} />
-        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.3px' }}>
-          NOW PLAYING
-        </span>
-      </div>
-
-      <div className="flex min-h-0 flex-1 items-center gap-3">
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <div className="flex min-w-0 flex-col">
-            <span
-              className="truncate text-[var(--text-primary)]"
-              style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.4px' }}
-            >
-              {np.title || 'Unknown track'}
-            </span>
-            <span
-              className="truncate text-[var(--text-secondary)]"
-              style={{ fontSize: 12.5, fontWeight: 500 }}
-            >
-              {np.artist || '—'}
-            </span>
-          </div>
-          <Waveform playing={np.playing} />
-        </div>
-        {volume >= 0 && (
-          <VolumeKnob value={volume} onChange={changeVolume} />
+    <div className="glass relative flex h-full w-full overflow-hidden rounded-[12px] border border-[var(--border)]">
+      {/* Cross-fade the artwork + colour wash when the track changes, so the
+          background eases between songs instead of snapping. */}
+      <AnimatePresence>
+        {hasArt && (
+          <motion.div
+            key={np.thumb}
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55, ease: 'easeInOut' }}
+            className="pointer-events-none absolute inset-0"
+          >
+            <img
+              src={np.thumb}
+              alt=""
+              className="h-full w-full scale-110 object-cover"
+              style={{ filter: 'blur(28px) saturate(160%)' }}
+            />
+            {color && (
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(150deg, rgba(${color},0.5), rgba(${color},0.12))`,
+                }}
+              />
+            )}
+            {/* readability scrim, darker toward the controls */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(8,8,12,0.34) 0%, rgba(8,8,12,0.62) 100%)',
+              }}
+            />
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
+      <div
+        className="relative z-10 flex h-full w-full flex-col gap-3 p-4"
+        style={textVars}
+      >
+        <div className="flex items-center gap-1.5 text-[var(--text-tertiary)]">
+          <Music size={12} strokeWidth={1.8} />
+          <span
+            className="truncate"
+            style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.3px' }}
+          >
+            {src ? src.toUpperCase() : 'NOW PLAYING'}
+          </span>
+        </div>
 
-      <div className="flex items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={() => control('prev')}
-          className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-        >
-          <SkipBack size={17} strokeWidth={1.8} fill="currentColor" />
-        </button>
-        <button
-          type="button"
-          onClick={() => control('playpause')}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--on-accent)] transition-transform hover:scale-105"
-        >
-          {np.playing ? (
-            <Pause size={16} strokeWidth={2} fill="currentColor" />
-          ) : (
-            <Play size={16} strokeWidth={2} fill="currentColor" />
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={() => control('next')}
-          className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-        >
-          <SkipForward size={17} strokeWidth={1.8} fill="currentColor" />
-        </button>
+        <div className="flex min-h-0 flex-1 items-center gap-3 overflow-hidden">
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div className="flex min-w-0 flex-col">
+              <span
+                className="truncate text-[var(--text-primary)]"
+                style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.4px' }}
+              >
+                {np.title || 'Unknown track'}
+              </span>
+              <span
+                className="truncate text-[var(--text-secondary)]"
+                style={{ fontSize: 12.5, fontWeight: 500 }}
+              >
+                {np.artist || '—'}
+              </span>
+            </div>
+            <Waveform
+              playing={np.playing}
+              color={hasArt ? 'rgba(255,255,255,0.55)' : undefined}
+            />
+          </div>
+          {volume >= 0 && <VolumeKnob value={volume} onChange={changeVolume} />}
+        </div>
+
+        <div className="flex shrink-0 items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => control('prev')}
+            className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+          >
+            <SkipBack size={17} strokeWidth={1.8} fill="currentColor" />
+          </button>
+          <button
+            type="button"
+            onClick={() => control('playpause')}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--on-accent)] transition-transform hover:scale-105"
+          >
+            {np.playing ? (
+              <Pause size={16} strokeWidth={2} fill="currentColor" />
+            ) : (
+              <Play size={16} strokeWidth={2} fill="currentColor" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => control('next')}
+            className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+          >
+            <SkipForward size={17} strokeWidth={1.8} fill="currentColor" />
+          </button>
+        </div>
       </div>
+    </div>
+  )
+}
+
+function NowPlayingSettings({
+  widget,
+  onUpdate,
+}: {
+  widget: NowPlayingWidgetType
+  onUpdate: (patch: Partial<NowPlayingWidgetType>) => void
+}) {
+  return (
+    <div className="flex w-[230px] flex-col gap-2">
+      <FieldRow label="Album-art background">
+        <Toggle
+          checked={widget.artBackground !== false}
+          onChange={(v) => onUpdate({ artBackground: v })}
+        />
+      </FieldRow>
+      <p className="text-[11px] leading-relaxed text-[var(--text-tertiary)]">
+        Blur the album art behind the player with a matching color wash. Turn off
+        for a plain themed card.
+      </p>
     </div>
   )
 }
@@ -314,15 +481,19 @@ export const nowPlayingDefinition: WidgetDefinition<NowPlayingWidgetType> = {
   label: 'Now Playing',
   icon: Music,
   enabled: true,
-  minSize: { width: 310, height: 188 },
-  maxSize: { width: 540, height: 290 },
+  // Min height keeps the volume knob (90px tall) from clipping; min width keeps
+  // it from clipping sideways. The knob always shows within these bounds.
+  minSize: { width: 300, height: 208 },
+  maxSize: { width: 540, height: 300 },
   create: (x, y) => ({
     type: 'nowplaying',
     x,
     y,
-    width: 370,
-    height: 210,
+    width: 380,
+    height: 214,
     locked: false,
+    artBackground: true,
   }),
   Renderer: NowPlayingRenderer,
+  Settings: NowPlayingSettings,
 }

@@ -18,7 +18,7 @@
     Name="__IDENTITY_NAME__"
     Publisher="__PUBLISHER__"
     Version="__VERSION__"
-    ProcessorArchitecture="x64" />
+    ProcessorArchitecture="__ARCH__" />
 
   <Properties>
     <!-- Must match the reserved Store name exactly. The Start-menu/tile name

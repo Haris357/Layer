@@ -1,7 +1,7 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tauri::{App, Emitter, Manager, WebviewWindow};
 
 // Hot corner: flicking to the top-left corner cycles spaces.
@@ -327,7 +327,11 @@ fn bring_to_front(_window: &WebviewWindow) {}
 fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
     thread::spawn(move || {
         let mut ignoring = true;
-        let mut was_corner = false;
+        // Hot-corner dwell tracking: when the cursor entered the corner, and
+        // whether we've already fired for this dwell. A timed dwell (not an
+        // instant flick) prevents accidental bumps from cycling spaces.
+        let mut corner_since: Option<Instant> = None;
+        let mut corner_fired = false;
         let mut was_peek = false;
         // Track the virtual desktop so we can re-cover it when a monitor is
         // plugged in / removed / rearranged — no app restart needed.
@@ -384,15 +388,28 @@ fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
             }
             was_peek = peek;
 
-            // Hot corner: flick into the top-left corner to cycle spaces.
+            // Hot corner: PARK the cursor in the top-left corner for ~300ms to
+            // cycle spaces — a deliberate dwell, not a flick, so an accidental
+            // bump into the corner never switches your space behind your back.
             if HOTCORNER.load(Ordering::Relaxed) {
-                let in_corner = cx <= ox + 3 && cy <= oy + 3;
-                if in_corner && !was_corner {
-                    let _ = window.emit("cycle-space", ());
+                let in_corner = cx <= ox + 4 && cy <= oy + 4;
+                if in_corner {
+                    match corner_since {
+                        None => corner_since = Some(Instant::now()),
+                        Some(t) => {
+                            if !corner_fired && t.elapsed() >= Duration::from_millis(300) {
+                                let _ = window.emit("cycle-space", ());
+                                corner_fired = true;
+                            }
+                        }
+                    }
+                } else {
+                    corner_since = None;
+                    corner_fired = false;
                 }
-                was_corner = in_corner;
             } else {
-                was_corner = false;
+                corner_since = None;
+                corner_fired = false;
             }
 
             thread::sleep(Duration::from_millis(8));

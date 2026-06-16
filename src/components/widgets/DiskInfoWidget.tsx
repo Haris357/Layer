@@ -9,6 +9,7 @@ import {
 import { getDisks, getDiskIo, isTauri, type DiskInfo, type DiskIo } from '../../lib/ipc'
 import type { DiskInfoWidget as DiskInfoWidgetType } from '../../types/widget'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
+import { Segmented } from '../ui'
 
 function fmtBytes(n: number): string {
   const tb = 1024 ** 4
@@ -78,10 +79,10 @@ function Stat({
   )
 }
 
-function DiskInfoRenderer() {
+function DiskInfoRenderer({ widget }: { widget: DiskInfoWidgetType }) {
   const [disks, setDisks] = useState<DiskInfo[] | null>(null)
   const [io, setIo] = useState<DiskIo[]>([])
-  const [selected, setSelected] = useState<string>('')
+  const [selected, setSelected] = useState<string>(widget.disk ?? '')
 
   useEffect(() => {
     if (!isTauri()) return
@@ -105,13 +106,21 @@ function DiskInfoRenderer() {
     }
   }, [])
 
+  // Follow the configured disk when it changes.
+  useEffect(() => {
+    if (widget.disk) setSelected(widget.disk)
+  }, [widget.disk])
+
   // Default selection + keep it valid as drives change.
   useEffect(() => {
     if (!disks || disks.length === 0) return
     if (!disks.some((d) => d.mount === selected)) {
-      setSelected(disks[0]!.mount)
+      const fallback =
+        (widget.disk && disks.find((d) => d.mount === widget.disk)?.mount) ||
+        disks[0]!.mount
+      setSelected(fallback)
     }
-  }, [disks, selected])
+  }, [disks, selected, widget.disk])
 
   const sel = disks?.find((d) => d.mount === selected) ?? disks?.[0]
   const letter = sel ? letterOf(sel.mount) : ''
@@ -253,6 +262,52 @@ function DiskInfoRenderer() {
   )
 }
 
+function DiskInfoSettings({
+  widget,
+  onUpdate,
+}: {
+  widget: DiskInfoWidgetType
+  onUpdate: (patch: Partial<DiskInfoWidgetType>) => void
+}) {
+  const [disks, setDisks] = useState<DiskInfo[] | null>(null)
+
+  useEffect(() => {
+    if (!isTauri()) return
+    let cancelled = false
+    getDisks()
+      .then((d) => !cancelled && setDisks(d))
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (!disks || disks.length === 0) {
+    return (
+      <div className="w-[200px] text-[11.5px] text-[var(--text-tertiary)]">
+        {disks === null ? 'Reading disks…' : 'No disks found'}
+      </div>
+    )
+  }
+
+  const value = disks.some((d) => d.mount === widget.disk)
+    ? widget.disk!
+    : disks[0]!.mount
+
+  return (
+    <div className="w-[200px]">
+      <Segmented
+        value={value}
+        options={disks.map((d) => ({
+          value: d.mount,
+          label: letterOf(d.mount),
+        }))}
+        onChange={(v) => onUpdate({ disk: v })}
+      />
+    </div>
+  )
+}
+
 export const diskInfoDefinition: WidgetDefinition<DiskInfoWidgetType> = {
   type: 'diskinfo',
   label: 'Disk Info',
@@ -269,4 +324,5 @@ export const diskInfoDefinition: WidgetDefinition<DiskInfoWidgetType> = {
     locked: false,
   }),
   Renderer: DiskInfoRenderer,
+  Settings: DiskInfoSettings,
 }

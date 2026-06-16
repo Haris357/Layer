@@ -1,6 +1,6 @@
 [package]
 name = "layer"
-version = "1.5.0"
+version = "1.6.0"
 description = "A quiet layer on your desktop"
 authors = ["Layer"]
 edition = "2021"
@@ -41,6 +41,7 @@ windows = { version = "0.59", features = [
     "Foundation_Collections",
     "Devices_Geolocation",
     "Media_Control",
+    "Storage_Streams",
     "UI_Notifications",
     "UI_Notifications_Management",
     "ApplicationModel",

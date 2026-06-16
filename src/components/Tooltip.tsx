@@ -67,7 +67,7 @@ export function Tooltip({
               animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.12, ease: 'easeOut' }}
-              className="glass pointer-events-none fixed z-[12000] whitespace-nowrap rounded-[7px] border border-[var(--border)] px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] shadow-md"
+              className="glass pointer-events-none fixed z-[12000] whitespace-nowrap rounded-[7px] border border-[var(--border)] px-2 py-1 text-[11px] font-medium text-[var(--text-primary)]"
               style={style}
             >
               {label}

@@ -46,7 +46,7 @@ function Tip({ label, show }: { label: string; show: boolean }) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -3, scale: 0.96 }}
           transition={{ duration: 0.12, ease: 'easeOut' }}
-          className="glass pointer-events-none absolute left-1/2 top-full z-[60] mt-2 -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[var(--border)] px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] shadow-md"
+          className="glass pointer-events-none absolute left-1/2 top-full z-[60] mt-2 -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[var(--border)] px-2 py-1 text-[11px] font-medium text-[var(--text-primary)]"
         >
           {label}
         </motion.span>
@@ -131,6 +131,20 @@ export function TopIsland() {
   const unreadCount = useNotificationStore((s) =>
     s.items.reduce((n, i) => n + (i.read ? 0 : 1), 0),
   )
+
+  // Safety for the destructive "Reset this space" action. The first click only
+  // *arms* it (confirmReset = true); the second click actually wipes the space.
+  // Auto-disarm when the bar closes or after a few seconds — otherwise a stale
+  // armed state (e.g. an accidental first click, then walking away) could fire
+  // the reset on a later, unrelated click and clear all widgets.
+  useEffect(() => {
+    if (!confirmReset) return
+    const id = window.setTimeout(() => setConfirmReset(false), 3000)
+    return () => window.clearTimeout(id)
+  }, [confirmReset])
+  useEffect(() => {
+    if (!hovered) setConfirmReset(false)
+  }, [hovered])
 
   // The tray menu fires these events; we open the matching modal here.
   useEffect(() => {

@@ -75,6 +75,13 @@ export interface NowPlaying {
   title: string
   artist: string
   playing: boolean
+  // Album/track art as a `data:` URL ('' when none).
+  thumb: string
+  // Source app id (e.g. "Spotify.exe" / a Store AUMID / "msedge.exe").
+  source: string
+  // Playback position + length in seconds (0 when the app reports none).
+  position: number
+  duration: number
 }
 
 export const getNowPlaying = () => invoke<NowPlaying>('get_now_playing')
@@ -147,7 +154,7 @@ export interface ShelfFile {
   name: string
   path: string
   size: number
-  kind: 'image' | 'video' | 'audio' | 'file'
+  kind: 'image' | 'video' | 'audio' | 'file' | 'folder'
 }
 export const shelfImport = (sourcePath: string) =>
   invoke<ShelfFile>('shelf_import', { sourcePath })

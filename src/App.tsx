@@ -16,14 +16,16 @@ import { useUpdateNotifications } from './hooks/useUpdateNotifications'
 import { useGalleryNotifications } from './hooks/useGalleryNotifications'
 import { useBatteryNotifications } from './hooks/useBatteryNotifications'
 import { useCalendarReminders } from './hooks/useCalendarReminders'
+import { useCalendarSources } from './hooks/useCalendarSources'
 import { useClipboardWatcher } from './hooks/useClipboardWatcher'
 import { useScreensaver } from './hooks/useScreensaver'
 import { useWallpaperAccent } from './hooks/useWallpaperAccent'
 import { useSpaces } from './hooks/useSpaces'
 import { useHotcorner } from './hooks/useHotcorner'
 import { useMonitors } from './hooks/useMonitors'
-import { AmbientBackground } from './components/AmbientBackground'
-import { Dock } from './dock/Dock'
+// Layer Dock is parked — not shipped in current updates. Code kept in src/dock
+// and the Settings → Notch tab is hidden. Re-enable when it's ready.
+// import { Dock } from './dock/Dock'
 import { useSettingsStore } from './store/settingsStore'
 
 export default function App() {
@@ -39,6 +41,7 @@ export default function App() {
   useGalleryNotifications()
   useBatteryNotifications()
   useCalendarReminders()
+  useCalendarSources()
   useClipboardWatcher()
   useScreensaver()
   useWallpaperAccent()
@@ -47,17 +50,14 @@ export default function App() {
   useMonitors()
 
   const onboarded = useSettingsStore((s) => s.onboarded)
-  const dockEnabled = useSettingsStore((s) => s.notchEnabled)
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      <AmbientBackground />
       <Canvas />
       <TopIsland />
       <CommandPalette />
       <QuickCaptureModal />
       <Toast />
-      {dockEnabled && <Dock />}
       {!onboarded && <Onboarding />}
     </div>
   )

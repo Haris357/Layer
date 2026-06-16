@@ -32,6 +32,28 @@ stages it with the tile logos + manifest, generates `resources.pri`, and packs
 `src-tauri/msix/out/Layer.msix`. Upload that file to Partner Center **unsigned**
 — Microsoft signs it.
 
+### ARM64 (native, no emulation)
+
+Build a native ARM64 package too so Snapdragon/Surface users don't run under x64
+emulation (a battery/perf hit). One-time setup:
+
+```powershell
+rustup target add aarch64-pc-windows-msvc
+```
+
+…and install **"MSVC v143 - VS C++ ARM64 build tools"** (VS Installer →
+Individual components). Then:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/build-msix.ps1 -Build -Arm64
+```
+
+That cross-compiles for `aarch64-pc-windows-msvc` and packs
+`src-tauri/msix/out/Layer-arm64.msix` (manifest `ProcessorArchitecture=arm64`).
+**Submit BOTH** `Layer.msix` and `Layer-arm64.msix` in the **same** Partner
+Center submission — the Store gives each device the matching architecture (ARM64
+to ARM PCs, x64 to everyone else).
+
 > Bump `version` in `tauri.conf.json` before each Store submission (it becomes
 > the 4-part MSIX version, e.g. `1.4.4` → `1.4.4.0`). The Store rejects a
 > version that isn't higher than the last published one.

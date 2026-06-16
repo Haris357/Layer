@@ -95,6 +95,8 @@ const KNOWN_TYPES: ReadonlySet<string> = new Set([
   'diskinfo',
   'greeting',
   'shelf',
+  'audio',
+  'board',
 ])
 function pruneUnknown(widgets: Widget[]): Widget[] {
   return widgets.filter((w) => KNOWN_TYPES.has(w.type))

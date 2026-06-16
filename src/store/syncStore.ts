@@ -204,9 +204,15 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         set({ status: 'idle' })
         return
       }
-      const { spaces } = useCanvasStore.getState()
+      const { spaces, activeId } = useCanvasStore.getState()
       const merged = mergeRestore(remote.spaces, spaces)
-      useCanvasStore.getState().hydrateSpaces(merged.spaces, merged.activeId)
+      // Keep the space the user is currently on if it still exists after the
+      // merge — otherwise a cloud restore (e.g. another device synced) would
+      // silently switch their active space out from under them.
+      const keepActive = merged.spaces.some((s) => s.id === activeId)
+        ? activeId
+        : merged.activeId
+      useCanvasStore.getState().hydrateSpaces(merged.spaces, keepActive)
       const now = new Date().toISOString()
       useSettingsStore.getState().setLastSyncedAt(now)
       set({ status: 'idle', lastSyncedAt: now })

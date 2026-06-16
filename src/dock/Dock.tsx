@@ -96,9 +96,6 @@ export function Dock() {
               className="pointer-events-auto my-auto flex max-h-[88vh] w-[260px] flex-col overflow-hidden rounded-[22px] border border-[var(--border)] p-4 text-[var(--text-primary)]"
               style={{
                 background: 'var(--surface)',
-                backdropFilter: 'blur(40px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                boxShadow: '0 26px 70px -18px rgba(0,0,0,0.55)',
               }}
             >
               <div className="mb-3 flex items-center justify-between">
@@ -128,12 +125,9 @@ export function Dock() {
             height: open ? 'auto' : 150,
             minHeight: open ? 360 : undefined,
             background: 'var(--surface)',
-            backdropFilter: 'blur(44px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(44px) saturate(180%)',
             border: '1px solid var(--border)',
             borderRight: 'none',
             borderRadius: '20px 0 0 20px',
-            boxShadow: '-16px 0 50px -12px rgba(0,0,0,0.5)',
           }}
         >
           <AnimatePresence initial={false} mode="wait">

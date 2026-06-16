@@ -124,7 +124,6 @@ export function Menu<T extends string | number>({
                 : { top: rect.bottom + 4 }),
               maxHeight: POP_MAX,
               zIndex: 10050,
-              boxShadow: '0 12px 32px -10px rgba(0, 0, 0, 0.5)',
             }}
             className="overflow-y-auto rounded-[10px] border border-[var(--border)] bg-[var(--surface)] p-1"
           >

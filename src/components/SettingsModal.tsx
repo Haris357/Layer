@@ -35,6 +35,13 @@ import { SyncTab } from './SyncTab'
 import { useNotchStore, type NotchModuleId } from '../notch/notchStore'
 import { IS_STORE } from '../lib/dist'
 
+// ☕ Support link — shown only in the direct-download build (the Microsoft Store
+// rejects external donation/payment links).
+// Flip SUPPORT_ENABLED to true once the GitHub Sponsors page is approved and
+// live; until then the button is hidden so users never hit a 404.
+const SUPPORT_ENABLED = false
+const SUPPORT_URL = 'https://github.com/sponsors/Haris357'
+
 const NOTCH_MODULE_LABELS: Record<NotchModuleId, string> = {
   nowplaying: 'Now Playing',
   shortcuts: 'Shortcuts',
@@ -113,7 +120,6 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const screensaverTheme = useSettingsStore((s) => s.screensaverTheme)
   const setScreensaverTheme = useSettingsStore((s) => s.setScreensaverTheme)
   const wallpaperAccent = useSettingsStore((s) => s.wallpaperAccent)
-  const ambientEffects = useSettingsStore((s) => s.ambientEffects)
   const hotCorner = useSettingsStore((s) => s.hotCorner)
   const setGridSize = useSettingsStore((s) => s.setGridSize)
   const setSnapEnabled = useSettingsStore((s) => s.setSnapEnabled)
@@ -121,7 +127,6 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const setTheme = useSettingsStore((s) => s.setTheme)
   const setScreensaverEnabled = useSettingsStore((s) => s.setScreensaverEnabled)
   const setWallpaperAccent = useSettingsStore((s) => s.setWallpaperAccent)
-  const setAmbientEffects = useSettingsStore((s) => s.setAmbientEffects)
   const setHotCorner = useSettingsStore((s) => s.setHotCorner)
   const wallpaperLoading = useThemeStatus((s) => s.wallpaperLoading)
   const resetSpace = useCanvasStore((s) => s.resetSpace)
@@ -409,9 +414,6 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   />
                 </div>
               </FieldRow>
-              <FieldRow label="Ambient background & weather">
-                <Toggle checked={ambientEffects} onChange={setAmbientEffects} />
-              </FieldRow>
 
               {monitors.length > 1 && (
                 <div className="flex flex-col gap-2">
@@ -634,6 +636,15 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 >
                   GitHub
                 </button>
+                {!IS_STORE && SUPPORT_ENABLED && (
+                  <button
+                    type="button"
+                    onClick={() => openUrl(SUPPORT_URL).catch(() => {})}
+                    className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
+                  >
+                    ☕ Support Layer
+                  </button>
+                )}
               </div>
 
               <button

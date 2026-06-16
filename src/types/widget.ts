@@ -25,6 +25,7 @@ export type WidgetType =
   | 'greeting'
   | 'shelf'
   | 'audio'
+  | 'board'
 
 export type Mode = 'edit' | 'view'
 
@@ -125,6 +126,8 @@ export interface WeatherWidget extends BaseWidget {
   city: string
   lat: number
   lon: number
+  // Temperature/wind units: 'c' = °C + km/h, 'f' = °F + mph. Default 'c'.
+  unit?: 'c' | 'f'
 }
 
 export interface StatsWidget extends BaseWidget {
@@ -179,11 +182,15 @@ export interface AppsWidget extends BaseWidget {
 
 export interface SearchWidget extends BaseWidget {
   type: 'search'
-  engine: 'google' | 'bing' | 'duckduckgo'
+  engine: 'google' | 'bing' | 'duckduckgo' | 'custom'
+  // For engine === 'custom': a URL template; `%s` is replaced with the query.
+  customUrl?: string
 }
 
 export interface NowPlayingWidget extends BaseWidget {
   type: 'nowplaying'
+  // Blur the album art behind the player with a matching color wash (default on).
+  artBackground?: boolean
 }
 
 export interface NotificationsWidget extends BaseWidget {
@@ -248,6 +255,8 @@ export interface WebEmbedWidget extends BaseWidget {
 
 export interface DiskInfoWidget extends BaseWidget {
   type: 'diskinfo'
+  // Which disk to show (mount/name from getDisks). Default = first disk.
+  disk?: string
 }
 
 export type GreetingStyle =
@@ -279,6 +288,30 @@ export interface AudioWidget extends BaseWidget {
   background: boolean
 }
 
+export interface BoardCard {
+  id: string
+  x: number
+  y: number
+  w: number
+  h: number
+  text: string
+  color: StickyColor
+}
+
+export interface BoardConnection {
+  id: string
+  from: string // card id
+  to: string // card id
+}
+
+export interface BoardWidget extends BaseWidget {
+  type: 'board'
+  cards: BoardCard[]
+  connections: BoardConnection[]
+  panX?: number
+  panY?: number
+}
+
 export type Widget =
   | NoteWidget
   | LinkWidget
@@ -306,6 +339,7 @@ export type Widget =
   | GreetingWidget
   | ShelfWidget
   | AudioWidget
+  | BoardWidget
 
 export type NewWidget = Omit<Widget, 'id' | 'zIndex'>
 

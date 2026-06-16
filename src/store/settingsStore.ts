@@ -14,7 +14,6 @@ interface SettingsState {
   screensaverEnabled: boolean
   screensaverTheme: ScreensaverTheme
   wallpaperAccent: boolean
-  ambientEffects: boolean
   hotCorner: boolean
   // Which monitor the pill + modals anchor to. -1 = auto (primary monitor).
   uiMonitor: number
@@ -39,7 +38,6 @@ interface SettingsState {
   setScreensaverEnabled: (value: boolean) => void
   setScreensaverTheme: (value: ScreensaverTheme) => void
   setWallpaperAccent: (value: boolean) => void
-  setAmbientEffects: (value: boolean) => void
   setHotCorner: (value: boolean) => void
   setUiMonitor: (value: number) => void
   setOnboarded: (value: boolean) => void
@@ -65,7 +63,6 @@ export const useSettingsStore = create<SettingsState>()(
       screensaverEnabled: true,
       screensaverTheme: 'ambient',
       wallpaperAccent: false,
-      ambientEffects: false,
       hotCorner: false,
       uiMonitor: -1,
       onboarded: false,
@@ -87,7 +84,6 @@ export const useSettingsStore = create<SettingsState>()(
         set({ screensaverEnabled }),
       setScreensaverTheme: (screensaverTheme) => set({ screensaverTheme }),
       setWallpaperAccent: (wallpaperAccent) => set({ wallpaperAccent }),
-      setAmbientEffects: (ambientEffects) => set({ ambientEffects }),
       setHotCorner: (hotCorner) => set({ hotCorner }),
       setUiMonitor: (uiMonitor) => set({ uiMonitor }),
       setOnboarded: (onboarded) => set({ onboarded }),

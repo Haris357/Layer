@@ -27,6 +27,7 @@ import { diskInfoDefinition } from '../components/widgets/DiskInfoWidget'
 import { greetingDefinition } from '../components/widgets/GreetingWidget'
 import { shelfDefinition } from '../components/widgets/ShelfWidget'
 import { audioDefinition } from '../components/widgets/AudioWidget'
+import { boardDefinition } from '../components/widgets/BoardWidget'
 
 export interface WidgetSize {
   width: number
@@ -92,11 +93,13 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   greeting: greetingDefinition as WidgetDefinition,
   shelf: shelfDefinition as WidgetDefinition,
   audio: audioDefinition as WidgetDefinition,
+  board: boardDefinition as WidgetDefinition,
 }
 
 export const widgetOrder: WidgetType[] = [
   'note',
   'sticky',
+  'board',
   'shelf',
   'greeting',
   'inbox',

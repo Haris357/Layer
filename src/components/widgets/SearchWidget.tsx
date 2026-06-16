@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { Search } from 'lucide-react'
 import type { SearchWidget as SearchWidgetType } from '../../types/widget'
 import { openUrl } from '../../lib/ipc'
-import { Segmented } from '../ui'
+import { Segmented, TextField } from '../ui'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
-const ENGINES: Record<SearchWidgetType['engine'], string> = {
+const ENGINES: Record<'google' | 'bing' | 'duckduckgo', string> = {
   google: 'https://www.google.com/search?q=',
   bing: 'https://www.bing.com/search?q=',
   duckduckgo: 'https://duckduckgo.com/?q=',
@@ -17,7 +17,18 @@ function SearchRenderer({ widget }: { widget: SearchWidgetType }) {
   const go = () => {
     const q = query.trim()
     if (!q) return
-    openUrl(ENGINES[widget.engine] + encodeURIComponent(q)).catch(() => {})
+    const encoded = encodeURIComponent(q)
+    let url: string
+    if (widget.engine === 'custom') {
+      const tmpl = widget.customUrl?.trim()
+      if (!tmpl) return
+      url = tmpl.includes('%s')
+        ? tmpl.replaceAll('%s', encoded)
+        : tmpl + encoded
+    } else {
+      url = ENGINES[widget.engine] + encoded
+    }
+    openUrl(url).catch(() => {})
     setQuery('')
   }
 
@@ -53,18 +64,26 @@ function SearchSettings({
   onUpdate: (patch: Partial<SearchWidgetType>) => void
 }) {
   return (
-    <div className="w-[210px]">
+    <div className="flex w-[256px] flex-col gap-2.5">
       <Segmented
         value={widget.engine}
         options={[
           { value: 'google', label: 'Google' },
           { value: 'bing', label: 'Bing' },
-          { value: 'duckduckgo', label: 'DuckDuckGo' },
+          { value: 'duckduckgo', label: 'DDG' },
+          { value: 'custom', label: 'Custom' },
         ]}
         onChange={(v) =>
           onUpdate({ engine: v as SearchWidgetType['engine'] })
         }
       />
+      {widget.engine === 'custom' && (
+        <TextField
+          value={widget.customUrl ?? ''}
+          placeholder="https://example.com/search?q=%s"
+          onChange={(v) => onUpdate({ customUrl: v })}
+        />
+      )}
     </div>
   )
 }

@@ -665,6 +665,32 @@ where
     rx.recv_timeout(std::time::Duration::from_millis(ms)).ok()?.ok()
 }
 
+// Like await_op, but polls the operation's status on the CALLING thread instead
+// of routing the result through a completion handler + channel. Needed for
+// non-agile (non-Send) results — e.g. media streams — which can't be moved
+// across threads. Sleeps between polls (never a blocking `.get()`), so a stuck
+// op just times out.
+#[cfg(target_os = "windows")]
+fn poll_op<T: windows::core::RuntimeType>(
+    op: windows::Foundation::IAsyncOperation<T>,
+    ms: u64,
+) -> Option<T> {
+    use windows::Foundation::AsyncStatus;
+    let start = std::time::Instant::now();
+    loop {
+        match op.Status() {
+            Ok(AsyncStatus::Completed) => return op.GetResults().ok(),
+            Ok(AsyncStatus::Started) => {
+                if start.elapsed() >= std::time::Duration::from_millis(ms) {
+                    return None;
+                }
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
+            _ => return None,
+        }
+    }
+}
+
 // The system's current coordinates via the Windows Geolocator, when location
 // access is enabled. Runs on a worker thread with a timeout so it can never
 // hang the app if the location service is slow or blocked. Returns [lat, lon].
@@ -703,6 +729,13 @@ pub struct NowPlaying {
     title: String,
     artist: String,
     playing: bool,
+    // Album/track art from the media session, as a `data:` URL. Empty if none.
+    thumb: String,
+    // Source app id (e.g. "Spotify.exe" / a Store AUMID / "msedge.exe").
+    source: String,
+    // Playback position + track length in seconds (0 when the app reports none).
+    position: f64,
+    duration: f64,
 }
 
 // ── Now Playing via a long-lived SMTC worker ────────────────────────────────
@@ -761,6 +794,12 @@ fn media_thread(
     // of staying dead until an app restart.
     let mut mgr: Option<Mgr> = None;
     let mut fails = 0u32;
+    // Cache the decoded album art keyed by "title|artist" so we only read the
+    // thumbnail stream when the track actually changes (read_session runs ~1×/s).
+    let mut thumb_cache: (String, String) = (String::new(), String::new());
+    // When a command was applied at the bottom of the previous iteration, skip
+    // the album-art read on the next snapshot so back-to-back presses stay fast.
+    let mut skip_thumb_next = false;
     loop {
         if mgr.is_none() {
             mgr = Mgr::RequestAsync().ok().and_then(|op| await_op(op, 4000));
@@ -779,12 +818,16 @@ fn media_thread(
             Some(m) => m,
             None => continue,
         };
-        match rx.recv_timeout(Duration::from_millis(1000)) {
-            Ok(cmd) => apply(m, cmd),
-            Err(RecvTimeoutError::Timeout) => {}
-            Err(RecvTimeoutError::Disconnected) => break,
+        // Apply any queued commands FIRST so a button press never waits behind
+        // a snapshot read (album-art reads can be slow). `did_cmd` makes the
+        // following snapshot skip the slower art read so playback stays snappy.
+        let mut did_cmd = skip_thumb_next;
+        skip_thumb_next = false;
+        while let Ok(cmd) = rx.try_recv() {
+            apply(m, cmd);
+            did_cmd = true;
         }
-        match read_session(m) {
+        match read_session(m, &mut thumb_cache, did_cmd) {
             Ok(snap) => {
                 fails = 0;
                 if let Ok(mut g) = np.lock() {
@@ -800,12 +843,27 @@ fn media_thread(
                 }
             }
         }
+        // Idle until the next command (wakes instantly when one is sent) or a
+        // ~0.8s refresh tick. A command applied here skips the next art read so
+        // back-to-back presses stay responsive.
+        match rx.recv_timeout(Duration::from_millis(800)) {
+            Ok(cmd) => {
+                if let Some(m2) = mgr.as_ref() {
+                    apply(m2, cmd);
+                    skip_thumb_next = true;
+                }
+            }
+            Err(RecvTimeoutError::Timeout) => {}
+            Err(RecvTimeoutError::Disconnected) => break,
+        }
     }
 }
 
 #[cfg(target_os = "windows")]
 fn read_session(
     mgr: &windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager,
+    thumb_cache: &mut (String, String),
+    skip_thumb: bool,
 ) -> windows::core::Result<NowPlaying> {
     use windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus as Status;
 
@@ -826,7 +884,10 @@ fn read_session(
         None => match mgr.GetCurrentSession() {
             Ok(s) => s,
             Err(_) if !sessions.is_empty() => sessions.swap_remove(0),
-            Err(e) => return Err(e),
+            // No sessions at all → every media app is closed. Report "nothing
+            // playing" (not an error) so the widget clears instead of holding
+            // the last track.
+            Err(_) => return Ok(NowPlaying::default()),
         },
     };
 
@@ -834,9 +895,11 @@ fn read_session(
         has_session: true,
         ..Default::default()
     };
+    let mut props_opt = None;
     if let Some(props) = await_op(session.TryGetMediaPropertiesAsync()?, 1500) {
         np.title = props.Title().map(|s| s.to_string()).unwrap_or_default();
         np.artist = props.Artist().map(|s| s.to_string()).unwrap_or_default();
+        props_opt = Some(props);
     }
     if let Ok(info) = session.GetPlaybackInfo() {
         np.playing = info
@@ -844,7 +907,60 @@ fn read_session(
             .map(|s| s == Status::Playing)
             .unwrap_or(false);
     }
+    if let Ok(src) = session.SourceAppUserModelId() {
+        np.source = src.to_string();
+    }
+    // Timeline (seconds). SMTC reports TimeSpan in 100ns ticks.
+    if let Ok(tl) = session.GetTimelineProperties() {
+        if let Ok(p) = tl.Position() {
+            np.position = p.Duration as f64 / 10_000_000.0;
+        }
+        if let Ok(e) = tl.EndTime() {
+            np.duration = e.Duration as f64 / 10_000_000.0;
+        }
+    }
+    // Album art: only re-read the thumbnail stream when the track changes.
+    let key = format!("{}|{}", np.title, np.artist);
+    if !skip_thumb && key != thumb_cache.0 {
+        thumb_cache.0 = key;
+        thumb_cache.1 = props_opt
+            .as_ref()
+            .and_then(read_thumb)
+            .unwrap_or_default();
+    }
+    np.thumb = thumb_cache.1.clone();
     Ok(np)
+}
+
+// Read the media session's thumbnail into a `data:` URL. Bounded by await_op
+// timeouts so a stuck media service can never hang the worker.
+#[cfg(target_os = "windows")]
+fn read_thumb(
+    props: &windows::Media::Control::GlobalSystemMediaTransportControlsSessionMediaProperties,
+) -> Option<String> {
+    use base64::Engine;
+    use windows::Storage::Streams::DataReader;
+
+    let thumb_ref = props.Thumbnail().ok()?;
+    let stream = poll_op(thumb_ref.OpenReadAsync().ok()?, 700)?;
+    let size = stream.Size().ok()?;
+    // Skip empty or implausibly large art (defensive).
+    if size == 0 || size > 8_000_000 {
+        return None;
+    }
+    let input = stream.GetInputStreamAt(0).ok()?;
+    let reader = DataReader::CreateDataReader(&input).ok()?;
+    let loaded = poll_op(reader.LoadAsync(size as u32).ok()?, 700)?;
+    let mut buf = vec![0u8; loaded as usize];
+    reader.ReadBytes(&mut buf).ok()?;
+    let mime = stream
+        .ContentType()
+        .ok()
+        .map(|h| h.to_string())
+        .filter(|s| s.starts_with("image/"))
+        .unwrap_or_else(|| "image/jpeg".into());
+    let b64 = base64::engine::general_purpose::STANDARD.encode(&buf);
+    Some(format!("data:{};base64,{}", mime, b64))
 }
 
 #[cfg(target_os = "windows")]
@@ -1305,7 +1421,7 @@ pub struct ShelfFile {
     name: String,
     path: String,
     size: u64,
-    kind: String, // "image" | "video" | "audio" | "file"
+    kind: String, // "image" | "video" | "audio" | "file" | "folder"
 }
 
 #[cfg(target_os = "windows")]
@@ -1333,6 +1449,15 @@ pub async fn shelf_import(
             .and_then(|s| s.to_str())
             .unwrap_or("file")
             .to_string();
+        // Folders are referenced in place (not copied into the shelf folder).
+        if source.is_dir() {
+            return Ok(ShelfFile {
+                name: orig,
+                path: source_path.clone(),
+                size: 0,
+                kind: "folder".to_string(),
+            });
+        }
         let ext = source
             .extension()
             .and_then(|s| s.to_str())
@@ -1366,10 +1491,12 @@ pub async fn shelf_import(
 pub fn shelf_remove(app: AppHandle, path: String) -> Result<(), String> {
     let dir = storage::shelf_dir(&app)?;
     let target = Path::new(&path);
+    // Folders are referenced in place (outside the shelf folder); removing the
+    // shelf entry must not touch the real directory — just no-op here.
     if !target.starts_with(&dir) {
-        return Err("refused: not a shelf file".into());
+        return Ok(());
     }
-    if target.exists() {
+    if target.is_file() {
         std::fs::remove_file(target).map_err(|e| e.to_string())?;
     }
     Ok(())

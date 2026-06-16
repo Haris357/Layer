@@ -1,7 +1,7 @@
 name: Release
 
-# Push a version tag to build the installer and publish it to the public
-# Layer-releases repo, where the app's auto-updater picks it up.
+# Push a version tag to build the installers and publish them to the public
+# Layer-releases repo, where the app's auto-updater picks them up.
 #   npm version patch   (or: edit versions, then `git tag v1.2.0`)
 #   git push --follow-tags
 
@@ -11,7 +11,48 @@ on:
       - 'v*'
 
 jobs:
+  # Native ARM64 build on an ARM Windows runner. Allowed to fail: if the runner
+  # is unavailable or the build breaks, the x64 release below still ships (it
+  # just won't include the ARM64 artifact this time).
+  build-arm64:
+    runs-on: windows-11-arm
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: arm64
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Layer (signed, ARM64)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npm run tauri build
+
+      - name: Upload ARM64 installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm64-installer
+          path: src-tauri/target/release/bundle/nsis/*-setup.exe*
+          if-no-files-found: error
+
   release:
+    needs: build-arm64
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -61,8 +102,17 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: npm run tauri build
 
+      # Pull the ARM64 installer from the build-arm64 job. Best effort — if that
+      # job failed/was skipped, the release continues x64-only.
+      - name: Download ARM64 installer
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: arm64-installer
+          path: arm64-dist
+
       - name: Generate update manifest
-        run: node scripts/make-latest-json.mjs ${{ github.ref_name }}
+        run: node scripts/make-latest-json.mjs ${{ github.ref_name }} arm64-dist
 
       - name: Publish release to Layer-releases
         env:
@@ -73,10 +123,23 @@ jobs:
             Select-Object -First 1
           # Stable-named copy so the website can always link to the latest build.
           Copy-Item $exe.FullName "Layer-Setup.exe"
-          gh release create ${{ github.ref_name }} `
-            "$($exe.FullName)#Layer installer (versioned)" `
-            "Layer-Setup.exe#Layer installer" `
-            "latest.json" `
+          $assets = @(
+            "$($exe.FullName)#Layer installer x64 (versioned)",
+            "Layer-Setup.exe#Layer installer",
+            "latest.json"
+          )
+          # Include the ARM64 installer if the ARM job produced one.
+          $arm = Get-ChildItem arm64-dist/*-setup.exe -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if ($arm) {
+            Copy-Item $arm.FullName "Layer-Setup-arm64.exe"
+            $assets += "$($arm.FullName)#Layer installer ARM64 (versioned)"
+            $assets += "Layer-Setup-arm64.exe#Layer installer (ARM64)"
+            Write-Host "Including ARM64 installer: $($arm.Name)"
+          } else {
+            Write-Host "No ARM64 installer this run — publishing x64 only."
+          }
+          gh release create ${{ github.ref_name }} @assets `
             --repo Haris357/Layer-releases `
             --title "Layer ${{ github.ref_name }}" `
             --notes-file notes.md

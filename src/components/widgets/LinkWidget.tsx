@@ -1,25 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Link as LinkIcon,
-  Globe,
-  Github,
-  Twitter,
-  Youtube,
-  Instagram,
-  Linkedin,
-  Facebook,
-  Twitch,
-  Figma,
-  Slack,
-  Mail,
-  Music,
-  Image as ImageIcon,
-  FileText,
-  Folder,
-  Calendar,
-  ShoppingCart,
-  BookOpen,
-  Code,
+  icons as LUCIDE,
   type LucideIcon,
 } from 'lucide-react'
 import type { LinkWidget as LinkWidgetType } from '../../types/widget'
@@ -29,44 +11,23 @@ import { Tooltip } from '../Tooltip'
 import { cn } from '../../lib/utils'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
-const ICONS: Record<string, LucideIcon> = {
-  Link: LinkIcon,
-  Globe,
-  Github,
-  Twitter,
-  Youtube,
-  Instagram,
-  Linkedin,
-  Facebook,
-  Twitch,
-  Figma,
-  Slack,
-  Mail,
-  Music,
-  Image: ImageIcon,
-  FileText,
-  Folder,
-  Calendar,
-  ShoppingCart,
-  BookOpen,
-  Code,
-}
+const ICON_MAP = LUCIDE as unknown as Record<string, LucideIcon>
 
 function resolveIcon(key: string): LucideIcon {
-  return ICONS[key] ?? LinkIcon
+  return ICON_MAP[key] ?? LinkIcon
 }
 
 export function normalizeUrl(input: string): string | null {
   const trimmed = input.trim()
   if (!trimmed) return null
-  const withProtocol = /^https?:\/\//i.test(trimmed)
-    ? trimmed
-    : `https://${trimmed}`
-  if (/\s/.test(withProtocol)) return null
+  if (/\s/.test(trimmed)) return null
+  const hasScheme =
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ||
+    /^mailto:/i.test(trimmed) ||
+    /^tel:/i.test(trimmed)
+  const candidate = hasScheme ? trimmed : `https://${trimmed}`
   try {
-    const url = new URL(withProtocol)
-    if (!url.hostname.includes('.')) return null
-    return url.toString()
+    return new URL(candidate).toString()
   } catch {
     return null
   }
@@ -123,6 +84,19 @@ function LinkSettings({
 }) {
   const [draft, setDraft] = useState(widget.url)
   const [error, setError] = useState('')
+  const [iconQuery, setIconQuery] = useState('')
+
+  const iconNames = useMemo(() => {
+    const q = iconQuery.trim().toLowerCase()
+    const all = Object.keys(ICON_MAP)
+    const matched = (
+      q ? all.filter((n) => n.toLowerCase().includes(q)) : all
+    ).slice(0, 90)
+    if (widget.iconKey && !matched.includes(widget.iconKey)) {
+      matched.unshift(widget.iconKey)
+    }
+    return matched
+  }, [iconQuery, widget.iconKey])
 
   const commitUrl = () => {
     if (draft.trim() === '') {
@@ -164,23 +138,31 @@ function LinkSettings({
         maxLength={30}
         onChange={(v) => onUpdate({ label: v })}
       />
-      <div className="grid grid-cols-7 gap-1">
-        {Object.entries(ICONS).map(([key, Icon]) => (
-          <Tooltip key={key} label={key} side="top">
-            <button
-              type="button"
-              onClick={() => onUpdate({ iconKey: key })}
-              className={cn(
-                'flex items-center justify-center rounded-[6px] p-1.5 transition-colors',
-                widget.iconKey === key
-                  ? 'bg-[var(--accent)] text-[var(--on-accent)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--fill-2)]',
-              )}
-            >
-              <Icon size={16} strokeWidth={1.5} />
-            </button>
-          </Tooltip>
-        ))}
+      <TextField
+        value={iconQuery}
+        placeholder="Search icons…"
+        onChange={setIconQuery}
+      />
+      <div className="grid max-h-[168px] grid-cols-7 gap-1 overflow-y-auto">
+        {iconNames.map((key) => {
+          const Icon = resolveIcon(key)
+          return (
+            <Tooltip key={key} label={key} side="top">
+              <button
+                type="button"
+                onClick={() => onUpdate({ iconKey: key })}
+                className={cn(
+                  'flex items-center justify-center rounded-[6px] p-1.5 transition-colors',
+                  widget.iconKey === key
+                    ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--fill-2)]',
+                )}
+              >
+                <Icon size={16} strokeWidth={1.5} />
+              </button>
+            </Tooltip>
+          )
+        })}
       </div>
     </div>
   )

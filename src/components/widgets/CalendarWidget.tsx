@@ -32,6 +32,17 @@ import { cn } from '../../lib/utils'
 import { Menu } from '../Menu'
 import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
+import { useCalendarSourcesStore } from '../../store/calendarSourcesStore'
+
+// Local events + read-only subscription events, merged for display.
+function useAllEvents(): CalendarEvent[] {
+  const events = useEventsStore((s) => s.events)
+  const external = useEventsStore((s) => s.externalEvents)
+  return useMemo(
+    () => (external.length ? [...events, ...external] : events),
+    [events, external],
+  )
+}
 
 type ViewKind = 'month' | 'week' | 'day'
 
@@ -323,7 +334,7 @@ function DayPopover({
   onNew: () => void
   onEdit: (e: CalendarEvent) => void
 }) {
-  const events = useEventsStore((s) => s.events)
+  const events = useAllEvents()
   const list = eventsOnDay(events, date)
   return createPortal(
     <div
@@ -446,6 +457,60 @@ function EventEditor({
     isEditing ? initial.recurrence : 'none',
   )
   const [until, setUntil] = useState(isEditing ? initial.until || '' : '')
+
+  // Subscription events are read-only — show details, no editing.
+  const isReadOnly = isEditing && !!(initial as CalendarEvent).readOnly
+  if (isReadOnly) {
+    const ev = initial as CalendarEvent
+    const when = ev.allDay
+      ? 'All day'
+      : new Date(ev.start).toLocaleString([], {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })
+    return createPortal(
+      <div
+        data-hit
+        className="fixed inset-0 z-[10001] flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.45)' }}
+        onMouseDown={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="glass flex w-[360px] flex-col gap-2 rounded-[16px] border border-[var(--border)] p-5"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <h2
+              className="text-[var(--text-primary)]"
+              style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.5px' }}
+            >
+              {ev.title}
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="text-[12.5px] text-[var(--text-secondary)]">{when}</div>
+          {ev.note && (
+            <p className="whitespace-pre-wrap text-[12.5px] text-[var(--text-secondary)]">
+              {ev.note}
+            </p>
+          )}
+          <div className="mt-1 text-[11px] text-[var(--text-tertiary)]">
+            From a subscribed calendar · read-only
+          </div>
+        </motion.div>
+      </div>,
+      document.body,
+    )
+  }
 
   const save = () => {
     const cleanTitle = title.trim() || 'Untitled'
@@ -625,7 +690,7 @@ function EventEditor({
 // ─── Main renderer ──────────────────────────────────────────────────────────
 
 function CalendarRenderer() {
-  const events = useEventsStore((s) => s.events)
+  const events = useAllEvents()
   const today = useMemo(() => startOfDay(new Date()), [])
   const [view, setView] = useState<ViewKind>('month')
   const [cursor, setCursor] = useState<Date>(today)
@@ -780,6 +845,138 @@ function CalendarRenderer() {
   )
 }
 
+// Manage external calendar subscriptions (.ics URLs). Shown in the widget's
+// settings popover. Sources are global (shared across calendar widgets).
+function CalendarSettings() {
+  const sources = useCalendarSourcesStore((s) => s.sources)
+  const addSource = useCalendarSourcesStore((s) => s.addSource)
+  const updateSource = useCalendarSourcesStore((s) => s.updateSource)
+  const removeSource = useCalendarSourcesStore((s) => s.removeSource)
+  const setExt = useEventsStore((s) => s.setExternalEventsForSource)
+  const [url, setUrl] = useState('')
+  const [label, setLabel] = useState('')
+  const [color, setColor] = useState<EventColor>('violet')
+  const [err, setErr] = useState('')
+
+  const input =
+    'rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[12.5px] text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)]'
+
+  const add = () => {
+    const u = url.trim()
+    if (!/^(https?|webcal):\/\//i.test(u)) {
+      setErr('Paste an https:// or webcal:// .ics link')
+      return
+    }
+    addSource({ label: label.trim() || 'Calendar', url: u, color, enabled: true })
+    setUrl('')
+    setLabel('')
+    setErr('')
+  }
+
+  return (
+    <div className="flex w-[284px] flex-col gap-3">
+      <div className="text-[12px] font-semibold text-[var(--text-secondary)]">
+        Subscribed calendars
+      </div>
+      {sources.length === 0 && (
+        <div className="text-[11.5px] leading-relaxed text-[var(--text-tertiary)]">
+          Paste an iCal/.ics link below. Google: Settings → “Secret address in
+          iCal format”. Proton/Outlook: the calendar’s share link.
+        </div>
+      )}
+      {sources.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          {sources.map((s) => (
+            <div
+              key={s.id}
+              className="flex items-center gap-2 rounded-[8px] bg-[var(--fill-1)] px-2 py-1.5"
+            >
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: COLORS[s.color] }}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[12px] text-[var(--text-primary)]">
+                  {s.label}
+                </div>
+                {s.lastError ? (
+                  <div className="truncate text-[10px] text-[var(--danger)]">
+                    Couldn’t load
+                  </div>
+                ) : s.lastFetched ? (
+                  <div className="truncate text-[10px] text-[var(--text-tertiary)]">
+                    Synced
+                  </div>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={() => updateSource(s.id, { enabled: !s.enabled })}
+                className={cn(
+                  'rounded-[6px] px-1.5 py-0.5 text-[10px] font-medium',
+                  s.enabled
+                    ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                    : 'bg-[var(--fill-2)] text-[var(--text-tertiary)]',
+                )}
+              >
+                {s.enabled ? 'On' : 'Off'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  removeSource(s.id)
+                  setExt(s.id, [])
+                }}
+                className="text-[var(--text-tertiary)] hover:text-[var(--danger)]"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex flex-col gap-1.5 border-t border-[var(--border)] pt-2.5">
+        <input
+          className={input}
+          placeholder="Name (e.g. Work)"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+        />
+        <input
+          className={input}
+          placeholder="https://…/basic.ics"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+        <div className="flex items-center gap-1.5">
+          {COLOR_OPTIONS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setColor(c)}
+              className={cn(
+                'h-5 w-5 rounded-full transition-transform',
+                color === c
+                  ? 'ring-2 ring-[var(--text-primary)] ring-offset-1 ring-offset-[var(--surface)]'
+                  : 'hover:scale-110',
+              )}
+              style={{ background: COLORS[c] }}
+            />
+          ))}
+          <button
+            type="button"
+            onClick={add}
+            className="ml-auto rounded-[8px] bg-[var(--accent)] px-3 py-1.5 text-[12px] font-medium text-[var(--on-accent)]"
+          >
+            Add
+          </button>
+        </div>
+        {err && <span className="text-[11px] text-[var(--danger)]">{err}</span>}
+      </div>
+    </div>
+  )
+}
+
 export const calendarDefinition: WidgetDefinition<CalendarWidgetType> = {
   type: 'calendar',
   label: 'Calendar',
@@ -796,4 +993,5 @@ export const calendarDefinition: WidgetDefinition<CalendarWidgetType> = {
     locked: false,
   }),
   Renderer: CalendarRenderer,
+  Settings: CalendarSettings,
 }

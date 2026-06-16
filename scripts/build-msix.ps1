@@ -15,8 +15,17 @@
 #>
 param(
   [switch]$Build,
-  [switch]$SelfSign
+  [switch]$SelfSign,
+  [switch]$Arm64
 )
+
+# Architecture: x64 (default) or arm64. ARM64 needs the Rust target
+# (`rustup target add aarch64-pc-windows-msvc`) and the VS "MSVC ARM64 build
+# tools" component installed. Output is Layer.msix / Layer-arm64.msix — submit
+# BOTH to the same Partner Center submission so each device gets a native build.
+$arch = if ($Arm64) { 'arm64' } else { 'x64' }
+$rustTarget = if ($Arm64) { 'aarch64-pc-windows-msvc' } else { $null }
+$pkgName = if ($Arm64) { 'Layer-arm64.msix' } else { 'Layer.msix' }
 
 $ErrorActionPreference = 'Stop'
 $root   = Split-Path -Parent $PSScriptRoot          # layer-desktop
@@ -46,19 +55,29 @@ if ($id.identityName -like 'REPLACE*' -or $id.publisher -like '*REPLACE*') {
 }
 $conf = Get-Content (Join-Path $tauri 'tauri.conf.json') -Raw | ConvertFrom-Json
 $ver4 = "$($conf.version).0"   # 1.4.3 -> 1.4.3.0 (MSIX needs 4 parts)
-Write-Host "Packaging Layer $ver4  (identity: $($id.identityName))"
+Write-Host "Packaging Layer $ver4  ($arch, identity: $($id.identityName))"
 
 # --- build the exe (optional) ----------------------------------------------
 # VITE_DIST=store bakes the Store behaviour into the embedded frontend (no
 # in-app updater, no system-screensaver/registry-autostart). If you build the
 # exe yourself instead of using -Build, set this env var first.
 if ($Build) {
-  Write-Host 'Building release exe (Store profile)...'
+  Write-Host "Building release exe (Store profile, $arch)..."
   $env:VITE_DIST = 'store'
   Push-Location $root
-  try { & npm run tauri build -- --no-bundle } finally { Pop-Location }
+  try {
+    if ($rustTarget) {
+      & npm run tauri build -- --no-bundle --target $rustTarget
+    } else {
+      & npm run tauri build -- --no-bundle
+    }
+  } finally { Pop-Location }
 }
-$exe = Join-Path $tauri 'target\release\Layer.exe'
+$exe = if ($rustTarget) {
+  Join-Path $tauri "target\$rustTarget\release\Layer.exe"
+} else {
+  Join-Path $tauri 'target\release\Layer.exe'
+}
 if (-not (Test-Path $exe)) {
   throw "Layer.exe not found at $exe. Build it first (or pass -Build)."
 }
@@ -77,7 +96,8 @@ $man = Get-Content (Join-Path $msix 'AppxManifest.xml') -Raw
 $man = $man.Replace('__IDENTITY_NAME__', $id.identityName).
             Replace('__PUBLISHER__', $id.publisher).
             Replace('__PUBLISHER_DISPLAY__', $id.publisherDisplayName).
-            Replace('__VERSION__', $ver4)
+            Replace('__VERSION__', $ver4).
+            Replace('__ARCH__', $arch)
 $manPath = Join-Path $stage 'AppxManifest.xml'
 Set-Content -Path $manPath -Value $man -Encoding UTF8
 
@@ -90,7 +110,7 @@ try {
 } finally { Pop-Location }
 
 # --- pack -------------------------------------------------------------------
-$pkg = Join-Path $outDir 'Layer.msix'
+$pkg = Join-Path $outDir $pkgName
 & $makeappx pack /d $stage /p $pkg /o
 if ($LASTEXITCODE -ne 0) { throw "makeappx failed ($LASTEXITCODE)" }
 Write-Host "Built $pkg"

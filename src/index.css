@@ -29,117 +29,6 @@
   }
 }
 
-/* ---------- ambient background ---------- */
-.ambient-root {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-.ambient-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.14;
-  will-change: transform;
-}
-.ambient-blob.a {
-  width: 44vw;
-  height: 44vw;
-  left: 6%;
-  top: 8%;
-  background: radial-gradient(circle, var(--accent), transparent 70%);
-  animation: ambient-drift-a 34s ease-in-out infinite;
-}
-.ambient-blob.b {
-  width: 38vw;
-  height: 38vw;
-  right: 8%;
-  bottom: 6%;
-  background: radial-gradient(circle, #6366f1, transparent 70%);
-  animation: ambient-drift-b 42s ease-in-out infinite;
-}
-.ambient-blob.c {
-  width: 32vw;
-  height: 32vw;
-  left: 42%;
-  bottom: 14%;
-  background: radial-gradient(circle, #2dd4bf, transparent 70%);
-  animation: ambient-drift-a 50s ease-in-out infinite reverse;
-}
-@keyframes ambient-drift-a {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(5%, 7%) scale(1.12);
-  }
-}
-@keyframes ambient-drift-b {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1.05);
-  }
-  50% {
-    transform: translate(-6%, -5%) scale(0.95);
-  }
-}
-
-.ambient-precip {
-  position: absolute;
-  inset: 0;
-}
-.ambient-precip span {
-  position: absolute;
-  top: -12vh;
-  will-change: transform;
-}
-.ambient-rain span {
-  width: 1.5px;
-  height: 64px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(170, 200, 255, 0.45)
-  );
-  animation-name: ambient-fall-rain;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-.ambient-snow span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.7);
-  animation-name: ambient-fall-snow;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-@keyframes ambient-fall-rain {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(120vh);
-  }
-}
-@keyframes ambient-fall-snow {
-  from {
-    transform: translateY(0) translateX(0);
-  }
-  to {
-    transform: translateY(120vh) translateX(var(--drift, 0));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ambient-blob,
-  .ambient-precip span {
-    animation: none;
-  }
-}
-
 :root,
 :root[data-theme='dark'] {
   --surface: rgba(23, 23, 27, 0.9);
@@ -245,11 +134,23 @@ body {
 
 .glass {
   background: var(--surface);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 14px 40px -10px rgba(0, 0, 0, 0.6);
+}
+
+/* Layer's window is transparent, so `backdrop-filter` has nothing real behind
+   it to blur — WebView2 smears/ghosts the compositor instead, which showed up
+   as a blur/streak artifact on widgets, the top bar, and on hover. The glass
+   surfaces are already ~90% opaque, so the blur added nothing visually anyway.
+   Neutralize it app-wide (this also overrides any inline backdrop-filter). */
+*,
+*::before,
+*::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* And no drop shadows: on the transparent overlay over a bright wallpaper
+     they read as murky dark halos / a fake "background" around panels, the
+     dock, tooltips and menus. Keep everything flat — the 1px borders define
+     edges. This overrides Tailwind `shadow-*` utilities and inline shadows. */
+  box-shadow: none !important;
 }
 
 [data-nobg] .glass:not([data-popover]) {

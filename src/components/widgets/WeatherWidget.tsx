@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { WeatherWidget as WeatherWidgetType } from '../../types/widget'
-import { TextField } from '../ui'
+import { TextField, Segmented } from '../ui'
 import { cn } from '../../lib/utils'
 import { detectLocation } from '../../lib/location'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
@@ -45,13 +45,17 @@ interface Current {
 function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
   const [data, setData] = useState<Current | null>(null)
   const [error, setError] = useState(false)
+  const fahrenheit = widget.unit === 'f'
 
   useEffect(() => {
     let cancelled = false
     const load = async () => {
       try {
+        const units = fahrenheit
+          ? '&temperature_unit=fahrenheit&wind_speed_unit=mph'
+          : ''
         const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${widget.lat}&longitude=${widget.lon}&current=temperature_2m,weather_code,wind_speed_10m`,
+          `https://api.open-meteo.com/v1/forecast?latitude=${widget.lat}&longitude=${widget.lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto${units}`,
         )
         const json = await res.json()
         if (cancelled) return
@@ -71,7 +75,7 @@ function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
       cancelled = true
       window.clearInterval(id)
     }
-  }, [widget.lat, widget.lon])
+  }, [widget.lat, widget.lon, fahrenheit])
 
   const info = data ? codeInfo(data.code) : null
 
@@ -113,7 +117,7 @@ function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
             style={{ fontSize: 12, fontWeight: 500 }}
           >
             <Wind size={12} strokeWidth={1.8} />
-            {data.wind} km/h
+            {data.wind} {fahrenheit ? 'mph' : 'km/h'}
           </span>
         )}
       </div>
@@ -169,7 +173,7 @@ function WeatherSettings({
       fetch(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
           q,
-        )}&count=6`,
+        )}&count=10&language=en`,
       )
         .then((res) => res.json())
         .then((json) => {
@@ -189,6 +193,14 @@ function WeatherSettings({
 
   return (
     <div className="flex w-[240px] flex-col gap-2">
+      <Segmented
+        value={widget.unit ?? 'c'}
+        options={[
+          { value: 'c', label: '°C' },
+          { value: 'f', label: '°F' },
+        ]}
+        onChange={(v) => onUpdate({ unit: v as 'c' | 'f' })}
+      />
       <button
         type="button"
         onClick={() => useMyLocation()}
@@ -243,17 +255,23 @@ export const weatherDefinition: WidgetDefinition<WeatherWidgetType> = {
   enabled: true,
   minSize: { width: 210, height: 150 },
   maxSize: { width: 380, height: 300 },
-  create: (x, y) => ({
-    type: 'weather',
-    x,
-    y,
-    width: 240,
-    height: 180,
-    locked: false,
-    city: 'London',
-    lat: 51.5072,
-    lon: -0.1276,
-  }),
+  create: async (x, y) => {
+    // Default to the user's actual location so a new widget shows local weather
+    // instead of a hardcoded city. Falls back to London if detection fails.
+    const loc = await detectLocation().catch(() => null)
+    return {
+      type: 'weather',
+      x,
+      y,
+      width: 240,
+      height: 180,
+      locked: false,
+      city: loc?.city || 'London',
+      lat: loc?.lat ?? 51.5072,
+      lon: loc?.lon ?? -0.1276,
+      unit: 'c',
+    }
+  },
   Renderer: WeatherRenderer,
   Settings: WeatherSettings,
 }

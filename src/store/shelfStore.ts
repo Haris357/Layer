@@ -1,12 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type ShelfKind = 'image' | 'video' | 'audio' | 'file'
+export type ShelfKind = 'image' | 'video' | 'audio' | 'file' | 'folder'
 
 export interface ShelfItem {
   id: string
   name: string
-  path: string // stored copy in the hidden shelf folder
+  // For files: the stored copy in the hidden shelf folder.
+  // For folders: the original directory path (folders are referenced in place).
+  path: string
   size: number
   kind: ShelfKind
   addedAt: string
