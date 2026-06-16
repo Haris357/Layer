@@ -1,0 +1,50 @@
+name: Announce release
+
+# Manually email the subscriber list about a release, using the current
+# RELEASE_NOTES.md. Use this to (re)send an announcement outside the normal
+# tag-push flow — e.g. to correct a mailout that went out with stale notes.
+#
+#   gh workflow run announce.yml -f tag=v1.6.0
+#
+# Make sure RELEASE_NOTES.md on the default branch holds the notes you want
+# emailed before running this.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Version tag to announce (e.g. v1.6.0)
+        required: true
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Strip the instructional HTML comment from RELEASE_NOTES.md so it never
+      # leaks into the email (mirrors the release workflow's cleaning step).
+      - name: Prepare release notes
+        shell: pwsh
+        run: |
+          $raw = Get-Content RELEASE_NOTES.md -Raw
+          $clean = ([regex]::Replace($raw, '(?s)<!--.*?-->', '')).Trim()
+          if (-not $clean) { throw "RELEASE_NOTES.md is empty after stripping comments." }
+          Set-Content -Path notes.md -Value $clean -Encoding utf8
+
+      - name: Install announcement deps
+        working-directory: scripts
+        run: npm install --no-audit --no-fund
+
+      - name: Send announcement
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: node scripts/announce.mjs ${{ inputs.tag }} notes.md

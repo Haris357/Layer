@@ -3,17 +3,24 @@
 > a quiet layer on your desktop
 
 A transparent, always-on-top desktop canvas for Windows. Press `Ctrl+Shift+Space`
-to enter edit mode, drop widgets (Note, Clock, Link, Image, Video) onto the
-canvas, arrange them however you want, then press the hotkey again to make the
-window click-through.
+to enter edit mode, drop widgets onto the canvas, arrange them however you want,
+then press the hotkey again to make the window click-through.
+
+Widgets include Notes, Clocks, World Clocks, Weather, a Now Playing media player
+(with blurred album art), an Audio device switcher, a connected-notes Board,
+Calendar (with iCal/.ics subscriptions), To-do, Countdown, Stats, Search, Links,
+App launchers, a Shelf for files & folders, Images, Video, Galleries, and more.
 
 ## Get Layer
 
 **[⬇️ Get it from the Microsoft Store](https://apps.microsoft.com/detail/9NL577X16L1N)** — recommended. One-click install, Microsoft-verified (no SmartScreen/antivirus warnings), and updates automatically through the Store.
 
 Prefer a plain installer? Grab the latest
-**[direct download](https://github.com/Haris357/Layer-releases/releases/latest)**
-(`Layer-Setup.exe`) — this build keeps itself up to date in the background.
+**[direct download](https://github.com/Haris357/Layer-releases/releases/latest)** —
+these builds keep themselves up to date in the background:
+
+- **Intel/AMD (x64):** `Layer-Setup.exe`
+- **Windows on ARM (ARM64):** `Layer-Setup-arm64.exe` — native build, no emulation
 
 Works on Windows 10 & 11.
 
