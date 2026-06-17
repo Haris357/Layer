@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Volume2, Mic, Check, Loader2, type LucideIcon } from 'lucide-react'
 import type { AudioWidget as AudioWidgetType } from '../../types/widget'
 import {
@@ -7,6 +8,7 @@ import {
   type AudioDevice,
 } from '../../lib/ipc'
 import { Segmented, FieldRow, Toggle } from '../ui'
+import { Tooltip } from '../Tooltip'
 import { cn } from '../../lib/utils'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
@@ -34,27 +36,27 @@ function DeviceGroup({
         {devices.map((d) => {
           const active = d.isDefault
           return (
-            <button
-              key={d.id}
-              type="button"
-              onClick={() => onPick(d)}
-              title={d.name}
-              className={cn(
-                'flex items-center gap-2 rounded-[9px] px-2.5 py-2 text-left transition-colors',
-                active
-                  ? 'bg-[var(--accent)] text-[var(--on-accent)]'
-                  : 'bg-[var(--fill-1)] text-[var(--text-primary)] hover:bg-[var(--fill-2)]',
-              )}
-            >
-              <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium">
-                {d.name}
-              </span>
-              {busy === d.id ? (
-                <Loader2 size={14} className="shrink-0 animate-spin opacity-80" />
-              ) : (
-                active && <Check size={14} className="shrink-0" strokeWidth={2.4} />
-              )}
-            </button>
+            <Tooltip key={d.id} label={d.name} side="top">
+              <button
+                type="button"
+                onClick={() => onPick(d)}
+                className={cn(
+                  'flex w-full items-center gap-2 rounded-[9px] px-2.5 py-2 text-left transition-colors',
+                  active
+                    ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                    : 'bg-[var(--fill-1)] text-[var(--text-primary)] hover:bg-[var(--fill-2)]',
+                )}
+              >
+                <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium">
+                  {d.name}
+                </span>
+                {busy === d.id ? (
+                  <Loader2 size={14} className="shrink-0 animate-spin opacity-80" />
+                ) : (
+                  active && <Check size={14} className="shrink-0" strokeWidth={2.4} />
+                )}
+              </button>
+            </Tooltip>
           )
         })}
       </div>
@@ -63,6 +65,7 @@ function DeviceGroup({
 }
 
 function AudioRenderer({ widget }: { widget: AudioWidgetType }) {
+  const { t } = useTranslation()
   const card = widget.background !== false
   const [devices, setDevices] = useState<AudioDevice[]>([])
   const [busy, setBusy] = useState<string | null>(null)
@@ -112,7 +115,7 @@ function AudioRenderer({ widget }: { widget: AudioWidgetType }) {
     >
       {showOut && (
         <DeviceGroup
-          title="Output"
+          title={t('audio.output')}
           icon={Volume2}
           devices={outputs}
           busy={busy}
@@ -121,7 +124,7 @@ function AudioRenderer({ widget }: { widget: AudioWidgetType }) {
       )}
       {showIn && (
         <DeviceGroup
-          title="Input"
+          title={t('audio.input')}
           icon={Mic}
           devices={inputs}
           busy={busy}
@@ -130,7 +133,7 @@ function AudioRenderer({ widget }: { widget: AudioWidgetType }) {
       )}
       {devices.length === 0 && (
         <div className="m-auto text-[12px] text-[var(--text-tertiary)]">
-          No audio devices found.
+          {t('audio.empty')}
         </div>
       )}
     </div>
@@ -144,18 +147,19 @@ function AudioSettings({
   widget: AudioWidgetType
   onUpdate: (patch: Partial<AudioWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex w-[248px] flex-col gap-3">
       <Segmented
         value={widget.show}
         options={[
-          { value: 'both', label: 'Both' },
-          { value: 'output', label: 'Output' },
-          { value: 'input', label: 'Input' },
+          { value: 'both', label: t('audio.settings.both') },
+          { value: 'output', label: t('audio.output') },
+          { value: 'input', label: t('audio.input') },
         ]}
         onChange={(v) => onUpdate({ show: v as AudioWidgetType['show'] })}
       />
-      <FieldRow label="Background">
+      <FieldRow label={t('audio.settings.background')}>
         <Toggle
           checked={widget.background !== false}
           onChange={(v) => onUpdate({ background: v })}

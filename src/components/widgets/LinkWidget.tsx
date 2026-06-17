@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Link as LinkIcon,
   icons as LUCIDE,
@@ -34,6 +35,7 @@ export function normalizeUrl(input: string): string | null {
 }
 
 function LinkRenderer({ widget }: { widget: LinkWidgetType }) {
+  const { t } = useTranslation()
   const Icon = resolveIcon(widget.iconKey)
   const card = widget.background !== false
 
@@ -45,7 +47,7 @@ function LinkRenderer({ widget }: { widget: LinkWidgetType }) {
 
   return (
     <Tooltip
-      label={widget.url ? `Double-click to open ${widget.url}` : ''}
+      label={widget.url ? t('link.renderer.openTooltip', { url: widget.url }) : ''}
       side="top"
       className="h-full w-full"
     >
@@ -68,7 +70,7 @@ function LinkRenderer({ widget }: { widget: LinkWidgetType }) {
           className="truncate text-[var(--text-primary)]"
           style={{ fontSize: 13, fontWeight: 600 }}
         >
-          {widget.label || 'Untitled'}
+          {widget.label || t('link.renderer.untitled')}
         </span>
       </div>
     </Tooltip>
@@ -82,6 +84,7 @@ function LinkSettings({
   widget: LinkWidgetType
   onUpdate: (patch: Partial<LinkWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const [draft, setDraft] = useState(widget.url)
   const [error, setError] = useState('')
   const [iconQuery, setIconQuery] = useState('')
@@ -106,7 +109,7 @@ function LinkSettings({
     }
     const normalized = normalizeUrl(draft)
     if (!normalized) {
-      setError('Enter a valid URL')
+      setError(t('link.settings.invalidUrl'))
       return
     }
     setError('')
@@ -119,7 +122,7 @@ function LinkSettings({
       <div className="flex flex-col gap-1">
         <TextField
           value={draft}
-          placeholder="https://..."
+          placeholder={t('link.settings.urlPlaceholder')}
           onChange={setDraft}
           onBlur={commitUrl}
         />
@@ -134,13 +137,13 @@ function LinkSettings({
       </div>
       <TextField
         value={widget.label}
-        placeholder="Label"
+        placeholder={t('link.settings.labelPlaceholder')}
         maxLength={30}
         onChange={(v) => onUpdate({ label: v })}
       />
       <TextField
         value={iconQuery}
-        placeholder="Search icons…"
+        placeholder={t('link.settings.iconSearchPlaceholder')}
         onChange={setIconQuery}
       />
       <div className="grid max-h-[168px] grid-cols-7 gap-1 overflow-y-auto">

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Workflow, Plus, X } from 'lucide-react'
 import type {
   BoardWidget as BoardWidgetType,
@@ -71,6 +72,7 @@ type DragState =
   | null
 
 function BoardRenderer({ widget }: { widget: BoardWidgetType }) {
+  const { t } = useTranslation()
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const liveUpdateWidget = useCanvasStore((s) => s.liveUpdateWidget)
 
@@ -343,7 +345,7 @@ function BoardRenderer({ widget }: { widget: BoardWidgetType }) {
       </div>
 
       {/* Floating "+" to add a card. */}
-      <Tooltip label="Add card" side="top" className="absolute bottom-2 right-2 z-20">
+      <Tooltip label={t('board.addCardTooltip')} side="top" className="absolute bottom-2 right-2 z-20">
         <button
           type="button"
           onPointerDown={(e) => e.stopPropagation()}
@@ -373,6 +375,7 @@ function Card({
   onDelete: (id: string) => void
   onColor: (id: string, color: StickyColor) => void
 }) {
+  const { t } = useTranslation()
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const palette = COLOR_STYLES[card.color] ?? COLOR_STYLES.yellow
   const [colorOpen, setColorOpen] = useState(false)
@@ -413,24 +416,26 @@ function Card({
           ⠿
         </span>
         <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover/card:opacity-100">
-          <button
-            type="button"
-            title="Change color"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => setColorOpen((v) => !v)}
-            className="h-3 w-3 rounded-full border border-black/20"
-            style={{ background: palette.ink }}
-          />
-          <button
-            type="button"
-            title="Delete card"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => onDelete(card.id)}
-            className="flex h-3.5 w-3.5 items-center justify-center rounded-full hover:bg-black/10"
-            style={{ color: palette.ink }}
-          >
-            <X size={11} strokeWidth={2.5} />
-          </button>
+          <Tooltip label={t('board.changeColorTooltip')} side="top">
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => setColorOpen((v) => !v)}
+              className="h-3 w-3 rounded-full border border-black/20"
+              style={{ background: palette.ink }}
+            />
+          </Tooltip>
+          <Tooltip label={t('board.deleteCardTooltip')} side="top">
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onDelete(card.id)}
+              className="flex h-3.5 w-3.5 items-center justify-center rounded-full hover:bg-black/10"
+              style={{ color: palette.ink }}
+            >
+              <X size={11} strokeWidth={2.5} />
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -440,17 +445,17 @@ function Card({
         defaultValue={card.text}
         onChange={onChange}
         onPointerDown={(e) => e.stopPropagation()}
-        placeholder="Note…"
+        placeholder={t('board.notePlaceholder')}
         spellCheck={false}
         className="min-h-0 flex-1 resize-none border-0 bg-transparent px-2.5 py-1.5 text-[13px] leading-snug outline-none"
         style={{ color: palette.ink, caretColor: palette.ink }}
       />
 
       {/* Connection handle — drag out to link to another card. */}
-      <Tooltip label="Drag to connect" side="bottom">
+      <Tooltip label={t('board.connectTooltip')} side="bottom">
         <button
           type="button"
-          aria-label="Drag to connect"
+          aria-label={t('board.connectTooltip')}
           onPointerDown={(e) => onConnectStart(e, card)}
           className="absolute -right-1.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-white opacity-0 transition-opacity group-hover/card:opacity-100"
           style={{ background: palette.ink, cursor: 'crosshair' }}

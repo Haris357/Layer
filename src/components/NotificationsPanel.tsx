@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import {
   X,
@@ -59,6 +60,7 @@ function tint(kind: NotificationKind): string {
 }
 
 function Row({ n }: { n: AppNotification }) {
+  const { t } = useTranslation()
   const markRead = useNotificationStore((s) => s.markRead)
   const remove = useNotificationStore((s) => s.remove)
   const Icon = ICONS[n.kind] ?? Info
@@ -102,7 +104,7 @@ function Row({ n }: { n: AppNotification }) {
       </div>
       <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/n:opacity-100">
         {!n.read && (
-          <Tooltip label="Mark as read">
+          <Tooltip label={t('notifPanel.markRead')}>
             <button
               type="button"
               onClick={() => markRead(n.id)}
@@ -112,7 +114,7 @@ function Row({ n }: { n: AppNotification }) {
             </button>
           </Tooltip>
         )}
-        <Tooltip label="Remove">
+        <Tooltip label={t('notifPanel.remove')}>
           <button
             type="button"
             onClick={() => remove(n.id)}
@@ -127,6 +129,7 @@ function Row({ n }: { n: AppNotification }) {
 }
 
 export function NotificationsPanel({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
   const items = useNotificationStore((s) => s.items)
   const markAllRead = useNotificationStore((s) => s.markAllRead)
   const clearAll = useNotificationStore((s) => s.clearAll)
@@ -162,7 +165,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
             className="text-[var(--text-primary)]"
             style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-1px' }}
           >
-            Notifications
+            {t('notifPanel.heading')}
           </h2>
           <div className="flex items-center gap-1">
             {items.length > 0 && (
@@ -173,10 +176,10 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                     onClick={markAllRead}
                     className="rounded-[7px] px-2 py-1 text-[11.5px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
                   >
-                    Mark all read
+                    {t('notifPanel.markAllRead')}
                   </button>
                 )}
-                <Tooltip label="Clear all">
+                <Tooltip label={t('notifPanel.clearAll')}>
                   <button
                     type="button"
                     onClick={clearAll}
@@ -187,7 +190,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                 </Tooltip>
               </>
             )}
-            <Tooltip label="Close" side="bottom">
+            <Tooltip label={t('common.close')} side="bottom">
               <button
                 type="button"
                 onClick={onClose}
@@ -202,7 +205,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
         {items.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-12 text-[var(--text-tertiary)]">
             <Bell size={28} strokeWidth={1.5} />
-            <span className="text-[13px]">All caught up ✦</span>
+            <span className="text-[13px]">{t('notifPanel.empty')}</span>
           </div>
         ) : (
           <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">

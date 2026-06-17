@@ -1,0 +1,637 @@
+{
+  "common": {
+    "close": "Schließen",
+    "dragToMove": "Zum Verschieben ziehen",
+    "quit": "Layer beenden"
+  },
+  "toolbar": {
+    "openMenu": "Menü öffnen",
+    "exitEdit": "Bearbeitungsmodus verlassen",
+    "lockAll": "Alle sperren",
+    "unlockAll": "Alle entsperren",
+    "showBackgrounds": "Hintergründe anzeigen",
+    "hideBackgrounds": "Hintergründe ausblenden",
+    "resetSpace": "Diesen Bereich zurücksetzen",
+    "resetSpaceConfirm": "Erneut klicken, um diesen Bereich zurückzusetzen",
+    "spaces": "Bereiche",
+    "notifications": "Benachrichtigungen",
+    "notificationsNew": "Benachrichtigungen · {{count}} neu",
+    "settings": "Einstellungen",
+    "styles": "{{name}} · Stile",
+    "styleHeader": "{{name}}-Stil",
+    "spaceReset": "Bereich zurückgesetzt"
+  },
+  "updates": {
+    "available": "Layer v{{version}} ist verfügbar",
+    "availableBody": "Öffne Einstellungen → Auf Updates prüfen, um zu installieren.",
+    "upToDate": "Du nutzt die neueste Version ✦",
+    "checkFailed": "Updates konnten nicht geprüft werden"
+  },
+  "widgets": {
+    "note": "Notiz",
+    "clock": "Uhr",
+    "link": "Link",
+    "image": "Bild",
+    "video": "Video",
+    "gallery": "Galerie",
+    "weather": "Wetter",
+    "stats": "Statistiken",
+    "todo": "Aufgaben",
+    "countdown": "Countdown",
+    "worldclock": "Weltuhr",
+    "calendar": "Kalender",
+    "apps": "Apps",
+    "search": "Suche",
+    "nowplaying": "Aktuelle Wiedergabe",
+    "notifications": "Benachrichtigungen",
+    "converter": "Umrechner",
+    "pomodoro": "Pomodoro",
+    "sticky": "Notizzettel",
+    "inbox": "Posteingang",
+    "clipboard": "Zwischenablage",
+    "webembed": "Web-Einbettung",
+    "diskinfo": "Laufwerksinfo",
+    "greeting": "Begrüßung",
+    "shelf": "Ablage",
+    "audio": "Audiogeräte",
+    "board": "Board"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "version": "Layer v{{version}}",
+    "tabs": {
+      "general": "Allgemein",
+      "appearance": "Darstellung",
+      "screensaver": "Bildschirmschoner",
+      "notch": "Notch",
+      "sync": "Cloud-Synchronisierung",
+      "shortcuts": "Tastenkürzel",
+      "about": "Über"
+    },
+    "general": {
+      "snapToGrid": "Widgets am Raster ausrichten",
+      "gridSize": "Rastergröße · {{size}}px",
+      "launchOnStartup": "Layer beim Systemstart starten",
+      "startupViaWindows": "Windows-Einstellungen → Autostart-Apps",
+      "hotCorner": "Aktive Ecke wechselt Bereiche",
+      "language": "Sprache",
+      "languageHint": "Die Sprache, die die Oberfläche von Layer verwendet.",
+      "canvas": "Arbeitsfläche",
+      "exportImage": "Arbeitsfläche als Bild exportieren",
+      "resetSpace": "Diesen Bereich zurücksetzen",
+      "resetSpaceConfirm": "Erneut klicken, um „{{name}}“ zu leeren"
+    },
+    "appearance": {
+      "theme": "Design",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System",
+      "matchWallpaper": "Akzentfarbe an Hintergrundbild anpassen",
+      "showOn": "Layer anzeigen auf",
+      "showOnHint": "Auf welchem Monitor die Pille, die Einstellungen und Pop-ups erscheinen.",
+      "autoPrimary": "Automatisch (primär)",
+      "display": "Bildschirm {{n}}"
+    },
+    "screensaver": {
+      "storeNote": "Layer als deinen Windows-Bildschirmschoner einzurichten, ist in der Microsoft-Store-Version nicht verfügbar (die Sandbox kann keinen System-Bildschirmschoner registrieren). Du kannst die Stile dennoch mit Ctrl+Shift+S in der Vorschau ansehen.",
+      "useAsScreensaver": "Layer als meinen Bildschirmschoner verwenden",
+      "style": "Stil",
+      "ambient": "Ambient",
+      "minimal": "Minimal",
+      "quote": "Zitat",
+      "descMinimal": "Nur eine große Uhr und das Datum.",
+      "descQuote": "Eine wechselnde ruhige Zeile mit der Uhrzeit.",
+      "descAmbient": "Uhr, Datum, aktuelles Wetter und aktuelle Wiedergabe.",
+      "idleNote": "Im Leerlauf füllt Layer jeden Bildschirm mit der obigen Ansicht. Jede Taste oder Mausbewegung blendet sie aus.",
+      "previewNow": "Jetzt Vorschau anzeigen"
+    },
+    "shortcuts": {
+      "keyboard": "Tastatur",
+      "toggleEdit": "Bearbeitungsmodus umschalten",
+      "pressKeys": "Tasten drücken…",
+      "quickCapture": "Schnellerfassung",
+      "cycleSpaces": "Bereiche durchschalten",
+      "peek": "Vorschau (halten)",
+      "previewScreensaver": "Bildschirmschoner-Vorschau",
+      "hotCornerNote": "Du kannst die Maus auch in die obere linke Ecke bewegen, um Bereiche zu wechseln (aktiviere „Aktive Ecke“ unter Allgemein)."
+    },
+    "about": {
+      "tagline": "eine stille Schicht auf deinem Desktop",
+      "storeUpdates": "Updates werden automatisch über den Microsoft Store bereitgestellt.",
+      "checkUpdates": "Auf Updates prüfen",
+      "checking": "Suche nach Updates…",
+      "upToDate": "Du nutzt die neueste Version.",
+      "updateFailed": "Updates konnten nicht geprüft werden.",
+      "rateStore": "Layer im Store bewerten",
+      "store": "Microsoft Store",
+      "github": "GitHub",
+      "support": "☕ Layer unterstützen"
+    },
+    "toasts": {
+      "canvasExported": "Arbeitsfläche exportiert",
+      "openFolder": "Ordner öffnen",
+      "exportFailed": "Export fehlgeschlagen",
+      "exportDialogTitle": "Arbeitsfläche als Bild exportieren"
+    }
+  },
+  "note": {
+    "editor": {
+      "placeholder": "Beginne zu schreiben"
+    },
+    "toolbar": {
+      "dragToMove": "Zum Verschieben ziehen",
+      "typefaceSize": "Schriftart & Größe",
+      "freewrite": "Freies Schreiben",
+      "endFreewrite": "Freies Schreiben beenden",
+      "darkMode": "Dunkler Modus",
+      "lightMode": "Heller Modus",
+      "fullscreen": "Vollbild",
+      "exitFullscreen": "Vollbild verlassen",
+      "newEntry": "Neuer Eintrag",
+      "pastEntries": "Frühere Einträge"
+    },
+    "font": {
+      "size": "Größe",
+      "typeface": "Schriftart",
+      "random": "Zufällige Schrift"
+    },
+    "freewrite": {
+      "title": "Freies Schreiben",
+      "description": "Schreibe ohne anzuhalten. Kein Backspace, kein Bearbeiten — lass die Wörter einfach fließen, bis die Zeit um ist.",
+      "introTitle": "Schreib einfach weiter",
+      "introBody": "Kein Backspace, kein Bearbeiten — lass die Wörter fließen, ohne sie zu bewerten. Hör nicht auf, bis der Timer abläuft.",
+      "hudHint": "Schreib weiter — kein Zurück · Esc zum Beenden",
+      "doneToast": "Freies Schreiben fertig — {{words}} Wörter in {{mins}} Min ✍",
+      "completeTitle": "Freies Schreiben abgeschlossen ✦",
+      "completeBody": "{{words}} Wörter in {{mins}} Minuten ununterbrochenem Fluss."
+    },
+    "history": {
+      "title": "Einträge",
+      "entryTitle": "Eintragstitel",
+      "emptyEntry": "Leerer Eintrag",
+      "pin": "Anheften",
+      "unpin": "Lösen",
+      "rename": "Umbenennen",
+      "delete": "Löschen"
+    },
+    "entry": {
+      "word": "{{count}} Wort",
+      "words": "{{count}} Wörter"
+    }
+  },
+  "sticky": {
+    "placeholder": "Notiere etwas…",
+    "dragToMove": "Zum Verschieben ziehen",
+    "colorLabel": "Zettelfarbe",
+    "colors": {
+      "yellow": "Gelb",
+      "pink": "Rosa",
+      "blue": "Blau",
+      "green": "Grün",
+      "orange": "Orange",
+      "lilac": "Flieder"
+    }
+  },
+  "greeting": {
+    "nameLabel": "Dein Name",
+    "namePlaceholder": "z. B. Haris",
+    "styleLabel": "Stil",
+    "alignLabel": "Ausrichtung",
+    "styles": {
+      "classic": "Klassisch",
+      "serif": "Serif",
+      "gradient": "Verlauf",
+      "mono": "Mono",
+      "script": "Schreibschrift",
+      "playfair": "Display",
+      "modern": "Modern"
+    }
+  },
+  "clock": {
+    "fonts": {
+      "anurati": "Anurati",
+      "stencil": "Stencil",
+      "scifi": "Sci-fi",
+      "retro": "Retro"
+    },
+    "format": {
+      "12h": "12h",
+      "24h": "24h"
+    },
+    "showSeconds": "Sekunden anzeigen",
+    "showDate": "Datum anzeigen"
+  },
+  "worldclock": {
+    "empty": "Stadt in den Einstellungen hinzufügen",
+    "removeZone": "Zone entfernen"
+  },
+  "todo": {
+    "header": "AUFGABEN · {{done}}/{{total}}",
+    "addPlaceholder": "Aufgabe hinzufügen…",
+    "deleteTooltip": "Aufgabe löschen"
+  },
+  "pomodoro": {
+    "phase": {
+      "focus": "Fokus",
+      "short": "Kurze Pause",
+      "long": "Lange Pause"
+    },
+    "start": "Start",
+    "pause": "Pause",
+    "reset": "Zurücksetzen",
+    "skip": "Überspringen",
+    "skipBreak": "Pause überspringen",
+    "focusSound": "Fokus-Klang",
+    "soundOff": "Aus",
+    "todayLabel": "Heute:",
+    "focused": "fokussiert",
+    "settings": {
+      "focusMin": "Fokus (Min)",
+      "shortBreakMin": "Kurze Pause (Min)",
+      "longBreakMin": "Lange Pause (Min)",
+      "longBreakAfter": "Lange Pause nach"
+    }
+  },
+  "inbox": {
+    "title": "Posteingang",
+    "shortcut": "Ctrl + Shift + N",
+    "emptyHint": "Drücke überall <b>Ctrl + Shift + N</b>, um einen Gedanken festzuhalten.",
+    "markDoneTooltip": "Als erledigt markieren",
+    "removeTooltip": "Entfernen",
+    "clearDoneTooltip": "Erledigte löschen"
+  },
+  "board": {
+    "notePlaceholder": "Notiz…",
+    "addCardTooltip": "Karte hinzufügen",
+    "changeColorTooltip": "Farbe ändern",
+    "deleteCardTooltip": "Karte löschen",
+    "connectTooltip": "Zum Verbinden ziehen"
+  },
+  "shelf": {
+    "title": "Ablage",
+    "addFolderTooltip": "Ordner hinzufügen",
+    "addFilesTooltip": "Dateien hinzufügen",
+    "openTooltip": "{{name}} öffnen",
+    "showInFolderTooltip": "Im Ordner anzeigen",
+    "removeTooltip": "Aus Ablage entfernen",
+    "emptyDrop": "Dateien hierher ziehen, um sie abzulegen",
+    "emptyBrowse": "oder zum Durchsuchen klicken",
+    "dropOverlay": "Zum Ablegen loslassen"
+  },
+  "countdown": {
+    "units": {
+      "days": "Tage",
+      "hrs": "Std",
+      "min": "Min",
+      "sec": "Sek"
+    },
+    "since": "seit",
+    "until": "bis",
+    "defaultTitle": "Countdown",
+    "eventNamePlaceholder": "Ereignisname"
+  },
+  "calendar": {
+    "allDay": "Ganztägig",
+    "nav": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "jumpToToday": "Zu heute springen"
+    },
+    "view": {
+      "month": "Monat",
+      "week": "Woche",
+      "day": "Tag"
+    },
+    "repeat": {
+      "none": "Wiederholt sich nicht",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich",
+      "yearly": "Jährlich"
+    },
+    "day": {
+      "free": "Frei",
+      "today": "Heute",
+      "noEvents": "Keine Termine",
+      "addOne": "+ Hinzufügen"
+    },
+    "popover": {
+      "nothingScheduled": "Nichts geplant.",
+      "newEvent": "Neuer Termin",
+      "repeatsLabel": "wiederholt sich {{repeat}}"
+    },
+    "editor": {
+      "editTitle": "Termin bearbeiten",
+      "newTitle": "Neuer Termin",
+      "eventTitle": "Termintitel",
+      "untitled": "Ohne Titel",
+      "allDayLabel": "Ganztägig",
+      "color": "Farbe",
+      "repeats": "Wiederholungen",
+      "repeatUntil": "Wiederholen bis",
+      "until": "Bis",
+      "notes": "Notizen (optional)",
+      "save": "Speichern",
+      "add": "Termin hinzufügen",
+      "delete": "Löschen",
+      "readOnly": "Aus einem abonnierten Kalender · schreibgeschützt"
+    },
+    "settings": {
+      "title": "Abonnierte Kalender",
+      "instructions": "Füge unten einen iCal-/.ics-Link ein. Google: Einstellungen → „Geheime Adresse im iCal-Format“. Proton/Outlook: der Freigabelink des Kalenders.",
+      "invalidLink": "Füge einen https://- oder webcal://-.ics-Link ein",
+      "defaultName": "Kalender",
+      "loadFailed": "Laden fehlgeschlagen",
+      "synced": "Synchronisiert",
+      "on": "Ein",
+      "off": "Aus",
+      "enable": "Aktivieren",
+      "disable": "Deaktivieren",
+      "removeCalendar": "Kalender entfernen",
+      "namePlaceholder": "Name (z. B. Arbeit)",
+      "urlPlaceholder": "https://…/basic.ics",
+      "add": "Hinzufügen"
+    }
+  },
+  "search": {
+    "placeholder": "Im Web suchen…",
+    "engines": {
+      "google": "Google",
+      "bing": "Bing",
+      "ddg": "DDG",
+      "custom": "Benutzerdefiniert"
+    },
+    "customPlaceholder": "https://example.com/search?q=%s"
+  },
+  "apps": {
+    "layout": {
+      "list": "Liste",
+      "grid": "Raster"
+    },
+    "searchInstalled": "Installierte Apps durchsuchen…",
+    "pin": "+ Anheften",
+    "pinned": "Angeheftet",
+    "addFolder": "Ordner hinzufügen",
+    "emptyHint": "Tippe auf +, um deine erste App anzuheften",
+    "addAppsOrFolder": "Apps oder einen Ordner hinzufügen",
+    "dragToReorder": "Zum Umsortieren ziehen",
+    "remove": "Entfernen"
+  },
+  "clipboard": {
+    "title": "Zwischenablage",
+    "empty": "Kopiere etwas — es erscheint hier.",
+    "noMatches": "Keine Treffer",
+    "search": "Suchen…",
+    "copyLabel": "{{label}} kopieren",
+    "pin": "Anheften",
+    "unpin": "Lösen",
+    "remove": "Entfernen",
+    "clearUnpinned": "Nicht angeheftete löschen",
+    "copied": "In die Zwischenablage kopiert",
+    "copyFailed": "Kopieren fehlgeschlagen"
+  },
+  "webembed": {
+    "addUrl": "URL in den Einstellungen hinzufügen",
+    "loading": "{{host}} wird geladen…",
+    "noEmbed": "erlaubt keine Einbettung",
+    "openInBrowser": "Im Browser öffnen",
+    "iframeTitle": "Web-Einbettung",
+    "urlLabel": "URL",
+    "urlPlaceholder": "ein Dashboard, ein YouTube-Videolink…",
+    "urlHint": "Seiten wie die YouTube-Startseite, Google oder X blockieren die Einbettung — füge einen Videolink ein oder nutze „Im Browser öffnen“.",
+    "zoom": "Zoom · {{pct}}%",
+    "autoRefresh": "Automatisch aktualisieren",
+    "refresh": {
+      "off": "Aus",
+      "30s": "30s",
+      "1m": "1m",
+      "5m": "5m"
+    }
+  },
+  "nowplaying": {
+    "empty": "Nichts wird wiedergegeben",
+    "defaultSource": "AKTUELLE WIEDERGABE",
+    "unknownTrack": "Unbekannter Titel",
+    "controls": {
+      "previous": "Zurück",
+      "play": "Wiedergabe",
+      "pause": "Pause",
+      "next": "Weiter"
+    },
+    "settings": {
+      "artBackground": "Albumcover-Hintergrund",
+      "artBackgroundDesc": "Das Albumcover hinter dem Player mit einem passenden Farbschleier verschwimmen lassen. Ausschalten für eine schlichte, designkonforme Karte."
+    }
+  },
+  "notifications": {
+    "title": "BENACHRICHTIGUNGEN · {{count}}",
+    "clearAll": "Alle löschen",
+    "empty": "Keine Benachrichtigungen",
+    "dismiss": "Verwerfen"
+  },
+  "audio": {
+    "output": "Ausgabe",
+    "input": "Eingabe",
+    "empty": "Keine Audiogeräte gefunden.",
+    "settings": {
+      "both": "Beide",
+      "background": "Hintergrund"
+    }
+  },
+  "converter": {
+    "swap": "Einheiten tauschen",
+    "categories": {
+      "length": "Länge",
+      "weight": "Gewicht",
+      "temperature": "Temp",
+      "currency": "Geld"
+    }
+  },
+  "link": {
+    "renderer": {
+      "openTooltip": "Doppelklick, um {{url}} zu öffnen",
+      "untitled": "Ohne Titel"
+    },
+    "settings": {
+      "invalidUrl": "Gib eine gültige URL ein",
+      "urlPlaceholder": "https://...",
+      "labelPlaceholder": "Bezeichnung",
+      "iconSearchPlaceholder": "Symbole suchen…"
+    }
+  },
+  "image": {
+    "settings": {
+      "fitCover": "Ausfüllen",
+      "fitContain": "Einpassen",
+      "rounded": "Abgerundet · {{px}}px",
+      "replace": "Bild ersetzen"
+    }
+  },
+  "video": {
+    "settings": {
+      "autoplay": "Automatisch abspielen",
+      "loop": "Schleife",
+      "muted": "Stumm",
+      "replace": "Video ersetzen"
+    }
+  },
+  "gallery": {
+    "renderer": {
+      "empty": "Medien in den Einstellungen hinzufügen"
+    },
+    "settings": {
+      "layoutSlides": "Folien",
+      "layoutGrid": "Raster",
+      "layoutPhotos": "Fotos",
+      "layoutCollage": "Collage",
+      "slideEvery": "Wechsel alle {{seconds}}s",
+      "rounded": "Abgerundet · {{px}}px",
+      "addMedia": "Medien hinzufügen ({{count}})"
+    }
+  },
+  "weather": {
+    "conditions": {
+      "clear": "Klar",
+      "partlyCloudy": "Teilweise bewölkt",
+      "cloudy": "Bewölkt",
+      "fog": "Nebel",
+      "drizzle": "Nieselregen",
+      "rain": "Regen",
+      "snow": "Schnee",
+      "showers": "Schauer",
+      "snowShowers": "Schneeschauer",
+      "thunderstorm": "Gewitter"
+    },
+    "renderer": {
+      "unavailable": "Nicht verfügbar",
+      "loading": "Wird geladen…",
+      "mph": "mph",
+      "kmh": "km/h"
+    },
+    "settings": {
+      "myLocation": "Mein Standort",
+      "findingYou": "Standort wird ermittelt…",
+      "useMyLocation": "Meinen Standort verwenden",
+      "searchCity": "Stadt suchen…"
+    }
+  },
+  "stats": {
+    "system": "SYSTEM",
+    "cpu": "CPU",
+    "memory": "Arbeitsspeicher",
+    "storage": "Speicher",
+    "battery": "Akku",
+    "chargingSuffix": " · lädt"
+  },
+  "diskinfo": {
+    "title": "Laufwerke",
+    "reading": "Laufwerke werden gelesen…",
+    "noDisks": "Keine Laufwerke gefunden",
+    "removable": "wechselbar",
+    "read": "LESEN",
+    "write": "SCHREIBEN",
+    "active": "AKTIV",
+    "freeOf": "frei von {{total}}",
+    "percentUsed": "{{percent}}% belegt"
+  },
+  "spaces": {
+    "heading": "Bereiche",
+    "description": "Wechsle Layouts, erstelle eigene, exportiere sie oder veröffentliche sie in der Galerie.",
+    "newSpace": "Neuer Bereich",
+    "import": "Importieren",
+    "badge": {
+      "default": "Standard"
+    },
+    "actions": {
+      "save": "Speichern",
+      "rename": "Umbenennen",
+      "publish": "In Galerie veröffentlichen",
+      "export": "Als ZIP exportieren",
+      "reset": "Bereich zurücksetzen",
+      "resetConfirm": "Erneut klicken zum Leeren",
+      "delete": "Löschen"
+    },
+    "feedback": {
+      "exported": "Bereich exportiert ✦",
+      "exportFailed": "Der Bereich konnte nicht exportiert werden.",
+      "imported": "„{{name}}“ importiert",
+      "published": "In der Galerie veröffentlicht ✦",
+      "publishFailed": "Veröffentlichung fehlgeschlagen — versuche es erneut.",
+      "reset": "„{{name}}“ zurückgesetzt"
+    },
+    "notify": {
+      "importedTitle": "\"{{name}}\" importiert",
+      "importedBody": "{{count}} Widgets als neuer Bereich hinzugefügt."
+    }
+  },
+  "notifPanel": {
+    "heading": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "clearAll": "Alle löschen",
+    "markRead": "Als gelesen markieren",
+    "remove": "Entfernen",
+    "empty": "Alles erledigt ✦"
+  },
+  "sync": {
+    "title": "Cloud-Synchronisierung",
+    "subtitle": "Optional — behalte deine Layouts geräteübergreifend.",
+    "consent": {
+      "title": "Was die Cloud-Synchronisierung speichert",
+      "syncedLabel": "Synchronisiert",
+      "localLabel": "Bleibt auf diesem Gerät",
+      "synced": {
+        "layout": "Bereiche & Widget-Layout",
+        "sizes": "Größen & Positionen",
+        "colors": "Farben & Hell/Dunkel",
+        "settings": "Widget-Einstellungen"
+      },
+      "local": {
+        "notes": "Notizen & Zetteltext",
+        "todo": "Text der Aufgaben",
+        "clipboard": "Zwischenablage & Posteingang",
+        "shelf": "Ablagedateien & lokale Pfade"
+      },
+      "checkbox": "Ich verstehe das und möchte die Cloud-Synchronisierung aktivieren."
+    },
+    "signIn": {
+      "emailLabel": "E-Mail",
+      "emailPlaceholder": "you@example.com",
+      "sending": "Wird gesendet…",
+      "sendCode": "Code senden",
+      "codeSentTo": "Gib den 6-stelligen Code ein, der gesendet wurde an",
+      "verifying": "Wird überprüft…",
+      "verify": "Überprüfen & aktivieren",
+      "resend": "Erneut senden",
+      "disclaimer": "Wir senden dir einen Einmalcode per E-Mail — kein Passwort. Deine Layouts werden unter dieser Adresse synchronisiert; die letzte Änderung gewinnt geräteübergreifend."
+    },
+    "signedIn": {
+      "signedIn": "Angemeldet",
+      "syncing": "Wird synchronisiert…",
+      "lastSynced": "Zuletzt synchronisiert {{time}}",
+      "autoSync": "Automatische Synchronisierung im Hintergrund",
+      "syncNow": "Jetzt synchronisieren",
+      "restore": "Aus der Cloud wiederherstellen",
+      "restoreConfirm": "Erneut klicken zum Überschreiben",
+      "signOut": "Abmelden"
+    }
+  },
+  "onboarding": {
+    "welcome": "Willkommen bei Layer",
+    "subtitle": "Eine stille Schicht aus Widgets auf deinem Desktop. Drei kurze Dinge:",
+    "getStarted": "Loslegen",
+    "steps": {
+      "hotkey": {
+        "title": "Mit einem Tastenkürzel aufrufen",
+        "body": "Drücke jederzeit Ctrl + Shift + Space, um Layer in den Vordergrund zu holen und mit dem Bearbeiten zu beginnen. Drücke es erneut, um es wieder hinter deine Apps zu schieben."
+      },
+      "island": {
+        "title": "Das Insel-Menü",
+        "body": "Eine Pille sitzt oben in der Mitte deines Bildschirms. Öffne sie, um Widgets hinzuzufügen — Notizen, Uhren, Wetter, Apps und mehr."
+      },
+      "arrange": {
+        "title": "Gestalte deine Arbeitsfläche",
+        "body": "Ziehe Widgets an ihrem Griff, ändere die Größe an den Ecken, klicke mit der rechten Maustaste für Optionen. Widgets rasten beim Verschieben aneinander ein."
+      }
+    }
+  }
+}

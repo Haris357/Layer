@@ -1,0 +1,637 @@
+{
+  "common": {
+    "close": "閉じる",
+    "dragToMove": "ドラッグして移動",
+    "quit": "Layer を終了"
+  },
+  "toolbar": {
+    "openMenu": "メニューを開く",
+    "exitEdit": "編集モードを終了",
+    "lockAll": "すべてロック",
+    "unlockAll": "すべてロック解除",
+    "showBackgrounds": "背景を表示",
+    "hideBackgrounds": "背景を非表示",
+    "resetSpace": "このスペースをリセット",
+    "resetSpaceConfirm": "もう一度クリックしてこのスペースをリセット",
+    "spaces": "スペース",
+    "notifications": "通知",
+    "notificationsNew": "通知 · 新着 {{count}} 件",
+    "settings": "設定",
+    "styles": "{{name}} · スタイル",
+    "styleHeader": "{{name}} スタイル",
+    "spaceReset": "スペースをリセットしました"
+  },
+  "updates": {
+    "available": "Layer v{{version}} が利用可能です",
+    "availableBody": "設定 → アップデートを確認 を開いてインストールしてください。",
+    "upToDate": "最新バージョンをご利用中です ✦",
+    "checkFailed": "アップデートを確認できませんでした"
+  },
+  "widgets": {
+    "note": "ノート",
+    "clock": "時計",
+    "link": "リンク",
+    "image": "画像",
+    "video": "動画",
+    "gallery": "ギャラリー",
+    "weather": "天気",
+    "stats": "ステータス",
+    "todo": "ToDo",
+    "countdown": "カウントダウン",
+    "worldclock": "世界時計",
+    "calendar": "カレンダー",
+    "apps": "アプリ",
+    "search": "検索",
+    "nowplaying": "再生中",
+    "notifications": "通知",
+    "converter": "コンバーター",
+    "pomodoro": "ポモドーロ",
+    "sticky": "付箋",
+    "inbox": "受信トレイ",
+    "clipboard": "クリップボード",
+    "webembed": "Web 埋め込み",
+    "diskinfo": "ディスク情報",
+    "greeting": "あいさつ",
+    "shelf": "シェルフ",
+    "audio": "オーディオデバイス",
+    "board": "ボード"
+  },
+  "settings": {
+    "title": "設定",
+    "version": "Layer v{{version}}",
+    "tabs": {
+      "general": "一般",
+      "appearance": "外観",
+      "screensaver": "スクリーンセーバー",
+      "notch": "ノッチ",
+      "sync": "クラウド同期",
+      "shortcuts": "ショートカット",
+      "about": "Layer について"
+    },
+    "general": {
+      "snapToGrid": "ウィジェットをグリッドにスナップ",
+      "gridSize": "スナップグリッドのサイズ · {{size}}px",
+      "launchOnStartup": "起動時に Layer を開く",
+      "startupViaWindows": "Windows の設定 → スタートアップ アプリ",
+      "hotCorner": "ホットコーナーでスペースを切り替え",
+      "language": "言語",
+      "languageHint": "Layer のインターフェースで使用する言語です。",
+      "canvas": "キャンバス",
+      "exportImage": "キャンバスを画像として書き出し",
+      "resetSpace": "このスペースをリセット",
+      "resetSpaceConfirm": "もう一度クリックして「{{name}}」を消去"
+    },
+    "appearance": {
+      "theme": "テーマ",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム",
+      "matchWallpaper": "アクセントを壁紙に合わせる",
+      "showOn": "Layer の表示先",
+      "showOnHint": "ピル、設定、ポップアップを表示するモニターです。",
+      "autoPrimary": "自動（メイン）",
+      "display": "ディスプレイ {{n}}"
+    },
+    "screensaver": {
+      "storeNote": "Microsoft Store 版では Layer を Windows のスクリーンセーバーとして設定できません（サンドボックスではシステムのスクリーンセーバーを登録できないため）。Ctrl+Shift+S でスタイルをプレビューすることは可能です。",
+      "useAsScreensaver": "Layer をスクリーンセーバーとして使用",
+      "style": "スタイル",
+      "ambient": "アンビエント",
+      "minimal": "ミニマル",
+      "quote": "名言",
+      "descMinimal": "大きな時計と日付だけ。",
+      "descQuote": "穏やかな一文と時刻が移り変わります。",
+      "descAmbient": "時計、日付、現在の天気、再生中の曲。",
+      "idleNote": "アイドル状態になると、Layer が上記のビューですべての画面を埋めます。キー入力やマウス操作で解除されます。",
+      "previewNow": "今すぐプレビュー"
+    },
+    "shortcuts": {
+      "keyboard": "キーボード",
+      "toggleEdit": "編集モードの切り替え",
+      "pressKeys": "キーを押してください…",
+      "quickCapture": "クイックキャプチャ",
+      "cycleSpaces": "スペースを順に切り替え",
+      "peek": "のぞき見（長押し）",
+      "previewScreensaver": "スクリーンセーバーをプレビュー",
+      "hotCornerNote": "マウスを左上の隅に弾くようにしてスペースを切り替えることもできます（一般設定で「ホットコーナー」を有効にしてください）。"
+    },
+    "about": {
+      "tagline": "デスクトップに静かに重なるレイヤー",
+      "storeUpdates": "アップデートは Microsoft Store によって自動的に配信されます。",
+      "checkUpdates": "アップデートを確認",
+      "checking": "アップデートを確認中…",
+      "upToDate": "最新バージョンをご利用中です。",
+      "updateFailed": "アップデートを確認できませんでした。",
+      "rateStore": "ストアで Layer を評価",
+      "store": "Microsoft Store",
+      "github": "GitHub",
+      "support": "☕ Layer を支援する"
+    },
+    "toasts": {
+      "canvasExported": "キャンバスを書き出しました",
+      "openFolder": "フォルダーを開く",
+      "exportFailed": "書き出しに失敗しました",
+      "exportDialogTitle": "キャンバスを画像として書き出し"
+    }
+  },
+  "note": {
+    "editor": {
+      "placeholder": "書き始める"
+    },
+    "toolbar": {
+      "dragToMove": "ドラッグして移動",
+      "typefaceSize": "書体とサイズ",
+      "freewrite": "フリーライト",
+      "endFreewrite": "フリーライトを終了",
+      "darkMode": "ダークモード",
+      "lightMode": "ライトモード",
+      "fullscreen": "全画面表示",
+      "exitFullscreen": "全画面表示を終了",
+      "newEntry": "新規エントリー",
+      "pastEntries": "過去のエントリー"
+    },
+    "font": {
+      "size": "サイズ",
+      "typeface": "書体",
+      "random": "ランダムなフォント"
+    },
+    "freewrite": {
+      "title": "フリーライト",
+      "description": "止まらずに書きましょう。バックスペースも編集もなし。時間が来るまでひたすら言葉を流し続けてください。",
+      "introTitle": "とにかく書き続ける",
+      "introBody": "バックスペースも編集もなし。判断せずに言葉を流しましょう。タイマーが終わるまで止めないで。",
+      "hudHint": "書き続けて — 戻れません · Esc で終了",
+      "doneToast": "フリーライト完了 — {{mins}} 分で {{words}} 語 ✍",
+      "completeTitle": "フリーライト完了 ✦",
+      "completeBody": "途切れない流れで {{mins}} 分間に {{words}} 語。"
+    },
+    "history": {
+      "title": "エントリー",
+      "entryTitle": "エントリーのタイトル",
+      "emptyEntry": "空のエントリー",
+      "pin": "ピン留め",
+      "unpin": "ピン留めを解除",
+      "rename": "名前を変更",
+      "delete": "削除"
+    },
+    "entry": {
+      "word": "{{count}} 語",
+      "words": "{{count}} 語"
+    }
+  },
+  "sticky": {
+    "placeholder": "メモを書き留める…",
+    "dragToMove": "ドラッグして移動",
+    "colorLabel": "付箋の色",
+    "colors": {
+      "yellow": "イエロー",
+      "pink": "ピンク",
+      "blue": "ブルー",
+      "green": "グリーン",
+      "orange": "オレンジ",
+      "lilac": "ライラック"
+    }
+  },
+  "greeting": {
+    "nameLabel": "あなたの名前",
+    "namePlaceholder": "例：Haris",
+    "styleLabel": "スタイル",
+    "alignLabel": "配置",
+    "styles": {
+      "classic": "クラシック",
+      "serif": "セリフ",
+      "gradient": "グラデーション",
+      "mono": "モノ",
+      "script": "スクリプト",
+      "playfair": "ディスプレイ",
+      "modern": "モダン"
+    }
+  },
+  "clock": {
+    "fonts": {
+      "anurati": "Anurati",
+      "stencil": "ステンシル",
+      "scifi": "SF",
+      "retro": "レトロ"
+    },
+    "format": {
+      "12h": "12h",
+      "24h": "24h"
+    },
+    "showSeconds": "秒を表示",
+    "showDate": "日付を表示"
+  },
+  "worldclock": {
+    "empty": "設定で都市を追加してください",
+    "removeZone": "ゾーンを削除"
+  },
+  "todo": {
+    "header": "タスク · {{done}}/{{total}}",
+    "addPlaceholder": "タスクを追加…",
+    "deleteTooltip": "タスクを削除"
+  },
+  "pomodoro": {
+    "phase": {
+      "focus": "集中",
+      "short": "小休憩",
+      "long": "長休憩"
+    },
+    "start": "開始",
+    "pause": "一時停止",
+    "reset": "リセット",
+    "skip": "スキップ",
+    "skipBreak": "休憩をスキップ",
+    "focusSound": "集中サウンド",
+    "soundOff": "オフ",
+    "todayLabel": "今日：",
+    "focused": "集中",
+    "settings": {
+      "focusMin": "集中（分）",
+      "shortBreakMin": "小休憩（分）",
+      "longBreakMin": "長休憩（分）",
+      "longBreakAfter": "長休憩までの回数"
+    }
+  },
+  "inbox": {
+    "title": "受信トレイ",
+    "shortcut": "Ctrl + Shift + N",
+    "emptyHint": "どこででも <b>Ctrl + Shift + N</b> を押して思いついたことをキャプチャ。",
+    "markDoneTooltip": "完了にする",
+    "removeTooltip": "削除",
+    "clearDoneTooltip": "完了を消去"
+  },
+  "board": {
+    "notePlaceholder": "ノート…",
+    "addCardTooltip": "カードを追加",
+    "changeColorTooltip": "色を変更",
+    "deleteCardTooltip": "カードを削除",
+    "connectTooltip": "ドラッグして接続"
+  },
+  "shelf": {
+    "title": "シェルフ",
+    "addFolderTooltip": "フォルダーを追加",
+    "addFilesTooltip": "ファイルを追加",
+    "openTooltip": "{{name}} を開く",
+    "showInFolderTooltip": "フォルダー内に表示",
+    "removeTooltip": "シェルフから削除",
+    "emptyDrop": "ここにファイルをドロップしてシェルフに追加",
+    "emptyBrowse": "またはクリックして参照",
+    "dropOverlay": "ドロップしてシェルフに追加"
+  },
+  "countdown": {
+    "units": {
+      "days": "日",
+      "hrs": "時間",
+      "min": "分",
+      "sec": "秒"
+    },
+    "since": "経過",
+    "until": "まで",
+    "defaultTitle": "カウントダウン",
+    "eventNamePlaceholder": "イベント名"
+  },
+  "calendar": {
+    "allDay": "終日",
+    "nav": {
+      "previous": "前へ",
+      "next": "次へ",
+      "jumpToToday": "今日へ移動"
+    },
+    "view": {
+      "month": "月",
+      "week": "週",
+      "day": "日"
+    },
+    "repeat": {
+      "none": "繰り返さない",
+      "daily": "毎日",
+      "weekly": "毎週",
+      "monthly": "毎月",
+      "yearly": "毎年"
+    },
+    "day": {
+      "free": "予定なし",
+      "today": "今日",
+      "noEvents": "イベントなし",
+      "addOne": "+ 追加"
+    },
+    "popover": {
+      "nothingScheduled": "予定はありません。",
+      "newEvent": "新規イベント",
+      "repeatsLabel": "{{repeat}}に繰り返し"
+    },
+    "editor": {
+      "editTitle": "イベントを編集",
+      "newTitle": "新規イベント",
+      "eventTitle": "イベントのタイトル",
+      "untitled": "無題",
+      "allDayLabel": "終日",
+      "color": "色",
+      "repeats": "繰り返し",
+      "repeatUntil": "繰り返しの終了",
+      "until": "終了日",
+      "notes": "メモ（任意）",
+      "save": "保存",
+      "add": "イベントを追加",
+      "delete": "削除",
+      "readOnly": "購読中のカレンダーから · 読み取り専用"
+    },
+    "settings": {
+      "title": "購読中のカレンダー",
+      "instructions": "下に iCal/.ics リンクを貼り付けてください。Google：設定 →「iCal 形式の非公開 URL」。Proton/Outlook：カレンダーの共有リンク。",
+      "invalidLink": "https:// または webcal:// の .ics リンクを貼り付けてください",
+      "defaultName": "カレンダー",
+      "loadFailed": "読み込めませんでした",
+      "synced": "同期済み",
+      "on": "オン",
+      "off": "オフ",
+      "enable": "有効にする",
+      "disable": "無効にする",
+      "removeCalendar": "カレンダーを削除",
+      "namePlaceholder": "名前（例：仕事）",
+      "urlPlaceholder": "https://…/basic.ics",
+      "add": "追加"
+    }
+  },
+  "search": {
+    "placeholder": "Web を検索…",
+    "engines": {
+      "google": "Google",
+      "bing": "Bing",
+      "ddg": "DDG",
+      "custom": "カスタム"
+    },
+    "customPlaceholder": "https://example.com/search?q=%s"
+  },
+  "apps": {
+    "layout": {
+      "list": "リスト",
+      "grid": "グリッド"
+    },
+    "searchInstalled": "インストール済みアプリを検索…",
+    "pin": "+ ピン留め",
+    "pinned": "ピン留め済み",
+    "addFolder": "フォルダーを追加",
+    "emptyHint": "+ をタップして最初のアプリをピン留め",
+    "addAppsOrFolder": "アプリまたはフォルダーを追加",
+    "dragToReorder": "ドラッグして並べ替え",
+    "remove": "削除"
+  },
+  "clipboard": {
+    "title": "クリップボード",
+    "empty": "何かをコピーすると、ここに表示されます。",
+    "noMatches": "一致なし",
+    "search": "検索…",
+    "copyLabel": "{{label}} をコピー",
+    "pin": "ピン留め",
+    "unpin": "ピン留めを解除",
+    "remove": "削除",
+    "clearUnpinned": "ピン留め以外を消去",
+    "copied": "クリップボードにコピーしました",
+    "copyFailed": "コピーできませんでした"
+  },
+  "webembed": {
+    "addUrl": "設定で URL を追加してください",
+    "loading": "{{host}} を読み込み中…",
+    "noEmbed": "は埋め込みを許可していません",
+    "openInBrowser": "ブラウザーで開く",
+    "iframeTitle": "Web 埋め込み",
+    "urlLabel": "URL",
+    "urlPlaceholder": "ダッシュボード、YouTube 動画のリンクなど…",
+    "urlHint": "YouTube のホーム、Google、X などは埋め込みをブロックします — 動画のリンクを貼り付けるか、「ブラウザーで開く」を使ってください。",
+    "zoom": "ズーム · {{pct}}%",
+    "autoRefresh": "自動更新",
+    "refresh": {
+      "off": "オフ",
+      "30s": "30s",
+      "1m": "1m",
+      "5m": "5m"
+    }
+  },
+  "nowplaying": {
+    "empty": "再生中のものはありません",
+    "defaultSource": "再生中",
+    "unknownTrack": "不明なトラック",
+    "controls": {
+      "previous": "前へ",
+      "play": "再生",
+      "pause": "一時停止",
+      "next": "次へ"
+    },
+    "settings": {
+      "artBackground": "アルバムアートの背景",
+      "artBackgroundDesc": "プレーヤーの背後にアルバムアートをぼかして表示し、調和した色合いを重ねます。オフにすると、シンプルなテーマカラーのカードになります。"
+    }
+  },
+  "notifications": {
+    "title": "通知 · {{count}}",
+    "clearAll": "すべて消去",
+    "empty": "通知はありません",
+    "dismiss": "閉じる"
+  },
+  "audio": {
+    "output": "出力",
+    "input": "入力",
+    "empty": "オーディオデバイスが見つかりません。",
+    "settings": {
+      "both": "両方",
+      "background": "背景"
+    }
+  },
+  "converter": {
+    "swap": "単位を入れ替え",
+    "categories": {
+      "length": "長さ",
+      "weight": "重さ",
+      "temperature": "温度",
+      "currency": "通貨"
+    }
+  },
+  "link": {
+    "renderer": {
+      "openTooltip": "ダブルクリックで {{url}} を開く",
+      "untitled": "無題"
+    },
+    "settings": {
+      "invalidUrl": "有効な URL を入力してください",
+      "urlPlaceholder": "https://...",
+      "labelPlaceholder": "ラベル",
+      "iconSearchPlaceholder": "アイコンを検索…"
+    }
+  },
+  "image": {
+    "settings": {
+      "fitCover": "カバー",
+      "fitContain": "全体表示",
+      "rounded": "角丸 · {{px}}px",
+      "replace": "画像を差し替え"
+    }
+  },
+  "video": {
+    "settings": {
+      "autoplay": "自動再生",
+      "loop": "ループ",
+      "muted": "ミュート",
+      "replace": "動画を差し替え"
+    }
+  },
+  "gallery": {
+    "renderer": {
+      "empty": "設定でメディアを追加してください"
+    },
+    "settings": {
+      "layoutSlides": "スライド",
+      "layoutGrid": "グリッド",
+      "layoutPhotos": "フォト",
+      "layoutCollage": "コラージュ",
+      "slideEvery": "{{seconds}}s ごとにスライド",
+      "rounded": "角丸 · {{px}}px",
+      "addMedia": "メディアを追加（{{count}}）"
+    }
+  },
+  "weather": {
+    "conditions": {
+      "clear": "快晴",
+      "partlyCloudy": "晴れときどき曇り",
+      "cloudy": "曇り",
+      "fog": "霧",
+      "drizzle": "霧雨",
+      "rain": "雨",
+      "snow": "雪",
+      "showers": "にわか雨",
+      "snowShowers": "にわか雪",
+      "thunderstorm": "雷雨"
+    },
+    "renderer": {
+      "unavailable": "利用できません",
+      "loading": "読み込み中…",
+      "mph": "mph",
+      "kmh": "km/h"
+    },
+    "settings": {
+      "myLocation": "現在地",
+      "findingYou": "現在地を取得中…",
+      "useMyLocation": "現在地を使用",
+      "searchCity": "都市を検索…"
+    }
+  },
+  "stats": {
+    "system": "システム",
+    "cpu": "CPU",
+    "memory": "メモリ",
+    "storage": "ストレージ",
+    "battery": "バッテリー",
+    "chargingSuffix": " · 充電中"
+  },
+  "diskinfo": {
+    "title": "ディスク",
+    "reading": "ディスクを読み込み中…",
+    "noDisks": "ディスクが見つかりません",
+    "removable": "リムーバブル",
+    "read": "読み取り",
+    "write": "書き込み",
+    "active": "アクティブ",
+    "freeOf": "空き / 全 {{total}}",
+    "percentUsed": "{{percent}}% 使用中"
+  },
+  "spaces": {
+    "heading": "スペース",
+    "description": "レイアウトを切り替えたり、自作したり、書き出したり、ギャラリーに公開したりできます。",
+    "newSpace": "新規スペース",
+    "import": "インポート",
+    "badge": {
+      "default": "デフォルト"
+    },
+    "actions": {
+      "save": "保存",
+      "rename": "名前を変更",
+      "publish": "ギャラリーに公開",
+      "export": "ZIP として書き出し",
+      "reset": "スペースをリセット",
+      "resetConfirm": "もう一度クリックして消去",
+      "delete": "削除"
+    },
+    "feedback": {
+      "exported": "スペースを書き出しました ✦",
+      "exportFailed": "スペースを書き出せませんでした。",
+      "imported": "「{{name}}」をインポートしました",
+      "published": "ギャラリーに公開しました ✦",
+      "publishFailed": "公開できませんでした — もう一度お試しください。",
+      "reset": "「{{name}}」をリセットしました"
+    },
+    "notify": {
+      "importedTitle": "「{{name}}」をインポートしました",
+      "importedBody": "{{count}} 個のウィジェットを新しいスペースとして追加しました。"
+    }
+  },
+  "notifPanel": {
+    "heading": "通知",
+    "markAllRead": "すべて既読にする",
+    "clearAll": "すべて消去",
+    "markRead": "既読にする",
+    "remove": "削除",
+    "empty": "すべて確認済みです ✦"
+  },
+  "sync": {
+    "title": "クラウド同期",
+    "subtitle": "任意 — レイアウトを複数のデバイス間で保持できます。",
+    "consent": {
+      "title": "クラウド同期で保存される内容",
+      "syncedLabel": "同期される",
+      "localLabel": "このデバイスに残る",
+      "synced": {
+        "layout": "スペースとウィジェットのレイアウト",
+        "sizes": "サイズと位置",
+        "colors": "色とライト/ダーク",
+        "settings": "ウィジェットの設定"
+      },
+      "local": {
+        "notes": "ノートと付箋のテキスト",
+        "todo": "ToDo 項目のテキスト",
+        "clipboard": "クリップボードと受信トレイ",
+        "shelf": "シェルフのファイルとローカルパス"
+      },
+      "checkbox": "内容を理解し、クラウド同期を有効にします。"
+    },
+    "signIn": {
+      "emailLabel": "メールアドレス",
+      "emailPlaceholder": "you@example.com",
+      "sending": "送信中…",
+      "sendCode": "コードを送信",
+      "codeSentTo": "次の宛先に送信された 6 桁のコードを入力してください",
+      "verifying": "確認中…",
+      "verify": "確認して有効にする",
+      "resend": "再送信",
+      "disclaimer": "パスワードは不要 — ワンタイムコードをメールでお送りします。レイアウトはこのアドレスで同期され、複数のデバイス間では最新の変更が優先されます。"
+    },
+    "signedIn": {
+      "signedIn": "サインイン済み",
+      "syncing": "同期中…",
+      "lastSynced": "最終同期 {{time}}",
+      "autoSync": "バックグラウンドで自動同期",
+      "syncNow": "今すぐ同期",
+      "restore": "クラウドから復元",
+      "restoreConfirm": "もう一度クリックして上書き",
+      "signOut": "サインアウト"
+    }
+  },
+  "onboarding": {
+    "welcome": "Layer へようこそ",
+    "subtitle": "デスクトップに静かに重なるウィジェットのレイヤー。まずは 3 つのポイント：",
+    "getStarted": "はじめる",
+    "steps": {
+      "hotkey": {
+        "title": "ホットキーで呼び出す",
+        "body": "いつでも Ctrl + Shift + Space を押すと Layer が前面に表示され、編集を始められます。もう一度押すと、アプリの背後にしまわれます。"
+      },
+      "island": {
+        "title": "アイランドメニュー",
+        "body": "画面上部中央にピルが配置されています。開くとウィジェットを追加できます — ノート、時計、天気、アプリなど。"
+      },
+      "arrange": {
+        "title": "キャンバスを整える",
+        "body": "グリップハンドルでウィジェットをドラッグし、角からサイズ変更、右クリックでオプションを表示。動かすとウィジェット同士がスナップします。"
+      }
+    }
+  }
+}

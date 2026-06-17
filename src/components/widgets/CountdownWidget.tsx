@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Timer, Hourglass } from 'lucide-react'
 import type { CountdownWidget as CountdownWidgetType } from '../../types/widget'
 import { TextField } from '../ui'
@@ -33,6 +34,7 @@ function breakdown(targetMs: number): Breakdown {
 }
 
 function CountdownRenderer({ widget }: { widget: CountdownWidgetType }) {
+  const { t } = useTranslation()
   const [, setTick] = useState(0)
 
   useEffect(() => {
@@ -48,7 +50,7 @@ function CountdownRenderer({ widget }: { widget: CountdownWidgetType }) {
     const fire = () =>
       notify({
         kind: 'timer',
-        title: `${widget.label || 'Countdown'} reached zero ✦`,
+        title: `${widget.label || t('countdown.defaultTitle')} reached zero ✦`,
         dedupe: `countdown-${widget.id}-${widget.target}`,
       })
     if (remaining <= 0) {
@@ -57,16 +59,16 @@ function CountdownRenderer({ widget }: { widget: CountdownWidgetType }) {
     }
     const id = window.setTimeout(fire, remaining)
     return () => window.clearTimeout(id)
-  }, [widget.id, widget.target, widget.label])
+  }, [widget.id, widget.target, widget.label, t])
 
   const card = widget.background !== false
   const b = breakdown(new Date(widget.target).getTime())
 
   const segs: { value: number; label: string }[] = [
-    { value: b.days, label: 'days' },
-    { value: b.hours, label: 'hrs' },
-    { value: b.minutes, label: 'min' },
-    { value: b.seconds, label: 'sec' },
+    { value: b.days, label: t('countdown.units.days') },
+    { value: b.hours, label: t('countdown.units.hrs') },
+    { value: b.minutes, label: t('countdown.units.min') },
+    { value: b.seconds, label: t('countdown.units.sec') },
   ]
 
   return (
@@ -120,7 +122,7 @@ function CountdownRenderer({ widget }: { widget: CountdownWidgetType }) {
           className="truncate text-center"
           style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.2px' }}
         >
-          {b.passed ? 'since' : 'until'} {widget.label}
+          {b.passed ? t('countdown.since') : t('countdown.until')} {widget.label}
         </span>
       </div>
     </div>
@@ -134,11 +136,12 @@ function CountdownSettings({
   widget: CountdownWidgetType
   onUpdate: (patch: Partial<CountdownWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex w-[230px] flex-col gap-2.5">
       <TextField
         value={widget.label}
-        placeholder="Event name"
+        placeholder={t('countdown.eventNamePlaceholder')}
         maxLength={28}
         onChange={(v) => onUpdate({ label: v })}
       />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Activity,
   Cpu,
@@ -47,6 +48,7 @@ function Bar({
 }
 
 function StatsRenderer() {
+  const { t } = useTranslation()
   const [stats, setStats] = useState<SystemStats | null>(null)
 
   useEffect(() => {
@@ -78,18 +80,18 @@ function StatsRenderer() {
       <div className="flex items-center gap-1.5 text-[var(--text-tertiary)]">
         <Activity size={13} strokeWidth={1.8} />
         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.3px' }}>
-          SYSTEM
+          {t('stats.system')}
         </span>
       </div>
       <Bar
         icon={Cpu}
-        label="CPU"
+        label={t('stats.cpu')}
         pct={stats?.cpu ?? 0}
         detail={stats ? `${Math.round(stats.cpu)}%` : '—'}
       />
       <Bar
         icon={MemoryStick}
-        label="Memory"
+        label={t('stats.memory')}
         pct={memPct}
         detail={
           stats
@@ -99,7 +101,7 @@ function StatsRenderer() {
       />
       <Bar
         icon={HardDrive}
-        label="Storage"
+        label={t('stats.storage')}
         pct={
           stats ? (stats.diskUsed / Math.max(1, stats.diskTotal)) * 100 : 0
         }
@@ -112,9 +114,9 @@ function StatsRenderer() {
       {stats && stats.battery >= 0 && (
         <Bar
           icon={stats.charging ? BatteryCharging : Battery}
-          label="Battery"
+          label={t('stats.battery')}
           pct={stats.battery}
-          detail={`${stats.battery}%${stats.charging ? ' · charging' : ''}`}
+          detail={`${stats.battery}%${stats.charging ? t('stats.chargingSuffix') : ''}`}
         />
       )}
     </div>

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Globe, X } from 'lucide-react'
 import type {
   WorldClockWidget as WorldClockWidgetType,
   WorldZone,
 } from '../../types/widget'
 import { uid } from '../../lib/utils'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 const COMMON_ZONES: { label: string; tz: string }[] = [
@@ -46,6 +48,7 @@ function zoneDay(tz: string, now: Date): string {
 }
 
 function WorldClockRenderer({ widget }: { widget: WorldClockWidgetType }) {
+  const { t } = useTranslation()
   const [now, setNow] = useState(() => new Date())
 
   useEffect(() => {
@@ -84,7 +87,7 @@ function WorldClockRenderer({ widget }: { widget: WorldClockWidgetType }) {
           className="text-[var(--text-tertiary)]"
           style={{ fontSize: 12 }}
         >
-          Add a city in settings
+          {t('worldclock.empty')}
         </span>
       )}
     </div>
@@ -98,6 +101,7 @@ function WorldClockSettings({
   widget: WorldClockWidgetType
   onUpdate: (patch: Partial<WorldClockWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const usedTz = new Set(widget.zones.map((z) => z.tz))
   const available = COMMON_ZONES.filter((z) => !usedTz.has(z.tz))
 
@@ -113,17 +117,19 @@ function WorldClockSettings({
               <span className="text-[12px] text-[var(--text-secondary)]">
                 {z.label}
               </span>
-              <button
-                type="button"
-                onClick={() =>
-                  onUpdate({
-                    zones: widget.zones.filter((x) => x.id !== z.id),
-                  })
-                }
-                className="text-[var(--text-tertiary)] hover:text-[var(--danger)]"
-              >
-                <X size={13} />
-              </button>
+              <Tooltip label={t('worldclock.removeZone')} side="left">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onUpdate({
+                      zones: widget.zones.filter((x) => x.id !== z.id),
+                    })
+                  }
+                  className="text-[var(--text-tertiary)] hover:text-[var(--danger)]"
+                >
+                  <X size={13} />
+                </button>
+              </Tooltip>
             </div>
           ))}
         </div>

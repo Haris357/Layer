@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   HardDrive,
   HardDriveDownload,
@@ -80,6 +81,7 @@ function Stat({
 }
 
 function DiskInfoRenderer({ widget }: { widget: DiskInfoWidgetType }) {
+  const { t } = useTranslation()
   const [disks, setDisks] = useState<DiskInfo[] | null>(null)
   const [io, setIo] = useState<DiskIo[]>([])
   const [selected, setSelected] = useState<string>(widget.disk ?? '')
@@ -137,17 +139,17 @@ function DiskInfoRenderer({ widget }: { widget: DiskInfoWidgetType }) {
           className="text-[var(--text-primary)]"
           style={{ fontSize: 12, fontWeight: 700, letterSpacing: '-0.3px' }}
         >
-          Disks
+          {t('diskinfo.title')}
         </span>
       </div>
 
       {disks === null ? (
         <div className="flex flex-1 items-center justify-center text-[11.5px] text-[var(--text-tertiary)]">
-          Reading disks…
+          {t('diskinfo.reading')}
         </div>
       ) : disks.length === 0 ? (
         <div className="flex flex-1 items-center justify-center text-[11.5px] text-[var(--text-tertiary)]">
-          No disks found
+          {t('diskinfo.noDisks')}
         </div>
       ) : (
         <>
@@ -203,7 +205,7 @@ function DiskInfoRenderer({ widget }: { widget: DiskInfoWidgetType }) {
                   )}
                   {sel.removable && (
                     <span className="text-[9.5px] font-semibold uppercase text-[var(--text-tertiary)]">
-                      removable
+                      {t('diskinfo.removable')}
                     </span>
                   )}
                   {sel.fs && (
@@ -227,10 +229,10 @@ function DiskInfoRenderer({ widget }: { widget: DiskInfoWidgetType }) {
                     <span className="font-semibold text-[var(--text-secondary)]">
                       {fmtBytes(sel.available)}
                     </span>{' '}
-                    free of {fmtBytes(sel.total)}
+                    {t('diskinfo.freeOf', { total: fmtBytes(sel.total) })}
                   </span>
                   <span className="font-semibold tabular-nums text-[var(--text-secondary)]">
-                    {Math.round(pct * 100)}% used
+                    {t('diskinfo.percentUsed', { percent: Math.round(pct * 100) })}
                   </span>
                 </div>
               </div>
@@ -239,17 +241,17 @@ function DiskInfoRenderer({ widget }: { widget: DiskInfoWidgetType }) {
               <div className="grid grid-cols-3 gap-1.5">
                 <Stat
                   icon={ArrowDownToLine}
-                  label="READ"
+                  label={t('diskinfo.read')}
                   value={act ? fmtSpeed(act.readBps) : '—'}
                 />
                 <Stat
                   icon={ArrowUpFromLine}
-                  label="WRITE"
+                  label={t('diskinfo.write')}
                   value={act ? fmtSpeed(act.writeBps) : '—'}
                 />
                 <Stat
                   icon={Activity}
-                  label="ACTIVE"
+                  label={t('diskinfo.active')}
                   value={act ? `${Math.round(Math.min(100, act.activePct))}%` : '—'}
                   pct={act ? act.activePct : 0}
                 />
@@ -269,6 +271,7 @@ function DiskInfoSettings({
   widget: DiskInfoWidgetType
   onUpdate: (patch: Partial<DiskInfoWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const [disks, setDisks] = useState<DiskInfo[] | null>(null)
 
   useEffect(() => {
@@ -285,7 +288,7 @@ function DiskInfoSettings({
   if (!disks || disks.length === 0) {
     return (
       <div className="w-[200px] text-[11.5px] text-[var(--text-tertiary)]">
-        {disks === null ? 'Reading disks…' : 'No disks found'}
+        {disks === null ? t('diskinfo.reading') : t('diskinfo.noDisks')}
       </div>
     )
   }

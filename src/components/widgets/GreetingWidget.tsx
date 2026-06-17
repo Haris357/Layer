@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Sparkles, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import type {
   GreetingWidget as GreetingWidgetType,
@@ -153,6 +154,7 @@ function GreetingSettings({
   widget: GreetingWidgetType
   onUpdate: (patch: Partial<GreetingWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const styles = Object.entries(GREETING_STYLES) as [GreetingStyle, StyleSpec][]
   const aligns: { id: GreetingAlign; Icon: typeof AlignLeft }[] = [
     { id: 'left', Icon: AlignLeft },
@@ -164,21 +166,21 @@ function GreetingSettings({
     <div className="flex w-[230px] flex-col gap-3">
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] font-medium text-[var(--text-tertiary)]">
-          Your name
+          {t('greeting.nameLabel')}
         </span>
         <input
           value={widget.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
-          placeholder="e.g. Haris"
+          placeholder={t('greeting.namePlaceholder')}
           className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)]"
         />
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] font-medium text-[var(--text-tertiary)]">
-          Style
+          {t('greeting.styleLabel')}
         </span>
         <div className="flex flex-wrap gap-1.5">
-          {styles.map(([id, s]) => {
+          {styles.map(([id]) => {
             const active = (widget.style ?? 'classic') === id
             return (
               <button
@@ -191,7 +193,7 @@ function GreetingSettings({
                     : 'border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]'
                 }`}
               >
-                {s.label}
+                {t(`greeting.styles.${id}`)}
               </button>
             )
           })}
@@ -199,7 +201,7 @@ function GreetingSettings({
       </div>
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] font-medium text-[var(--text-tertiary)]">
-          Alignment
+          {t('greeting.alignLabel')}
         </span>
         <div className="flex gap-1.5">
           {aligns.map(({ id, Icon }) => {

@@ -8,6 +8,7 @@ import {
   type SyntheticEvent,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   NotebookPen,
@@ -231,6 +232,7 @@ function NoteEditor({
   onKeyDown: (e: ReactKeyboardEvent<HTMLTextAreaElement>) => void
   onCaret: (e: SyntheticEvent<HTMLTextAreaElement>) => void
 }) {
+  const { t } = useTranslation()
   const updateEntry = useJournalStore((s) => s.updateEntry)
   const { syncKey, onChange } = useUncontrolledText(
     content,
@@ -250,7 +252,7 @@ function NoteEditor({
       onCut={(e) => {
         if (freewrite) e.preventDefault()
       }}
-      placeholder="Begin writing"
+      placeholder={t('note.editor.placeholder')}
       spellCheck
       className={cn(
         'h-full w-full resize-none bg-transparent px-9 py-8 outline-none placeholder:opacity-40',
@@ -269,6 +271,7 @@ function NoteEditor({
 }
 
 function Journal({ widget }: { widget: NoteWidgetType }) {
+  const { t } = useTranslation()
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const entries = useJournalStore((s) => s.entries)
   const hydrated = useJournalStore((s) => s.hydrated)
@@ -371,14 +374,14 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
         const mins = Math.round(timerDuration / 60)
         if (activeId) markFreewrite(activeId)
         useToastStore.getState().showToast({
-          message: `Freewrite done — ${words} words in ${mins} min ✍`,
+          message: t('note.freewrite.doneToast', { words, mins }),
           icon: 'focus',
           duration: 7000,
         })
         notify({
           kind: 'timer',
-          title: 'Freewrite complete ✦',
-          body: `${words} words in ${mins} minutes of unbroken flow.`,
+          title: t('note.freewrite.completeTitle'),
+          body: t('note.freewrite.completeBody', { words, mins }),
         })
         return
       }
@@ -395,7 +398,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
       window.clearInterval(id)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [timerOn, timerDuration, widget.activeEntryId, markFreewrite, updateEntry])
+  }, [timerOn, timerDuration, widget.activeEntryId, markFreewrite, updateEntry, t])
 
   // Close any open popovers (font menu, history) when the click lands
   // outside this note widget.
@@ -535,7 +538,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
         className="flex shrink-0 flex-col items-center gap-1 border-r py-2.5"
         style={{ borderColor: c.line, width: 50 }}
       >
-        <Tooltip label="Drag to move" side="right" className="mb-1">
+        <Tooltip label={t('note.toolbar.dragToMove')} side="right" className="mb-1">
           <div className="layer-drag-handle layer-grab flex flex-col items-center gap-[3px] py-1">
           {[0, 1, 2].map((i) => (
             <span
@@ -549,7 +552,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
 
         <div className="relative">
           <IconBtn
-            tip="Typeface & size"
+            tip={t('note.toolbar.typefaceSize')}
             active={fontMenu}
             theme={c}
             onClick={() => setFontMenu((v) => !v)}
@@ -572,7 +575,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                     className="text-[10px] font-bold uppercase tracking-wide"
                     style={{ color: c.sub }}
                   >
-                    Size
+                    {t('note.font.size')}
                   </span>
                   <span
                     className="text-[11px] tabular-nums"
@@ -602,9 +605,9 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                     className="text-[10px] font-bold uppercase tracking-wide"
                     style={{ color: c.sub }}
                   >
-                    Typeface
+                    {t('note.font.typeface')}
                   </span>
-                  <Tooltip label="Random font" side="top">
+                  <Tooltip label={t('note.font.random')} side="top">
                     <button
                       type="button"
                       onClick={() => {
@@ -646,7 +649,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
 
         <div className="relative">
           <IconBtn
-            tip={freewrite ? 'End freewrite' : 'Freewrite'}
+            tip={freewrite ? t('note.toolbar.endFreewrite') : t('note.toolbar.freewrite')}
             active={freewrite || fwMenu}
             theme={c}
             onClick={() => {
@@ -677,14 +680,13 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                   className="text-[13px] font-bold"
                   style={{ color: c.fg }}
                 >
-                  Freewrite
+                  {t('note.freewrite.title')}
                 </div>
                 <p
                   className="mt-1 text-[11.5px] leading-relaxed"
                   style={{ color: c.sub }}
                 >
-                  Write without stopping. No backspace, no editing — just keep
-                  the words flowing until time’s up.
+                  {t('note.freewrite.description')}
                 </p>
                 <div className="mt-2.5 grid grid-cols-4 gap-1.5">
                   {FREEWRITE_PRESETS.map((m) => (
@@ -711,7 +713,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
         </div>
 
         <IconBtn
-          tip={widget.theme === 'light' ? 'Dark mode' : 'Light mode'}
+          tip={widget.theme === 'light' ? t('note.toolbar.darkMode') : t('note.toolbar.lightMode')}
           theme={c}
           onClick={() => {
             const next = widget.theme === 'light' ? 'dark' : 'light'
@@ -729,7 +731,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
         <div className="flex-1" />
 
         <IconBtn
-          tip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+          tip={fullscreen ? t('note.toolbar.exitFullscreen') : t('note.toolbar.fullscreen')}
           theme={c}
           onClick={() => setFullscreen(!fullscreen)}
         >
@@ -740,12 +742,12 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
           )}
         </IconBtn>
 
-        <IconBtn tip="New entry" theme={c} onClick={newEntry}>
+        <IconBtn tip={t('note.toolbar.newEntry')} theme={c} onClick={newEntry}>
           <FilePlus2 size={16} strokeWidth={1.8} />
         </IconBtn>
 
         <IconBtn
-          tip="Past entries"
+          tip={t('note.toolbar.pastEntries')}
           active={showHistory}
           theme={c}
           onClick={() => setShowHistory((v) => !v)}
@@ -827,8 +829,14 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                   {fmt(timerLeft)}
                 </span>
                 <span style={{ color: c.sub, fontSize: 12 }}>
-                  {wordCount(editorRef.current?.value ?? active?.content ?? '')}{' '}
-                  words
+                  {(() => {
+                    const wc = wordCount(
+                      editorRef.current?.value ?? active?.content ?? '',
+                    )
+                    return t(wc === 1 ? 'note.entry.word' : 'note.entry.words', {
+                      count: wc,
+                    })
+                  })()}
                 </span>
               </div>
               {/* bottom hint */}
@@ -836,7 +844,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                 className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px]"
                 style={{ color: c.sub }}
               >
-                Keep writing — no going back · Esc to end
+                {t('note.freewrite.hudHint')}
               </div>
             </motion.div>
           )}
@@ -864,14 +872,13 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                 <div
                   style={{ color: c.fg, fontSize: 19, fontWeight: 700 }}
                 >
-                  Just keep writing
+                  {t('note.freewrite.introTitle')}
                 </div>
                 <p
                   className="mt-2 text-[13.5px] leading-relaxed"
                   style={{ color: c.sub }}
                 >
-                  No backspace, no editing — let the words flow without judging
-                  them. Don’t stop until the timer runs out.
+                  {t('note.freewrite.introBody')}
                 </p>
               </div>
             </motion.div>
@@ -894,7 +901,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                 style={{ borderColor: c.line }}
               >
                 <span style={{ color: c.fg, fontSize: 14, fontWeight: 700 }}>
-                  Entries
+                  {t('note.history.title')}
                 </span>
                 <button
                   type="button"
@@ -940,7 +947,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                             if (ev.key === 'Enter') commitRename()
                             if (ev.key === 'Escape') setRenamingId(null)
                           }}
-                          placeholder="Entry title"
+                          placeholder={t('note.history.entryTitle')}
                           className="my-2 min-w-0 flex-1 rounded-[6px] px-2 py-1 text-[13px] outline-none"
                           style={{
                             background: c.hover,
@@ -976,14 +983,16 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                             className="truncate"
                             style={{ color: c.sub, fontSize: 12 }}
                           >
-                            {preview ? preview.slice(0, 42) : 'Empty entry'}
+                            {preview ? preview.slice(0, 42) : t('note.history.emptyEntry')}
                           </span>
                           <span
                             className="mt-0.5 flex items-center gap-1.5"
                             style={{ color: c.sub, fontSize: 10.5 }}
                           >
                             <span>
-                              {words} {words === 1 ? 'word' : 'words'}
+                              {t(words === 1 ? 'note.entry.word' : 'note.entry.words', {
+                                count: words,
+                              })}
                             </span>
                             {fw > 0 && (
                               <span className="flex items-center gap-0.5">
@@ -996,7 +1005,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                       )}
                       {!renaming && (
                         <div className="flex shrink-0 items-center opacity-0 transition-opacity group-hover/e:opacity-100">
-                          <Tooltip label={e.pinned ? 'Unpin' : 'Pin'} side="top">
+                          <Tooltip label={e.pinned ? t('note.history.unpin') : t('note.history.pin')} side="top">
                             <button
                               type="button"
                               onClick={() => togglePin(e.id)}
@@ -1006,7 +1015,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                               <Pin size={12} />
                             </button>
                           </Tooltip>
-                          <Tooltip label="Rename" side="top">
+                          <Tooltip label={t('note.history.rename')} side="top">
                             <button
                               type="button"
                               onClick={() => {
@@ -1019,7 +1028,7 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
                               <Pencil size={12} />
                             </button>
                           </Tooltip>
-                          <Tooltip label="Delete" side="top">
+                          <Tooltip label={t('note.history.delete')} side="top">
                             <button
                               type="button"
                               onClick={() => deleteEntry(e.id)}

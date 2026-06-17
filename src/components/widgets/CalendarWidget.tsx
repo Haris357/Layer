@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -139,6 +140,7 @@ function WeekView({
   events: CalendarEvent[]
   onSelectDay: (d: Date) => void
 }) {
+  const { t } = useTranslation()
   // 7 days starting from the Sunday of the cursor week, as horizontal rows.
   const sunday = addDays(cursor, -cursor.getDay())
   const days = Array.from({ length: 7 }, (_, i) => addDays(sunday, i))
@@ -207,7 +209,7 @@ function WeekView({
                   className="italic text-[var(--text-tertiary)]"
                   style={{ fontSize: 10.5 }}
                 >
-                  Free
+                  {t('calendar.day.free')}
                 </span>
               ) : (
                 ev.map((e) => (
@@ -251,6 +253,7 @@ function DayView({
   onAdd: () => void
   onEdit: (e: CalendarEvent) => void
 }) {
+  const { t } = useTranslation()
   const dayEvents = eventsOnDay(events, cursor)
   const isToday = sameDay(cursor, today)
   return (
@@ -267,7 +270,7 @@ function DayView({
               className="ml-1.5 rounded-[4px] px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide"
               style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}
             >
-              Today
+              {t('calendar.day.today')}
             </span>
           )}
         </span>
@@ -278,13 +281,13 @@ function DayView({
             className="my-auto flex flex-col items-center gap-2 text-[var(--text-tertiary)]"
           >
             <CalendarDays size={22} strokeWidth={1.5} />
-            <span style={{ fontSize: 11 }}>No events</span>
+            <span style={{ fontSize: 11 }}>{t('calendar.day.noEvents')}</span>
             <button
               type="button"
               onClick={onAdd}
               className="mt-1 rounded-[8px] bg-[var(--accent)] px-3 py-1 text-[11px] font-semibold text-[var(--on-accent)]"
             >
-              + Add one
+              {t('calendar.day.addOne')}
             </button>
           </div>
         )}
@@ -310,8 +313,9 @@ function DayView({
                 className="text-[var(--text-tertiary)]"
                 style={{ fontSize: 10.5 }}
               >
-                {e.allDay ? 'All day' : fmtTime(new Date(e.start))}
-                {e.recurrence !== 'none' && ` · ${e.recurrence}`}
+                {e.allDay ? t('calendar.allDay') : fmtTime(new Date(e.start))}
+                {e.recurrence !== 'none' &&
+                  ` · ${t(`calendar.repeat.${e.recurrence}`)}`}
               </div>
             </div>
           </button>
@@ -334,6 +338,7 @@ function DayPopover({
   onNew: () => void
   onEdit: (e: CalendarEvent) => void
 }) {
+  const { t } = useTranslation()
   const events = useAllEvents()
   const list = eventsOnDay(events, date)
   return createPortal(
@@ -358,7 +363,7 @@ function DayPopover({
             {WEEKDAYS_SHORT[date.getDay()]}, {MONTHS[date.getMonth()]}{' '}
             {date.getDate()}
           </span>
-          <Tooltip label="Close" side="bottom">
+          <Tooltip label={t('common.close')} side="bottom">
             <button
               type="button"
               onClick={onClose}
@@ -371,7 +376,7 @@ function DayPopover({
         <div className="flex flex-1 flex-col gap-1 overflow-y-auto">
           {list.length === 0 && (
             <div className="py-6 text-center text-[12px] text-[var(--text-tertiary)]">
-              Nothing scheduled.
+              {t('calendar.popover.nothingScheduled')}
             </div>
           )}
           {list.map((e) => (
@@ -396,8 +401,9 @@ function DayPopover({
                   className="text-[var(--text-tertiary)]"
                   style={{ fontSize: 11 }}
                 >
-                  {e.allDay ? 'All day' : fmtTime(new Date(e.start))}
-                  {e.recurrence !== 'none' && ` · repeats ${e.recurrence}`}
+                  {e.allDay ? t('calendar.allDay') : fmtTime(new Date(e.start))}
+                  {e.recurrence !== 'none' &&
+                    ` · ${t('calendar.popover.repeatsLabel', { repeat: t(`calendar.repeat.${e.recurrence}`) })}`}
                 </div>
                 {e.note && (
                   <div
@@ -417,7 +423,7 @@ function DayPopover({
           className="mt-3 flex items-center justify-center gap-1.5 rounded-[8px] bg-[var(--accent)] py-2 text-[13px] font-semibold text-[var(--on-accent)] transition-transform hover:scale-[1.01]"
         >
           <Plus size={14} strokeWidth={2.4} />
-          New event
+          {t('calendar.popover.newEvent')}
         </button>
       </motion.div>
     </div>,
@@ -434,6 +440,7 @@ function EventEditor({
   initial: CalendarEvent | { dateHint: Date }
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const add = useEventsStore((s) => s.add)
   const update = useEventsStore((s) => s.update)
   const remove = useEventsStore((s) => s.remove)
@@ -463,7 +470,7 @@ function EventEditor({
   if (isReadOnly) {
     const ev = initial as CalendarEvent
     const when = ev.allDay
-      ? 'All day'
+      ? t('calendar.allDay')
       : new Date(ev.start).toLocaleString([], {
           dateStyle: 'medium',
           timeStyle: 'short',
@@ -489,13 +496,15 @@ function EventEditor({
             >
               {ev.title}
             </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-            >
-              <X size={18} />
-            </button>
+            <Tooltip label={t('common.close')} side="bottom">
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+              >
+                <X size={18} />
+              </button>
+            </Tooltip>
           </div>
           <div className="text-[12.5px] text-[var(--text-secondary)]">{when}</div>
           {ev.note && (
@@ -504,7 +513,7 @@ function EventEditor({
             </p>
           )}
           <div className="mt-1 text-[11px] text-[var(--text-tertiary)]">
-            From a subscribed calendar · read-only
+            {t('calendar.editor.readOnly')}
           </div>
         </motion.div>
       </div>,
@@ -513,7 +522,7 @@ function EventEditor({
   }
 
   const save = () => {
-    const cleanTitle = title.trim() || 'Untitled'
+    const cleanTitle = title.trim() || t('calendar.editor.untitled')
     const start = allDay
       ? new Date(`${date}T00:00:00`).toISOString()
       : new Date(`${date}T${time}:00`).toISOString()
@@ -555,9 +564,9 @@ function EventEditor({
             className="text-[var(--text-primary)]"
             style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.6px' }}
           >
-            {isEditing ? 'Edit event' : 'New event'}
+            {isEditing ? t('calendar.editor.editTitle') : t('calendar.editor.newTitle')}
           </h2>
-          <Tooltip label="Close" side="bottom">
+          <Tooltip label={t('common.close')} side="bottom">
             <button
               type="button"
               onClick={onClose}
@@ -572,7 +581,7 @@ function EventEditor({
           autoFocus
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Event title"
+          placeholder={t('calendar.editor.eventTitle')}
           className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2 text-[13.5px] text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)]"
         />
 
@@ -599,12 +608,12 @@ function EventEditor({
             checked={allDay}
             onChange={(e) => setAllDay(e.target.checked)}
           />
-          All-day
+          {t('calendar.editor.allDayLabel')}
         </label>
 
         <div className="flex items-center gap-1.5">
           <span className="mr-1 text-[11.5px] font-medium text-[var(--text-tertiary)]">
-            Color
+            {t('calendar.editor.color')}
           </span>
           {COLOR_OPTIONS.map((c) => (
             <button
@@ -624,28 +633,28 @@ function EventEditor({
 
         <div className="flex flex-col gap-1">
           <span className="text-[11.5px] font-medium text-[var(--text-tertiary)]">
-            Repeats
+            {t('calendar.editor.repeats')}
           </span>
           <div className="flex gap-2">
             <Menu<Recurrence>
               value={recurrence}
               options={[
-                { value: 'none', label: "Doesn't repeat" },
-                { value: 'daily', label: 'Daily' },
-                { value: 'weekly', label: 'Weekly' },
-                { value: 'monthly', label: 'Monthly' },
-                { value: 'yearly', label: 'Yearly' },
+                { value: 'none', label: t('calendar.repeat.none') },
+                { value: 'daily', label: t('calendar.repeat.daily') },
+                { value: 'weekly', label: t('calendar.repeat.weekly') },
+                { value: 'monthly', label: t('calendar.repeat.monthly') },
+                { value: 'yearly', label: t('calendar.repeat.yearly') },
               ]}
               onChange={setRecurrence}
               className="flex-1"
             />
             {recurrence !== 'none' && (
-              <Tooltip label="Repeat until">
+              <Tooltip label={t('calendar.editor.repeatUntil')}>
                 <input
                   type="date"
                   value={until}
                   onChange={(e) => setUntil(e.target.value)}
-                  placeholder="Until"
+                  placeholder={t('calendar.editor.until')}
                   className="w-[150px] rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[12.5px] text-[var(--text-primary)] outline-none"
                 />
               </Tooltip>
@@ -656,7 +665,7 @@ function EventEditor({
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Notes (optional)"
+          placeholder={t('calendar.editor.notes')}
           rows={2}
           className="resize-none rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2 text-[12.5px] text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)]"
         />
@@ -667,10 +676,10 @@ function EventEditor({
             onClick={save}
             className="flex-1 rounded-[8px] bg-[var(--accent)] py-2 text-[13px] font-semibold text-[var(--on-accent)] transition-transform hover:scale-[1.01]"
           >
-            {isEditing ? 'Save' : 'Add event'}
+            {isEditing ? t('calendar.editor.save') : t('calendar.editor.add')}
           </button>
           {isEditing && (
-            <Tooltip label="Delete">
+            <Tooltip label={t('calendar.editor.delete')}>
               <button
                 type="button"
                 onClick={del}
@@ -690,6 +699,7 @@ function EventEditor({
 // ─── Main renderer ──────────────────────────────────────────────────────────
 
 function CalendarRenderer() {
+  const { t } = useTranslation()
   const events = useAllEvents()
   const today = useMemo(() => startOfDay(new Date()), [])
   const [view, setView] = useState<ViewKind>('month')
@@ -737,7 +747,7 @@ function CalendarRenderer() {
   return (
     <div className="glass flex h-full w-full flex-col overflow-hidden rounded-[12px] border border-[var(--border)] p-3">
       <div className="mb-2 flex items-center justify-between gap-1">
-        <Tooltip label="Previous" side="bottom">
+        <Tooltip label={t('calendar.nav.previous')} side="bottom">
           <button
             type="button"
             onClick={() => shift(-1)}
@@ -746,7 +756,7 @@ function CalendarRenderer() {
             <ChevronLeft size={15} />
           </button>
         </Tooltip>
-        <Tooltip label="Jump to today" side="bottom" className="flex-1">
+        <Tooltip label={t('calendar.nav.jumpToToday')} side="bottom" className="flex-1">
           <button
             type="button"
             onClick={goToday}
@@ -756,7 +766,7 @@ function CalendarRenderer() {
             {headerTitle}
           </button>
         </Tooltip>
-        <Tooltip label="Next" side="bottom">
+        <Tooltip label={t('calendar.nav.next')} side="bottom">
           <button
             type="button"
             onClick={() => shift(1)}
@@ -781,11 +791,11 @@ function CalendarRenderer() {
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
               )}
             >
-              {v}
+              {t(`calendar.view.${v}`)}
             </button>
           ))}
         </div>
-        <Tooltip label="New event">
+        <Tooltip label={t('calendar.popover.newEvent')}>
           <button
             type="button"
             onClick={() => setEditing({ dateHint: cursor })}
@@ -848,6 +858,7 @@ function CalendarRenderer() {
 // Manage external calendar subscriptions (.ics URLs). Shown in the widget's
 // settings popover. Sources are global (shared across calendar widgets).
 function CalendarSettings() {
+  const { t } = useTranslation()
   const sources = useCalendarSourcesStore((s) => s.sources)
   const addSource = useCalendarSourcesStore((s) => s.addSource)
   const updateSource = useCalendarSourcesStore((s) => s.updateSource)
@@ -864,10 +875,10 @@ function CalendarSettings() {
   const add = () => {
     const u = url.trim()
     if (!/^(https?|webcal):\/\//i.test(u)) {
-      setErr('Paste an https:// or webcal:// .ics link')
+      setErr(t('calendar.settings.invalidLink'))
       return
     }
-    addSource({ label: label.trim() || 'Calendar', url: u, color, enabled: true })
+    addSource({ label: label.trim() || t('calendar.settings.defaultName'), url: u, color, enabled: true })
     setUrl('')
     setLabel('')
     setErr('')
@@ -876,12 +887,11 @@ function CalendarSettings() {
   return (
     <div className="flex w-[284px] flex-col gap-3">
       <div className="text-[12px] font-semibold text-[var(--text-secondary)]">
-        Subscribed calendars
+        {t('calendar.settings.title')}
       </div>
       {sources.length === 0 && (
         <div className="text-[11.5px] leading-relaxed text-[var(--text-tertiary)]">
-          Paste an iCal/.ics link below. Google: Settings → “Secret address in
-          iCal format”. Proton/Outlook: the calendar’s share link.
+          {t('calendar.settings.instructions')}
         </div>
       )}
       {sources.length > 0 && (
@@ -901,36 +911,40 @@ function CalendarSettings() {
                 </div>
                 {s.lastError ? (
                   <div className="truncate text-[10px] text-[var(--danger)]">
-                    Couldn’t load
+                    {t('calendar.settings.loadFailed')}
                   </div>
                 ) : s.lastFetched ? (
                   <div className="truncate text-[10px] text-[var(--text-tertiary)]">
-                    Synced
+                    {t('calendar.settings.synced')}
                   </div>
                 ) : null}
               </div>
-              <button
-                type="button"
-                onClick={() => updateSource(s.id, { enabled: !s.enabled })}
-                className={cn(
-                  'rounded-[6px] px-1.5 py-0.5 text-[10px] font-medium',
-                  s.enabled
-                    ? 'bg-[var(--accent)] text-[var(--on-accent)]'
-                    : 'bg-[var(--fill-2)] text-[var(--text-tertiary)]',
-                )}
-              >
-                {s.enabled ? 'On' : 'Off'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  removeSource(s.id)
-                  setExt(s.id, [])
-                }}
-                className="text-[var(--text-tertiary)] hover:text-[var(--danger)]"
-              >
-                <Trash2 size={13} />
-              </button>
+              <Tooltip label={s.enabled ? t('calendar.settings.disable') : t('calendar.settings.enable')} side="top">
+                <button
+                  type="button"
+                  onClick={() => updateSource(s.id, { enabled: !s.enabled })}
+                  className={cn(
+                    'rounded-[6px] px-1.5 py-0.5 text-[10px] font-medium',
+                    s.enabled
+                      ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                      : 'bg-[var(--fill-2)] text-[var(--text-tertiary)]',
+                  )}
+                >
+                  {s.enabled ? t('calendar.settings.on') : t('calendar.settings.off')}
+                </button>
+              </Tooltip>
+              <Tooltip label={t('calendar.settings.removeCalendar')} side="top">
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeSource(s.id)
+                    setExt(s.id, [])
+                  }}
+                  className="text-[var(--text-tertiary)] hover:text-[var(--danger)]"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </Tooltip>
             </div>
           ))}
         </div>
@@ -938,13 +952,13 @@ function CalendarSettings() {
       <div className="flex flex-col gap-1.5 border-t border-[var(--border)] pt-2.5">
         <input
           className={input}
-          placeholder="Name (e.g. Work)"
+          placeholder={t('calendar.settings.namePlaceholder')}
           value={label}
           onChange={(e) => setLabel(e.target.value)}
         />
         <input
           className={input}
-          placeholder="https://…/basic.ics"
+          placeholder={t('calendar.settings.urlPlaceholder')}
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
@@ -968,7 +982,7 @@ function CalendarSettings() {
             onClick={add}
             className="ml-auto rounded-[8px] bg-[var(--accent)] px-3 py-1.5 text-[12px] font-medium text-[var(--on-accent)]"
           >
-            Add
+            {t('calendar.settings.add')}
           </button>
         </div>
         {err && <span className="text-[11px] text-[var(--danger)]">{err}</span>}

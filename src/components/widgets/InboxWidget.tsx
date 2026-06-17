@@ -1,3 +1,4 @@
+import { useTranslation, Trans } from 'react-i18next'
 import { Inbox, Check, X, Trash2 } from 'lucide-react'
 import type { InboxWidget as InboxWidgetType } from '../../types/widget'
 import { useInboxStore } from '../../store/inboxStore'
@@ -18,6 +19,7 @@ function relTime(iso: string): string {
 }
 
 function InboxRenderer() {
+  const { t } = useTranslation()
   const items = useInboxStore((s) => s.items)
   const toggle = useInboxStore((s) => s.toggle)
   const remove = useInboxStore((s) => s.remove)
@@ -30,10 +32,10 @@ function InboxRenderer() {
           className="text-[var(--text-primary)]"
           style={{ fontSize: 12, fontWeight: 700, letterSpacing: '-0.3px' }}
         >
-          Inbox
+          {t('inbox.title')}
         </span>
         <span className="text-[10px] text-[var(--text-tertiary)]">
-          Ctrl + Shift + N
+          {t('inbox.shortcut')}
         </span>
       </div>
 
@@ -41,7 +43,7 @@ function InboxRenderer() {
         <div className="my-auto flex flex-col items-center gap-2 px-3 text-center text-[var(--text-tertiary)]">
           <Inbox size={22} strokeWidth={1.5} />
           <span style={{ fontSize: 11, lineHeight: 1.4 }}>
-            Press <b>Ctrl + Shift + N</b> anywhere to capture a thought.
+            <Trans i18nKey="inbox.emptyHint" components={{ b: <b /> }} />
           </span>
         </div>
       ) : (
@@ -51,21 +53,23 @@ function InboxRenderer() {
               key={i.id}
               className="group/i flex items-start gap-1.5 rounded-[7px] px-1.5 py-1 transition-colors hover:bg-[var(--fill-1)]"
             >
-              <button
-                type="button"
-                onClick={() => toggle(i.id)}
-                className={cn(
-                  'mt-[3px] flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border transition-colors',
-                  i.done
-                    ? 'border-transparent'
-                    : 'border-[var(--border-strong)] hover:border-[var(--accent)]',
-                )}
-                style={{ background: i.done ? 'var(--accent)' : 'transparent' }}
-              >
-                {i.done && (
-                  <Check size={9} strokeWidth={3} color="var(--on-accent)" />
-                )}
-              </button>
+              <Tooltip label={t('inbox.markDoneTooltip')} side="top" className="mt-[3px] shrink-0">
+                <button
+                  type="button"
+                  onClick={() => toggle(i.id)}
+                  className={cn(
+                    'flex h-3.5 w-3.5 items-center justify-center rounded-[3px] border transition-colors',
+                    i.done
+                      ? 'border-transparent'
+                      : 'border-[var(--border-strong)] hover:border-[var(--accent)]',
+                  )}
+                  style={{ background: i.done ? 'var(--accent)' : 'transparent' }}
+                >
+                  {i.done && (
+                    <Check size={9} strokeWidth={3} color="var(--on-accent)" />
+                  )}
+                </button>
+              </Tooltip>
               <div className="min-w-0 flex-1">
                 <div
                   className={cn(
@@ -81,7 +85,7 @@ function InboxRenderer() {
                   {relTime(i.createdAt)}
                 </div>
               </div>
-              <Tooltip label="Remove" className="shrink-0 self-start">
+              <Tooltip label={t('inbox.removeTooltip')} className="shrink-0 self-start">
                 <button
                   type="button"
                   onClick={() => remove(i.id)}
@@ -96,7 +100,7 @@ function InboxRenderer() {
       )}
 
       {items.some((i) => i.done) && (
-        <Tooltip label="Clear done" side="top" className="mt-1">
+        <Tooltip label={t('inbox.clearDoneTooltip')} side="top" className="mt-1">
           <button
             type="button"
             onClick={clearDone}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { listen } from '@tauri-apps/api/event'
 import {
@@ -105,6 +106,11 @@ function ToolButton({
 }
 
 export function TopIsland() {
+  const { t } = useTranslation()
+  // Widget display names live in i18n under widgets.<type>, falling back to the
+  // registry's English label for any type not yet translated.
+  const widgetName = (def: WidgetDefinition) =>
+    t(`widgets.${def.type}`, { defaultValue: def.label })
   const mode = useCanvasStore((s) => s.mode)
   const toggleMode = useCanvasStore((s) => s.toggleMode)
   const addWidget = useCanvasStore((s) => s.addWidget)
@@ -167,19 +173,19 @@ export function TopIsland() {
         if (u) {
           notify({
             kind: 'update',
-            title: `Layer v${u.version} is available`,
-            body: 'Open Settings → Check for updates to install.',
+            title: t('updates.available', { version: u.version }),
+            body: t('updates.availableBody'),
             dedupe: `available-${u.version}`,
           })
         } else {
           notify({
             kind: 'info',
-            title: 'You’re on the latest version ✦',
+            title: t('updates.upToDate'),
             dedupe: `uptodate-${new Date().toDateString()}`,
           })
         }
       } catch {
-        notify({ kind: 'info', title: 'Could not check for updates' })
+        notify({ kind: 'info', title: t('updates.checkFailed') })
       }
     })
     return () => {
@@ -308,7 +314,7 @@ export function TopIsland() {
                 />
               )}
               <Tip
-                label={open ? 'Exit edit mode' : 'Open menu'}
+                label={open ? t('toolbar.exitEdit') : t('toolbar.openMenu')}
                 show={notchHov}
               />
               <AnimatePresence initial={false}>
@@ -364,7 +370,7 @@ export function TopIsland() {
                         >
                           <ToolButton
                             index={i}
-                            label={`${def.label} · styles`}
+                            label={t('toolbar.styles', { name: widgetName(def) })}
                             onClick={() =>
                               setStyleMenu(isOpen ? null : def.type)
                             }
@@ -387,7 +393,9 @@ export function TopIsland() {
                               >
                                 <div className="glass flex w-[150px] flex-col gap-0.5 rounded-[10px] border border-[var(--border)] p-1">
                                   <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
-                                    {def.label} style
+                                    {t('toolbar.styleHeader', {
+                                      name: widgetName(def),
+                                    })}
                                   </div>
                                   {def.styles.map((s) => (
                                     <button
@@ -410,7 +418,7 @@ export function TopIsland() {
                       <ToolButton
                         key={def.type}
                         index={i}
-                        label={def.label}
+                        label={widgetName(def)}
                         onClick={() => handleAdd(def)}
                       >
                         <Icon size={18} strokeWidth={1.5} />
@@ -420,7 +428,7 @@ export function TopIsland() {
                   <motion.div variants={dividerVariants} className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
                   <ToolButton
                     index={widgetList.length}
-                    label={allLocked ? 'Unlock all' : 'Lock all'}
+                    label={allLocked ? t('toolbar.unlockAll') : t('toolbar.lockAll')}
                     onClick={() => lockAll(!allLocked)}
                   >
                     {allLocked ? (
@@ -431,7 +439,11 @@ export function TopIsland() {
                   </ToolButton>
                   <ToolButton
                     index={widgetList.length + 1}
-                    label={anyBg ? 'Hide backgrounds' : 'Show backgrounds'}
+                    label={
+                      anyBg
+                        ? t('toolbar.hideBackgrounds')
+                        : t('toolbar.showBackgrounds')
+                    }
                     onClick={() => setBackgroundAll(!anyBg)}
                   >
                     {anyBg ? (
@@ -446,14 +458,14 @@ export function TopIsland() {
                     danger={confirmReset}
                     label={
                       confirmReset
-                        ? 'Click again to reset this space'
-                        : 'Reset this space'
+                        ? t('toolbar.resetSpaceConfirm')
+                        : t('toolbar.resetSpace')
                     }
                     onClick={() => {
                       if (confirmReset) {
                         resetSpace(activeId)
                         setConfirmReset(false)
-                        toast('Space reset')
+                        toast(t('toolbar.spaceReset'))
                       } else {
                         setConfirmReset(true)
                       }
@@ -467,7 +479,7 @@ export function TopIsland() {
                   </ToolButton>
                   <ToolButton
                     index={widgetList.length + 3}
-                    label="Spaces"
+                    label={t('toolbar.spaces')}
                     onClick={() => setShowSpaces(true)}
                   >
                     <LayoutTemplate size={18} strokeWidth={1.5} />
@@ -476,8 +488,8 @@ export function TopIsland() {
                     index={widgetList.length + 4}
                     label={
                       unreadCount > 0
-                        ? `Notifications · ${unreadCount} new`
-                        : 'Notifications'
+                        ? t('toolbar.notificationsNew', { count: unreadCount })
+                        : t('toolbar.notifications')
                     }
                     onClick={() => setShowNotifications(true)}
                   >
@@ -493,7 +505,7 @@ export function TopIsland() {
                   </ToolButton>
                   <ToolButton
                     index={widgetList.length + 5}
-                    label="Settings"
+                    label={t('toolbar.settings')}
                     onClick={() => setShowSettings(true)}
                   >
                     <SettingsIcon size={18} strokeWidth={1.5} />

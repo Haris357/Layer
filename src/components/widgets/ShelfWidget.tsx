@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -21,6 +22,7 @@ import {
 } from '../../lib/ipc'
 import { useShelfStore, type ShelfItem } from '../../store/shelfStore'
 import type { ShelfWidget as ShelfWidgetType } from '../../types/widget'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 function fmtSize(n: number): string {
@@ -47,6 +49,7 @@ async function importPaths(paths: string[]) {
 }
 
 function Tile({ item }: { item: ShelfItem }) {
+  const { t } = useTranslation()
   const removeFromStore = useShelfStore((s) => s.remove)
   const remove = () => {
     const path = removeFromStore(item.id)
@@ -59,10 +62,10 @@ function Tile({ item }: { item: ShelfItem }) {
 
   return (
     <div className="group/t relative flex flex-col gap-1">
+      <Tooltip label={t('shelf.openTooltip', { name: item.name })} side="top" className="w-full">
       <button
         type="button"
         onClick={open}
-        title={`Open ${item.name}`}
         className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-[9px] border border-[var(--border)] bg-[var(--fill-2)] transition-colors hover:border-[var(--border-strong)]"
       >
         {src ? (
@@ -84,30 +87,33 @@ function Tile({ item }: { item: ShelfItem }) {
 
         {/* hover actions */}
         <span className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-gradient-to-t from-black/55 to-transparent px-1 pb-1 pt-3 opacity-0 transition-opacity group-hover/t:opacity-100">
-          <span
-            role="button"
-            tabIndex={-1}
-            onClick={(e) => {
-              e.stopPropagation()
-              showInFolder(item.path).catch(() => {})
-            }}
-            title="Show in folder"
-            className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-white/15 text-white hover:bg-white/30"
-          >
-            <FolderOpen size={11} strokeWidth={2} />
-          </span>
+          <Tooltip label={t('shelf.showInFolderTooltip')} side="top">
+            <span
+              role="button"
+              tabIndex={-1}
+              onClick={(e) => {
+                e.stopPropagation()
+                showInFolder(item.path).catch(() => {})
+              }}
+              className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-white/15 text-white hover:bg-white/30"
+            >
+              <FolderOpen size={11} strokeWidth={2} />
+            </span>
+          </Tooltip>
         </span>
       </button>
+      </Tooltip>
 
       {/* remove */}
-      <button
-        type="button"
-        onClick={remove}
-        title="Remove from shelf"
-        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity hover:bg-[var(--danger)] group-hover/t:opacity-100"
-      >
-        <X size={11} strokeWidth={2.5} />
-      </button>
+      <Tooltip label={t('shelf.removeTooltip')} side="top" className="absolute right-1 top-1">
+        <button
+          type="button"
+          onClick={remove}
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity hover:bg-[var(--danger)] group-hover/t:opacity-100"
+        >
+          <X size={11} strokeWidth={2.5} />
+        </button>
+      </Tooltip>
 
       <span
         className="truncate px-0.5 text-[10px] text-[var(--text-secondary)]"
@@ -120,6 +126,7 @@ function Tile({ item }: { item: ShelfItem }) {
 }
 
 function ShelfRenderer() {
+  const { t } = useTranslation()
   const items = useShelfStore((s) => s.items)
   const rootRef = useRef<HTMLDivElement>(null)
   const [dragOver, setDragOver] = useState(false)
@@ -196,29 +203,31 @@ function ShelfRenderer() {
           className="text-[var(--text-primary)]"
           style={{ fontSize: 12, fontWeight: 700, letterSpacing: '-0.3px' }}
         >
-          Shelf
+          {t('shelf.title')}
         </span>
         {items.length > 0 && (
           <span className="rounded-full bg-[var(--fill-2)] px-1.5 text-[9.5px] font-semibold text-[var(--text-tertiary)]">
             {items.length}
           </span>
         )}
-        <button
-          type="button"
-          onClick={pickFolders}
-          title="Add folder"
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-        >
-          <Folder size={13} strokeWidth={2.2} />
-        </button>
-        <button
-          type="button"
-          onClick={pickFiles}
-          title="Add files"
-          className="flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-        >
-          <Plus size={14} strokeWidth={2.2} />
-        </button>
+        <Tooltip label={t('shelf.addFolderTooltip')} side="top" className="ml-auto">
+          <button
+            type="button"
+            onClick={pickFolders}
+            className="flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+          >
+            <Folder size={13} strokeWidth={2.2} />
+          </button>
+        </Tooltip>
+        <Tooltip label={t('shelf.addFilesTooltip')} side="top">
+          <button
+            type="button"
+            onClick={pickFiles}
+            className="flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+          >
+            <Plus size={14} strokeWidth={2.2} />
+          </button>
+        </Tooltip>
       </div>
 
       {items.length === 0 ? (
@@ -229,9 +238,9 @@ function ShelfRenderer() {
         >
           <Layers3 size={22} strokeWidth={1.5} />
           <span style={{ fontSize: 11.5, lineHeight: 1.4 }}>
-            Drop files here to shelf them
+            {t('shelf.emptyDrop')}
             <br />
-            <span className="text-[var(--text-secondary)]">or click to browse</span>
+            <span className="text-[var(--text-secondary)]">{t('shelf.emptyBrowse')}</span>
           </span>
         </button>
       ) : (
@@ -259,7 +268,7 @@ function ShelfRenderer() {
             className="rounded-[8px] px-3 py-1.5 text-[12px] font-semibold"
             style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}
           >
-            Drop to shelf
+            {t('shelf.dropOverlay')}
           </span>
         </div>
       )}

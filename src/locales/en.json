@@ -1,0 +1,637 @@
+{
+  "common": {
+    "close": "Close",
+    "dragToMove": "Drag to move",
+    "quit": "Quit Layer"
+  },
+  "toolbar": {
+    "openMenu": "Open menu",
+    "exitEdit": "Exit edit mode",
+    "lockAll": "Lock all",
+    "unlockAll": "Unlock all",
+    "showBackgrounds": "Show backgrounds",
+    "hideBackgrounds": "Hide backgrounds",
+    "resetSpace": "Reset this space",
+    "resetSpaceConfirm": "Click again to reset this space",
+    "spaces": "Spaces",
+    "notifications": "Notifications",
+    "notificationsNew": "Notifications · {{count}} new",
+    "settings": "Settings",
+    "styles": "{{name}} · styles",
+    "styleHeader": "{{name}} style",
+    "spaceReset": "Space reset"
+  },
+  "updates": {
+    "available": "Layer v{{version}} is available",
+    "availableBody": "Open Settings → Check for updates to install.",
+    "upToDate": "You’re on the latest version ✦",
+    "checkFailed": "Could not check for updates"
+  },
+  "widgets": {
+    "note": "Note",
+    "clock": "Clock",
+    "link": "Link",
+    "image": "Image",
+    "video": "Video",
+    "gallery": "Gallery",
+    "weather": "Weather",
+    "stats": "Stats",
+    "todo": "To-do",
+    "countdown": "Countdown",
+    "worldclock": "World Clock",
+    "calendar": "Calendar",
+    "apps": "Apps",
+    "search": "Search",
+    "nowplaying": "Now Playing",
+    "notifications": "Notifications",
+    "converter": "Converter",
+    "pomodoro": "Pomodoro",
+    "sticky": "Sticky note",
+    "inbox": "Inbox",
+    "clipboard": "Clipboard",
+    "webembed": "Web Embed",
+    "diskinfo": "Disk Info",
+    "greeting": "Greeting",
+    "shelf": "Shelf",
+    "audio": "Audio Devices",
+    "board": "Board"
+  },
+  "settings": {
+    "title": "Settings",
+    "version": "Layer v{{version}}",
+    "tabs": {
+      "general": "General",
+      "appearance": "Appearance",
+      "screensaver": "Screensaver",
+      "notch": "Notch",
+      "sync": "Cloud Sync",
+      "shortcuts": "Shortcuts",
+      "about": "About"
+    },
+    "general": {
+      "snapToGrid": "Snap widgets to grid",
+      "gridSize": "Snap grid size · {{size}}px",
+      "launchOnStartup": "Launch Layer on startup",
+      "startupViaWindows": "Windows Settings → Startup apps",
+      "hotCorner": "Hot corner switches spaces",
+      "language": "Language",
+      "languageHint": "The language Layer's interface uses.",
+      "canvas": "Canvas",
+      "exportImage": "Export canvas as image",
+      "resetSpace": "Reset this space",
+      "resetSpaceConfirm": "Click again to clear “{{name}}”"
+    },
+    "appearance": {
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "matchWallpaper": "Match accent to wallpaper",
+      "showOn": "Show Layer on",
+      "showOnHint": "Which monitor the pill, Settings and pop-ups appear on.",
+      "autoPrimary": "Auto (primary)",
+      "display": "Display {{n}}"
+    },
+    "screensaver": {
+      "storeNote": "Setting Layer as your Windows screensaver isn’t available in the Microsoft Store version (the sandbox can’t register a system screensaver). You can still preview the styles with Ctrl+Shift+S.",
+      "useAsScreensaver": "Use Layer as my screensaver",
+      "style": "Style",
+      "ambient": "Ambient",
+      "minimal": "Minimal",
+      "quote": "Quote",
+      "descMinimal": "Just a large clock and date.",
+      "descQuote": "A rotating calm line with the time.",
+      "descAmbient": "Clock, date, live weather and now-playing.",
+      "idleNote": "When idle, Layer fills every screen with the view above. Any key or mouse movement dismisses it.",
+      "previewNow": "Preview now"
+    },
+    "shortcuts": {
+      "keyboard": "Keyboard",
+      "toggleEdit": "Toggle edit mode",
+      "pressKeys": "Press keys…",
+      "quickCapture": "Quick capture",
+      "cycleSpaces": "Cycle spaces",
+      "peek": "Peek (hold)",
+      "previewScreensaver": "Preview screensaver",
+      "hotCornerNote": "You can also flick the mouse to the top-left corner to switch spaces (enable “Hot corner” in General)."
+    },
+    "about": {
+      "tagline": "a quiet layer on your desktop",
+      "storeUpdates": "Updates are delivered automatically by the Microsoft Store.",
+      "checkUpdates": "Check for updates",
+      "checking": "Checking for updates…",
+      "upToDate": "You're on the latest version.",
+      "updateFailed": "Could not check for updates.",
+      "rateStore": "Rate Layer on the Store",
+      "store": "Microsoft Store",
+      "github": "GitHub",
+      "support": "☕ Support Layer"
+    },
+    "toasts": {
+      "canvasExported": "Canvas exported",
+      "openFolder": "Open folder",
+      "exportFailed": "Export failed",
+      "exportDialogTitle": "Export canvas as image"
+    }
+  },
+  "note": {
+    "editor": {
+      "placeholder": "Begin writing"
+    },
+    "toolbar": {
+      "dragToMove": "Drag to move",
+      "typefaceSize": "Typeface & size",
+      "freewrite": "Freewrite",
+      "endFreewrite": "End freewrite",
+      "darkMode": "Dark mode",
+      "lightMode": "Light mode",
+      "fullscreen": "Fullscreen",
+      "exitFullscreen": "Exit fullscreen",
+      "newEntry": "New entry",
+      "pastEntries": "Past entries"
+    },
+    "font": {
+      "size": "Size",
+      "typeface": "Typeface",
+      "random": "Random font"
+    },
+    "freewrite": {
+      "title": "Freewrite",
+      "description": "Write without stopping. No backspace, no editing — just keep the words flowing until time’s up.",
+      "introTitle": "Just keep writing",
+      "introBody": "No backspace, no editing — let the words flow without judging them. Don’t stop until the timer runs out.",
+      "hudHint": "Keep writing — no going back · Esc to end",
+      "doneToast": "Freewrite done — {{words}} words in {{mins}} min ✍",
+      "completeTitle": "Freewrite complete ✦",
+      "completeBody": "{{words}} words in {{mins}} minutes of unbroken flow."
+    },
+    "history": {
+      "title": "Entries",
+      "entryTitle": "Entry title",
+      "emptyEntry": "Empty entry",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "rename": "Rename",
+      "delete": "Delete"
+    },
+    "entry": {
+      "word": "{{count}} word",
+      "words": "{{count}} words"
+    }
+  },
+  "sticky": {
+    "placeholder": "Jot something down…",
+    "dragToMove": "Drag to move",
+    "colorLabel": "Sticky color",
+    "colors": {
+      "yellow": "Yellow",
+      "pink": "Pink",
+      "blue": "Blue",
+      "green": "Green",
+      "orange": "Orange",
+      "lilac": "Lilac"
+    }
+  },
+  "greeting": {
+    "nameLabel": "Your name",
+    "namePlaceholder": "e.g. Haris",
+    "styleLabel": "Style",
+    "alignLabel": "Alignment",
+    "styles": {
+      "classic": "Classic",
+      "serif": "Serif",
+      "gradient": "Gradient",
+      "mono": "Mono",
+      "script": "Script",
+      "playfair": "Display",
+      "modern": "Modern"
+    }
+  },
+  "clock": {
+    "fonts": {
+      "anurati": "Anurati",
+      "stencil": "Stencil",
+      "scifi": "Sci-fi",
+      "retro": "Retro"
+    },
+    "format": {
+      "12h": "12h",
+      "24h": "24h"
+    },
+    "showSeconds": "Show seconds",
+    "showDate": "Show date"
+  },
+  "worldclock": {
+    "empty": "Add a city in settings",
+    "removeZone": "Remove zone"
+  },
+  "todo": {
+    "header": "TASKS · {{done}}/{{total}}",
+    "addPlaceholder": "Add a task…",
+    "deleteTooltip": "Delete task"
+  },
+  "pomodoro": {
+    "phase": {
+      "focus": "Focus",
+      "short": "Short break",
+      "long": "Long break"
+    },
+    "start": "Start",
+    "pause": "Pause",
+    "reset": "Reset",
+    "skip": "Skip",
+    "skipBreak": "Skip break",
+    "focusSound": "Focus sound",
+    "soundOff": "Off",
+    "todayLabel": "Today:",
+    "focused": "focused",
+    "settings": {
+      "focusMin": "Focus (min)",
+      "shortBreakMin": "Short break (min)",
+      "longBreakMin": "Long break (min)",
+      "longBreakAfter": "Long break after"
+    }
+  },
+  "inbox": {
+    "title": "Inbox",
+    "shortcut": "Ctrl + Shift + N",
+    "emptyHint": "Press <b>Ctrl + Shift + N</b> anywhere to capture a thought.",
+    "markDoneTooltip": "Mark done",
+    "removeTooltip": "Remove",
+    "clearDoneTooltip": "Clear done"
+  },
+  "board": {
+    "notePlaceholder": "Note…",
+    "addCardTooltip": "Add card",
+    "changeColorTooltip": "Change color",
+    "deleteCardTooltip": "Delete card",
+    "connectTooltip": "Drag to connect"
+  },
+  "shelf": {
+    "title": "Shelf",
+    "addFolderTooltip": "Add folder",
+    "addFilesTooltip": "Add files",
+    "openTooltip": "Open {{name}}",
+    "showInFolderTooltip": "Show in folder",
+    "removeTooltip": "Remove from shelf",
+    "emptyDrop": "Drop files here to shelf them",
+    "emptyBrowse": "or click to browse",
+    "dropOverlay": "Drop to shelf"
+  },
+  "countdown": {
+    "units": {
+      "days": "days",
+      "hrs": "hrs",
+      "min": "min",
+      "sec": "sec"
+    },
+    "since": "since",
+    "until": "until",
+    "defaultTitle": "Countdown",
+    "eventNamePlaceholder": "Event name"
+  },
+  "calendar": {
+    "allDay": "All day",
+    "nav": {
+      "previous": "Previous",
+      "next": "Next",
+      "jumpToToday": "Jump to today"
+    },
+    "view": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day"
+    },
+    "repeat": {
+      "none": "Doesn't repeat",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "day": {
+      "free": "Free",
+      "today": "Today",
+      "noEvents": "No events",
+      "addOne": "+ Add one"
+    },
+    "popover": {
+      "nothingScheduled": "Nothing scheduled.",
+      "newEvent": "New event",
+      "repeatsLabel": "repeats {{repeat}}"
+    },
+    "editor": {
+      "editTitle": "Edit event",
+      "newTitle": "New event",
+      "eventTitle": "Event title",
+      "untitled": "Untitled",
+      "allDayLabel": "All-day",
+      "color": "Color",
+      "repeats": "Repeats",
+      "repeatUntil": "Repeat until",
+      "until": "Until",
+      "notes": "Notes (optional)",
+      "save": "Save",
+      "add": "Add event",
+      "delete": "Delete",
+      "readOnly": "From a subscribed calendar · read-only"
+    },
+    "settings": {
+      "title": "Subscribed calendars",
+      "instructions": "Paste an iCal/.ics link below. Google: Settings → “Secret address in iCal format”. Proton/Outlook: the calendar’s share link.",
+      "invalidLink": "Paste an https:// or webcal:// .ics link",
+      "defaultName": "Calendar",
+      "loadFailed": "Couldn’t load",
+      "synced": "Synced",
+      "on": "On",
+      "off": "Off",
+      "enable": "Enable",
+      "disable": "Disable",
+      "removeCalendar": "Remove calendar",
+      "namePlaceholder": "Name (e.g. Work)",
+      "urlPlaceholder": "https://…/basic.ics",
+      "add": "Add"
+    }
+  },
+  "search": {
+    "placeholder": "Search the web…",
+    "engines": {
+      "google": "Google",
+      "bing": "Bing",
+      "ddg": "DDG",
+      "custom": "Custom"
+    },
+    "customPlaceholder": "https://example.com/search?q=%s"
+  },
+  "apps": {
+    "layout": {
+      "list": "List",
+      "grid": "Grid"
+    },
+    "searchInstalled": "Search installed apps…",
+    "pin": "+ Pin",
+    "pinned": "Pinned",
+    "addFolder": "Add a folder",
+    "emptyHint": "Tap + to pin your first app",
+    "addAppsOrFolder": "Add apps or a folder",
+    "dragToReorder": "Drag to reorder",
+    "remove": "Remove"
+  },
+  "clipboard": {
+    "title": "Clipboard",
+    "empty": "Copy anything — it’ll show up here.",
+    "noMatches": "No matches",
+    "search": "Search…",
+    "copyLabel": "Copy {{label}}",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "remove": "Remove",
+    "clearUnpinned": "Clear unpinned",
+    "copied": "Copied to clipboard",
+    "copyFailed": "Could not copy"
+  },
+  "webembed": {
+    "addUrl": "Add a URL in settings",
+    "loading": "Loading {{host}}…",
+    "noEmbed": "doesn’t allow embedding",
+    "openInBrowser": "Open in browser",
+    "iframeTitle": "Web embed",
+    "urlLabel": "URL",
+    "urlPlaceholder": "a dashboard, a YouTube video link…",
+    "urlHint": "Sites like YouTube’s home, Google or X block embedding — paste a video link, or use “Open in browser”.",
+    "zoom": "Zoom · {{pct}}%",
+    "autoRefresh": "Auto-refresh",
+    "refresh": {
+      "off": "Off",
+      "30s": "30s",
+      "1m": "1m",
+      "5m": "5m"
+    }
+  },
+  "nowplaying": {
+    "empty": "Nothing playing",
+    "defaultSource": "NOW PLAYING",
+    "unknownTrack": "Unknown track",
+    "controls": {
+      "previous": "Previous",
+      "play": "Play",
+      "pause": "Pause",
+      "next": "Next"
+    },
+    "settings": {
+      "artBackground": "Album-art background",
+      "artBackgroundDesc": "Blur the album art behind the player with a matching color wash. Turn off for a plain themed card."
+    }
+  },
+  "notifications": {
+    "title": "NOTIFICATIONS · {{count}}",
+    "clearAll": "Clear all",
+    "empty": "No notifications",
+    "dismiss": "Dismiss"
+  },
+  "audio": {
+    "output": "Output",
+    "input": "Input",
+    "empty": "No audio devices found.",
+    "settings": {
+      "both": "Both",
+      "background": "Background"
+    }
+  },
+  "converter": {
+    "swap": "Swap units",
+    "categories": {
+      "length": "Length",
+      "weight": "Weight",
+      "temperature": "Temp",
+      "currency": "Money"
+    }
+  },
+  "link": {
+    "renderer": {
+      "openTooltip": "Double-click to open {{url}}",
+      "untitled": "Untitled"
+    },
+    "settings": {
+      "invalidUrl": "Enter a valid URL",
+      "urlPlaceholder": "https://...",
+      "labelPlaceholder": "Label",
+      "iconSearchPlaceholder": "Search icons…"
+    }
+  },
+  "image": {
+    "settings": {
+      "fitCover": "Cover",
+      "fitContain": "Contain",
+      "rounded": "Rounded · {{px}}px",
+      "replace": "Replace image"
+    }
+  },
+  "video": {
+    "settings": {
+      "autoplay": "Autoplay",
+      "loop": "Loop",
+      "muted": "Muted",
+      "replace": "Replace video"
+    }
+  },
+  "gallery": {
+    "renderer": {
+      "empty": "Add media in settings"
+    },
+    "settings": {
+      "layoutSlides": "Slides",
+      "layoutGrid": "Grid",
+      "layoutPhotos": "Photos",
+      "layoutCollage": "Collage",
+      "slideEvery": "Slide every {{seconds}}s",
+      "rounded": "Rounded · {{px}}px",
+      "addMedia": "Add media ({{count}})"
+    }
+  },
+  "weather": {
+    "conditions": {
+      "clear": "Clear",
+      "partlyCloudy": "Partly cloudy",
+      "cloudy": "Cloudy",
+      "fog": "Fog",
+      "drizzle": "Drizzle",
+      "rain": "Rain",
+      "snow": "Snow",
+      "showers": "Showers",
+      "snowShowers": "Snow showers",
+      "thunderstorm": "Thunderstorm"
+    },
+    "renderer": {
+      "unavailable": "Unavailable",
+      "loading": "Loading…",
+      "mph": "mph",
+      "kmh": "km/h"
+    },
+    "settings": {
+      "myLocation": "My location",
+      "findingYou": "Finding you…",
+      "useMyLocation": "Use my location",
+      "searchCity": "Search a city…"
+    }
+  },
+  "stats": {
+    "system": "SYSTEM",
+    "cpu": "CPU",
+    "memory": "Memory",
+    "storage": "Storage",
+    "battery": "Battery",
+    "chargingSuffix": " · charging"
+  },
+  "diskinfo": {
+    "title": "Disks",
+    "reading": "Reading disks…",
+    "noDisks": "No disks found",
+    "removable": "removable",
+    "read": "READ",
+    "write": "WRITE",
+    "active": "ACTIVE",
+    "freeOf": "free of {{total}}",
+    "percentUsed": "{{percent}}% used"
+  },
+  "spaces": {
+    "heading": "Spaces",
+    "description": "Switch layouts, build your own, export them, or publish to the gallery.",
+    "newSpace": "New space",
+    "import": "Import",
+    "badge": {
+      "default": "Default"
+    },
+    "actions": {
+      "save": "Save",
+      "rename": "Rename",
+      "publish": "Publish to gallery",
+      "export": "Export as ZIP",
+      "reset": "Reset space",
+      "resetConfirm": "Click again to clear",
+      "delete": "Delete"
+    },
+    "feedback": {
+      "exported": "Space exported ✦",
+      "exportFailed": "Couldn’t export the space.",
+      "imported": "Imported “{{name}}”",
+      "published": "Published to the gallery ✦",
+      "publishFailed": "Couldn’t publish — try again.",
+      "reset": "Reset “{{name}}”"
+    },
+    "notify": {
+      "importedTitle": "Imported \"{{name}}\"",
+      "importedBody": "{{count}} widgets added as a new space."
+    }
+  },
+  "notifPanel": {
+    "heading": "Notifications",
+    "markAllRead": "Mark all read",
+    "clearAll": "Clear all",
+    "markRead": "Mark as read",
+    "remove": "Remove",
+    "empty": "All caught up ✦"
+  },
+  "sync": {
+    "title": "Cloud Sync",
+    "subtitle": "Optional — keep your layouts across devices.",
+    "consent": {
+      "title": "What Cloud Sync saves",
+      "syncedLabel": "Synced",
+      "localLabel": "Stays on this device",
+      "synced": {
+        "layout": "Spaces & widget layout",
+        "sizes": "Sizes & positions",
+        "colors": "Colors & light/dark",
+        "settings": "Widget settings"
+      },
+      "local": {
+        "notes": "Notes & sticky text",
+        "todo": "To-do item text",
+        "clipboard": "Clipboard & inbox",
+        "shelf": "Shelf files & local paths"
+      },
+      "checkbox": "I understand and want to enable Cloud Sync."
+    },
+    "signIn": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "sending": "Sending…",
+      "sendCode": "Send code",
+      "codeSentTo": "Enter the 6-digit code sent to",
+      "verifying": "Verifying…",
+      "verify": "Verify & enable",
+      "resend": "Resend",
+      "disclaimer": "We email you a one-time code — no password. Your layouts sync under this address; the latest change wins across devices."
+    },
+    "signedIn": {
+      "signedIn": "Signed in",
+      "syncing": "Syncing…",
+      "lastSynced": "Last synced {{time}}",
+      "autoSync": "Auto-sync in the background",
+      "syncNow": "Sync now",
+      "restore": "Restore from cloud",
+      "restoreConfirm": "Click again to overwrite",
+      "signOut": "Sign out"
+    }
+  },
+  "onboarding": {
+    "welcome": "Welcome to Layer",
+    "subtitle": "A quiet layer of widgets on your desktop. Three quick things:",
+    "getStarted": "Get started",
+    "steps": {
+      "hotkey": {
+        "title": "Summon with a hotkey",
+        "body": "Press Ctrl + Shift + Space anytime to bring Layer to the front and start editing. Press it again to tuck it back behind your apps."
+      },
+      "island": {
+        "title": "The island menu",
+        "body": "A pill sits at the top-center of your screen. Open it to add widgets — notes, clocks, weather, apps, and more."
+      },
+      "arrange": {
+        "title": "Arrange your canvas",
+        "body": "Drag widgets by their grip handle, resize from the corners, right-click for options. Widgets snap to each other as you move them."
+      }
+    }
+  }
+}

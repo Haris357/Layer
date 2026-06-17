@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import {
   Plus,
@@ -28,6 +29,7 @@ import type { Space } from '../types/widget'
 import { cn } from '../lib/utils'
 
 export function SpacesModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
   const spaces = useCanvasStore((s) => s.spaces)
   const activeId = useCanvasStore((s) => s.activeId)
   const switchSpace = useCanvasStore((s) => s.switchSpace)
@@ -44,9 +46,9 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
   const [publishing, setPublishing] = useState<Space | null>(null)
   const primary = useAnchorMonitor()
 
-  const startRename = (t: Space) => {
-    setRenaming(t.id)
-    setDraft(t.name)
+  const startRename = (sp: Space) => {
+    setRenaming(sp.id)
+    setDraft(sp.name)
   }
   const commitRename = () => {
     if (renaming && draft.trim()) renameSpace(renaming, draft.trim())
@@ -54,22 +56,22 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
   }
 
   const newSpace = () => {
-    const count = spaces.filter((t) => !t.builtin).length
+    const count = spaces.filter((sp) => !sp.builtin).length
     createSpace(`Space ${count + 1}`)
   }
 
   // Export a template as a ZIP (template.json + canvas screenshot).
-  const exportZip = (t: Space) => {
+  const exportZip = (sp: Space) => {
     if (!isTauri()) return
-    switchSpace(t.id)
+    switchSpace(sp.id)
     onClose()
     setTimeout(async () => {
       try {
         const png = await captureCanvas()
-        await exportSpaceZip(t, png)
-        toast('Space exported ✦')
+        await exportSpaceZip(sp, png)
+        toast(t('spaces.feedback.exported'))
       } catch {
-        toast('Couldn’t export the space.')
+        toast(t('spaces.feedback.exportFailed'))
       }
     }, 600)
   }
@@ -79,34 +81,34 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
     const result = await importSpaceFile()
     if (result) {
       importSpace(result.name, result.widgets)
-      toast(`Imported “${result.name}”`)
+      toast(t('spaces.feedback.imported', { name: result.name }))
       notify({
         kind: 'import',
-        title: `Imported "${result.name}"`,
-        body: `${result.widgets.length} widgets added as a new space.`,
+        title: t('spaces.notify.importedTitle', { name: result.name }),
+        body: t('spaces.notify.importedBody', { count: result.widgets.length }),
       })
     }
   }
 
   // Publish: capture the canvas with all UI hidden, then upload.
   const doPublish = (author: string, description: string) => {
-    const t = publishing
-    if (!t) return
+    const sp = publishing
+    if (!sp) return
     setPublishing(null)
-    switchSpace(t.id)
+    switchSpace(sp.id)
     onClose()
     setTimeout(async () => {
       try {
         const png = await captureCanvas()
         await publishToGallery({
-          space: t,
+          space: sp,
           author,
           description,
           screenshotPng: png,
         })
-        toast('Published to the gallery ✦')
+        toast(t('spaces.feedback.published'))
       } catch {
-        toast('Couldn’t publish — try again.')
+        toast(t('spaces.feedback.publishFailed'))
       }
     }, 600)
   }
@@ -140,9 +142,9 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
               className="text-[var(--text-primary)]"
               style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-1.2px' }}
             >
-              Spaces
+              {t('spaces.heading')}
             </h2>
-            <Tooltip label="Close" side="bottom">
+            <Tooltip label={t('common.close')} side="bottom">
               <button
                 type="button"
                 onClick={onClose}
@@ -156,16 +158,15 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
             className="mb-4 text-[var(--text-secondary)]"
             style={{ fontSize: 12.5 }}
           >
-            Switch layouts, build your own, export them, or publish to the
-            gallery.
+            {t('spaces.description')}
           </p>
 
           <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
-            {spaces.map((t) => {
-              const active = t.id === activeId
+            {spaces.map((sp) => {
+              const active = sp.id === activeId
               return (
                 <div
-                  key={t.id}
+                  key={sp.id}
                   className={cn(
                     'flex items-center gap-2 rounded-[10px] border px-3 py-2.5 transition-colors',
                     active
@@ -175,7 +176,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
                 >
                   <button
                     type="button"
-                    onClick={() => switchSpace(t.id)}
+                    onClick={() => switchSpace(sp.id)}
                     className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border"
                     style={{
                       borderColor: active
@@ -191,7 +192,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
                     )}
                   </button>
 
-                  {renaming === t.id ? (
+                  {renaming === sp.id ? (
                     <input
                       autoFocus
                       value={draft}
@@ -206,22 +207,22 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => switchSpace(t.id)}
+                      onClick={() => switchSpace(sp.id)}
                       className="min-w-0 flex-1 truncate text-left text-[13px] font-semibold text-[var(--text-primary)]"
                     >
-                      {t.name}
+                      {sp.name}
                     </button>
                   )}
 
-                  {t.builtin && (
+                  {sp.builtin && (
                     <span className="shrink-0 rounded-[5px] bg-[var(--fill-2)] px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
-                      Default
+                      {t('spaces.badge.default')}
                     </span>
                   )}
 
                   <div className="flex shrink-0 items-center gap-0.5">
-                    {renaming === t.id ? (
-                      <Tooltip label="Save">
+                    {renaming === sp.id ? (
+                      <Tooltip label={t('spaces.actions.save')}>
                         <button
                           type="button"
                           onClick={commitRename}
@@ -231,11 +232,11 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
                         </button>
                       </Tooltip>
                     ) : (
-                      !t.builtin && (
-                        <Tooltip label="Rename">
+                      !sp.builtin && (
+                        <Tooltip label={t('spaces.actions.rename')}>
                           <button
                             type="button"
-                            onClick={() => startRename(t)}
+                            onClick={() => startRename(sp)}
                             className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
                           >
                             <Pencil size={13} />
@@ -243,49 +244,49 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
                         </Tooltip>
                       )
                     )}
-                    <Tooltip label="Publish to gallery">
+                    <Tooltip label={t('spaces.actions.publish')}>
                       <button
                         type="button"
-                        onClick={() => setPublishing(t)}
+                        onClick={() => setPublishing(sp)}
                         className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
                       >
                         <Share2 size={13} />
                       </button>
                     </Tooltip>
-                    <Tooltip label="Export as ZIP">
+                    <Tooltip label={t('spaces.actions.export')}>
                       <button
                         type="button"
-                        onClick={() => exportZip(t)}
+                        onClick={() => exportZip(sp)}
                         className="rounded-[6px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
                       >
                         <Download size={13} />
                       </button>
                     </Tooltip>
-                    {!t.builtin && (
+                    {!sp.builtin && (
                       <Tooltip
                         label={
-                          confirmReset === t.id
-                            ? 'Click again to clear'
-                            : 'Reset space'
+                          confirmReset === sp.id
+                            ? t('spaces.actions.resetConfirm')
+                            : t('spaces.actions.reset')
                         }
                       >
                         <button
                           type="button"
                           onClick={() => {
-                            if (confirmReset === t.id) {
-                              resetSpace(t.id)
+                            if (confirmReset === sp.id) {
+                              resetSpace(sp.id)
                               setConfirmReset(null)
-                              toast(`Reset “${t.name}”`)
+                              toast(t('spaces.feedback.reset', { name: sp.name }))
                             } else {
-                              setConfirmReset(t.id)
+                              setConfirmReset(sp.id)
                             }
                           }}
                           onMouseLeave={() =>
-                            setConfirmReset((c) => (c === t.id ? null : c))
+                            setConfirmReset((c) => (c === sp.id ? null : c))
                           }
                           className={cn(
                             'rounded-[6px] p-1.5 transition-colors',
-                            confirmReset === t.id
+                            confirmReset === sp.id
                               ? 'text-[var(--danger)] bg-[var(--fill-2)]'
                               : 'text-[var(--text-secondary)] hover:bg-[var(--fill-2)]',
                           )}
@@ -294,11 +295,11 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
                         </button>
                       </Tooltip>
                     )}
-                    {!t.builtin && (
-                      <Tooltip label="Delete">
+                    {!sp.builtin && (
+                      <Tooltip label={t('spaces.actions.delete')}>
                         <button
                           type="button"
-                          onClick={() => deleteSpace(t.id)}
+                          onClick={() => deleteSpace(sp.id)}
                           className="rounded-[6px] p-1.5 text-[var(--text-tertiary)] hover:bg-[var(--fill-2)] hover:text-[var(--danger)]"
                         >
                           <Trash2 size={13} />
@@ -318,7 +319,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
               className="flex flex-1 items-center justify-center gap-1.5 rounded-[8px] bg-[var(--accent)] px-3 py-2 text-[13px] font-semibold text-[var(--on-accent)] transition-transform hover:scale-[1.02]"
             >
               <Plus size={15} strokeWidth={2.4} />
-              New space
+              {t('spaces.newSpace')}
             </button>
             <button
               type="button"
@@ -326,7 +327,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
               className="flex items-center justify-center gap-1.5 rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
             >
               <Upload size={14} />
-              Import
+              {t('spaces.import')}
             </button>
           </div>
         </motion.div>

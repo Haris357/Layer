@@ -9,6 +9,9 @@ interface SettingsState {
   snapEnabled: boolean
   hotkey: string
   clockFormat24h: boolean
+  // UI language code (e.g. 'en', 'es'). i18n reads this from the persisted blob
+  // on boot; the Settings picker drives changes via lib/i18n's changeLanguage.
+  language: string
   theme: ThemePref
   autostartInit: boolean
   screensaverEnabled: boolean
@@ -33,6 +36,7 @@ interface SettingsState {
   setSnapEnabled: (enabled: boolean) => void
   setHotkey: (hotkey: string) => void
   setClockFormat24h: (value: boolean) => void
+  setLanguage: (value: string) => void
   setTheme: (theme: ThemePref) => void
   setAutostartInit: (value: boolean) => void
   setScreensaverEnabled: (value: boolean) => void
@@ -58,6 +62,7 @@ export const useSettingsStore = create<SettingsState>()(
       snapEnabled: true,
       hotkey: 'Ctrl+Shift+Space',
       clockFormat24h: false,
+      language: 'en',
       theme: 'system',
       autostartInit: false,
       screensaverEnabled: true,
@@ -78,6 +83,7 @@ export const useSettingsStore = create<SettingsState>()(
       setSnapEnabled: (snapEnabled) => set({ snapEnabled }),
       setHotkey: (hotkey) => set({ hotkey }),
       setClockFormat24h: (clockFormat24h) => set({ clockFormat24h }),
+      setLanguage: (language) => set({ language }),
       setTheme: (theme) => set({ theme }),
       setAutostartInit: (autostartInit) => set({ autostartInit }),
       setScreensaverEnabled: (screensaverEnabled) =>

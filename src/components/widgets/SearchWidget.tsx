@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import type { SearchWidget as SearchWidgetType } from '../../types/widget'
 import { openUrl } from '../../lib/ipc'
@@ -12,6 +13,7 @@ const ENGINES: Record<'google' | 'bing' | 'duckduckgo', string> = {
 }
 
 function SearchRenderer({ widget }: { widget: SearchWidgetType }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
 
   const go = () => {
@@ -49,7 +51,7 @@ function SearchRenderer({ widget }: { widget: SearchWidgetType }) {
         onKeyDown={(e) => {
           if (e.key === 'Enter') go()
         }}
-        placeholder="Search the web…"
+        placeholder={t('search.placeholder')}
         className="min-w-0 flex-1 bg-transparent text-[14px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
       />
     </div>
@@ -63,15 +65,16 @@ function SearchSettings({
   widget: SearchWidgetType
   onUpdate: (patch: Partial<SearchWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex w-[256px] flex-col gap-2.5">
       <Segmented
         value={widget.engine}
         options={[
-          { value: 'google', label: 'Google' },
-          { value: 'bing', label: 'Bing' },
-          { value: 'duckduckgo', label: 'DDG' },
-          { value: 'custom', label: 'Custom' },
+          { value: 'google', label: t('search.engines.google') },
+          { value: 'bing', label: t('search.engines.bing') },
+          { value: 'duckduckgo', label: t('search.engines.ddg') },
+          { value: 'custom', label: t('search.engines.custom') },
         ]}
         onChange={(v) =>
           onUpdate({ engine: v as SearchWidgetType['engine'] })
@@ -80,7 +83,7 @@ function SearchSettings({
       {widget.engine === 'custom' && (
         <TextField
           value={widget.customUrl ?? ''}
-          placeholder="https://example.com/search?q=%s"
+          placeholder={t('search.customPlaceholder')}
           onChange={(v) => onUpdate({ customUrl: v })}
         />
       )}

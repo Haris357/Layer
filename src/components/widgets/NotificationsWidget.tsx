@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bell, BellOff, X } from 'lucide-react'
 import {
@@ -9,9 +10,11 @@ import {
   type NotificationItem,
 } from '../../lib/ipc'
 import type { NotificationsWidget as NotificationsWidgetType } from '../../types/widget'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 function NotificationsRenderer() {
+  const { t } = useTranslation()
   const [items, setItems] = useState<NotificationItem[]>([])
 
   useEffect(() => {
@@ -50,7 +53,7 @@ function NotificationsRenderer() {
           <span
             style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.3px' }}
           >
-            NOTIFICATIONS · {items.length}
+            {t('notifications.title', { count: items.length })}
           </span>
         </span>
         {items.length > 0 && (
@@ -60,7 +63,7 @@ function NotificationsRenderer() {
             className="text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)]"
             style={{ fontSize: 11, fontWeight: 600 }}
           >
-            Clear all
+            {t('notifications.clearAll')}
           </button>
         )}
       </div>
@@ -69,7 +72,7 @@ function NotificationsRenderer() {
         <div className="flex flex-1 flex-col items-center justify-center gap-2 text-[var(--text-tertiary)]">
           <BellOff size={22} strokeWidth={1.5} />
           <span style={{ fontSize: 12, fontWeight: 500 }}>
-            No notifications
+            {t('notifications.empty')}
           </span>
         </div>
       ) : (
@@ -111,13 +114,15 @@ function NotificationsRenderer() {
                     </span>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => clearOne(n.id)}
-                  className="shrink-0 text-[var(--text-tertiary)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--danger)]"
-                >
-                  <X size={14} />
-                </button>
+                <Tooltip label={t('notifications.dismiss')} side="left">
+                  <button
+                    type="button"
+                    onClick={() => clearOne(n.id)}
+                    className="shrink-0 text-[var(--text-tertiary)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--danger)]"
+                  >
+                    <X size={14} />
+                  </button>
+                </Tooltip>
               </motion.div>
             ))}
           </AnimatePresence>

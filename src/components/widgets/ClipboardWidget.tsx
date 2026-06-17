@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import { Clipboard, Pin, X, Search, Trash2 } from 'lucide-react'
 import type { ClipboardWidget as ClipboardWidgetType } from '../../types/widget'
@@ -10,6 +11,7 @@ import { detectKind } from '../../lib/clipboardKind'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 function ClipboardRenderer() {
+  const { t } = useTranslation()
   const items = useClipboardStore((s) => s.items)
   const togglePin = useClipboardStore((s) => s.togglePin)
   const remove = useClipboardStore((s) => s.remove)
@@ -25,9 +27,9 @@ function ClipboardRenderer() {
   const copy = async (text: string) => {
     try {
       await writeText(text)
-      toast('Copied to clipboard')
+      toast(t('clipboard.copied'))
     } catch {
-      toast('Could not copy')
+      toast(t('clipboard.copyFailed'))
     }
   }
 
@@ -39,7 +41,7 @@ function ClipboardRenderer() {
             className="text-[var(--text-primary)]"
             style={{ fontSize: 12, fontWeight: 700, letterSpacing: '-0.3px' }}
           >
-            Clipboard
+            {t('clipboard.title')}
           </span>
           {items.length > 0 && (
             <span
@@ -51,7 +53,7 @@ function ClipboardRenderer() {
           )}
         </span>
         {items.length > 0 && (
-          <Tooltip label="Clear unpinned" side="bottom">
+          <Tooltip label={t('clipboard.clearUnpinned')} side="bottom">
             <button
               type="button"
               onClick={clearUnpinned}
@@ -69,7 +71,7 @@ function ClipboardRenderer() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search…"
+            placeholder={t('clipboard.search')}
             className="min-w-0 flex-1 bg-transparent text-[11.5px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
           />
         </div>
@@ -80,8 +82,8 @@ function ClipboardRenderer() {
           <Clipboard size={22} strokeWidth={1.5} />
           <span style={{ fontSize: 11, lineHeight: 1.4 }}>
             {items.length === 0
-              ? 'Copy anything — it’ll show up here.'
-              : 'No matches'}
+              ? t('clipboard.empty')
+              : t('clipboard.noMatches')}
           </span>
         </div>
       ) : (
@@ -115,7 +117,7 @@ function ClipboardRenderer() {
                 </span>
               )}
               <Tooltip
-                label={`Copy ${meta.label.toLowerCase()}`}
+                label={t('clipboard.copyLabel', { label: meta.label.toLowerCase() })}
                 side="top"
                 className="min-w-0 flex-1"
               >
@@ -140,7 +142,7 @@ function ClipboardRenderer() {
                 </button>
               </Tooltip>
               <div className="flex shrink-0 items-center gap-0.5">
-                <Tooltip label={i.pinned ? 'Unpin' : 'Pin'} side="top">
+                <Tooltip label={i.pinned ? t('clipboard.unpin') : t('clipboard.pin')} side="top">
                   <button
                     type="button"
                     onClick={() => togglePin(i.id)}
@@ -158,7 +160,7 @@ function ClipboardRenderer() {
                     />
                   </button>
                 </Tooltip>
-                <Tooltip label="Remove" side="top">
+                <Tooltip label={t('clipboard.remove')} side="top">
                   <button
                     type="button"
                     onClick={() => remove(i.id)}

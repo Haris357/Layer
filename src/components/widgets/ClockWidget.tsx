@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Clock } from 'lucide-react'
 import type {
   ClockWidget as ClockWidgetType,
@@ -381,6 +382,7 @@ function ClockSettings({
   widget: ClockWidgetType
   onUpdate: (patch: Partial<ClockWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   if (widget.variant === 'analog') return null
 
   return (
@@ -389,10 +391,10 @@ function ClockSettings({
         <Segmented
           value={widget.font ?? 'anurati'}
           options={[
-            { value: 'anurati', label: 'Anurati' },
-            { value: 'wallpoet', label: 'Stencil' },
-            { value: 'oxanium', label: 'Sci-fi' },
-            { value: 'audiowide', label: 'Retro' },
+            { value: 'anurati', label: t('clock.fonts.anurati') },
+            { value: 'wallpoet', label: t('clock.fonts.stencil') },
+            { value: 'oxanium', label: t('clock.fonts.scifi') },
+            { value: 'audiowide', label: t('clock.fonts.retro') },
           ]}
           onChange={(v) => onUpdate({ font: v as ClockFont })}
         />
@@ -400,18 +402,18 @@ function ClockSettings({
       <Segmented
         value={widget.format}
         options={[
-          { value: '12h', label: '12h' },
-          { value: '24h', label: '24h' },
+          { value: '12h', label: t('clock.format.12h') },
+          { value: '24h', label: t('clock.format.24h') },
         ]}
         onChange={(v) => onUpdate({ format: v as ClockWidgetType['format'] })}
       />
-      <FieldRow label="Show seconds">
+      <FieldRow label={t('clock.showSeconds')}>
         <Toggle
           checked={widget.showSeconds}
           onChange={(v) => onUpdate({ showSeconds: v })}
         />
       </FieldRow>
-      <FieldRow label="Show date">
+      <FieldRow label={t('clock.showDate')}>
         <Toggle
           checked={widget.showDate}
           onChange={(v) => onUpdate({ showDate: v })}

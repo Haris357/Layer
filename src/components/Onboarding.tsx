@@ -1,26 +1,16 @@
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Layers, Keyboard, MousePointer2, Sparkles } from 'lucide-react'
 import { useSettingsStore } from '../store/settingsStore'
 
 const STEPS = [
-  {
-    icon: Keyboard,
-    title: 'Summon with a hotkey',
-    body: 'Press Ctrl + Shift + Space anytime to bring Layer to the front and start editing. Press it again to tuck it back behind your apps.',
-  },
-  {
-    icon: Layers,
-    title: 'The island menu',
-    body: 'A pill sits at the top-center of your screen. Open it to add widgets — notes, clocks, weather, apps, and more.',
-  },
-  {
-    icon: MousePointer2,
-    title: 'Arrange your canvas',
-    body: 'Drag widgets by their grip handle, resize from the corners, right-click for options. Widgets snap to each other as you move them.',
-  },
-]
+  { icon: Keyboard, key: 'hotkey' },
+  { icon: Layers, key: 'island' },
+  { icon: MousePointer2, key: 'arrange' },
+] as const
 
 export function Onboarding() {
+  const { t } = useTranslation()
   const setOnboarded = useSettingsStore((s) => s.setOnboarded)
 
   return (
@@ -40,19 +30,19 @@ export function Onboarding() {
           <h2
             style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-1.2px' }}
           >
-            Welcome to Layer
+            {t('onboarding.welcome')}
           </h2>
         </div>
         <p
           className="mb-5 text-[var(--text-secondary)]"
           style={{ fontSize: 13 }}
         >
-          A quiet layer of widgets on your desktop. Three quick things:
+          {t('onboarding.subtitle')}
         </p>
 
         <div className="flex flex-col gap-3.5">
           {STEPS.map((s) => (
-            <div key={s.title} className="flex gap-3">
+            <div key={s.key} className="flex gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[var(--fill-2)] text-[var(--text-primary)]">
                 <s.icon size={17} strokeWidth={1.8} />
               </div>
@@ -61,13 +51,13 @@ export function Onboarding() {
                   className="text-[var(--text-primary)]"
                   style={{ fontSize: 13.5, fontWeight: 700 }}
                 >
-                  {s.title}
+                  {t(`onboarding.steps.${s.key}.title`)}
                 </span>
                 <span
                   className="text-[var(--text-secondary)]"
                   style={{ fontSize: 12.5, lineHeight: 1.5 }}
                 >
-                  {s.body}
+                  {t(`onboarding.steps.${s.key}.body`)}
                 </span>
               </div>
             </div>
@@ -79,7 +69,7 @@ export function Onboarding() {
           onClick={() => setOnboarded(true)}
           className="mt-6 rounded-[10px] bg-[var(--accent)] py-2.5 text-[14px] font-semibold text-[var(--on-accent)] transition-transform hover:scale-[1.02]"
         >
-          Get started
+          {t('onboarding.getStarted')}
         </button>
       </motion.div>
     </div>

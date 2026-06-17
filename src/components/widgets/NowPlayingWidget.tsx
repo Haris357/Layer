@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Music, Play, Pause, SkipBack, SkipForward } from 'lucide-react'
 import {
@@ -11,6 +12,7 @@ import {
 } from '../../lib/ipc'
 import type { NowPlayingWidget as NowPlayingWidgetType } from '../../types/widget'
 import { Toggle, FieldRow } from '../ui'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 // Pull a representative colour from the album art (saturation-weighted average)
@@ -281,6 +283,7 @@ function VolumeKnob({
 }
 
 function NowPlayingRenderer({ widget }: { widget: NowPlayingWidgetType }) {
+  const { t } = useTranslation()
   const [np, setNp] = useState<NowPlaying | null>(null)
   const [volume, setVol] = useState(-1)
   const color = useArtColor(np?.thumb ?? '')
@@ -325,7 +328,7 @@ function NowPlayingRenderer({ widget }: { widget: NowPlayingWidgetType }) {
     return (
       <div className="glass flex h-full w-full flex-col items-center justify-center gap-2 rounded-[12px] border border-[var(--border)] text-[var(--text-tertiary)]">
         <Music size={26} strokeWidth={1.5} />
-        <span style={{ fontSize: 12, fontWeight: 500 }}>Nothing playing</span>
+        <span style={{ fontSize: 12, fontWeight: 500 }}>{t('nowplaying.empty')}</span>
       </div>
     )
   }
@@ -393,7 +396,7 @@ function NowPlayingRenderer({ widget }: { widget: NowPlayingWidgetType }) {
             className="truncate"
             style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.3px' }}
           >
-            {src ? src.toUpperCase() : 'NOW PLAYING'}
+            {src ? src.toUpperCase() : t('nowplaying.defaultSource')}
           </span>
         </div>
 
@@ -404,7 +407,7 @@ function NowPlayingRenderer({ widget }: { widget: NowPlayingWidgetType }) {
                 className="truncate text-[var(--text-primary)]"
                 style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.4px' }}
               >
-                {np.title || 'Unknown track'}
+                {np.title || t('nowplaying.unknownTrack')}
               </span>
               <span
                 className="truncate text-[var(--text-secondary)]"
@@ -422,31 +425,40 @@ function NowPlayingRenderer({ widget }: { widget: NowPlayingWidgetType }) {
         </div>
 
         <div className="flex shrink-0 items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => control('prev')}
-            className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+          <Tooltip label={t('nowplaying.controls.previous')} side="top">
+            <button
+              type="button"
+              onClick={() => control('prev')}
+              className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+            >
+              <SkipBack size={17} strokeWidth={1.8} fill="currentColor" />
+            </button>
+          </Tooltip>
+          <Tooltip
+            label={np.playing ? t('nowplaying.controls.pause') : t('nowplaying.controls.play')}
+            side="top"
           >
-            <SkipBack size={17} strokeWidth={1.8} fill="currentColor" />
-          </button>
-          <button
-            type="button"
-            onClick={() => control('playpause')}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--on-accent)] transition-transform hover:scale-105"
-          >
-            {np.playing ? (
-              <Pause size={16} strokeWidth={2} fill="currentColor" />
-            ) : (
-              <Play size={16} strokeWidth={2} fill="currentColor" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => control('next')}
-            className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-          >
-            <SkipForward size={17} strokeWidth={1.8} fill="currentColor" />
-          </button>
+            <button
+              type="button"
+              onClick={() => control('playpause')}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--on-accent)] transition-transform hover:scale-105"
+            >
+              {np.playing ? (
+                <Pause size={16} strokeWidth={2} fill="currentColor" />
+              ) : (
+                <Play size={16} strokeWidth={2} fill="currentColor" />
+              )}
+            </button>
+          </Tooltip>
+          <Tooltip label={t('nowplaying.controls.next')} side="top">
+            <button
+              type="button"
+              onClick={() => control('next')}
+              className="text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+            >
+              <SkipForward size={17} strokeWidth={1.8} fill="currentColor" />
+            </button>
+          </Tooltip>
         </div>
       </div>
     </div>
@@ -460,17 +472,17 @@ function NowPlayingSettings({
   widget: NowPlayingWidgetType
   onUpdate: (patch: Partial<NowPlayingWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex w-[230px] flex-col gap-2">
-      <FieldRow label="Album-art background">
+      <FieldRow label={t('nowplaying.settings.artBackground')}>
         <Toggle
           checked={widget.artBackground !== false}
           onChange={(v) => onUpdate({ artBackground: v })}
         />
       </FieldRow>
       <p className="text-[11px] leading-relaxed text-[var(--text-tertiary)]">
-        Blur the album art behind the player with a matching color wash. Turn off
-        for a plain themed card.
+        {t('nowplaying.settings.artBackgroundDesc')}
       </p>
     </div>
   )

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Cloud, Check, ShieldCheck, Loader2 } from 'lucide-react'
 import { useSyncStore } from '../store/syncStore'
 import { useSettingsStore } from '../store/settingsStore'
@@ -131,35 +132,36 @@ function relativeTime(iso: string | null): string {
 }
 
 function ConsentPanel() {
+  const { t } = useTranslation()
   const consented = useSettingsStore((s) => s.cloudSyncConsented)
   const setConsented = useSettingsStore((s) => s.setCloudSyncConsented)
   return (
     <div className="flex flex-col gap-3 rounded-[12px] border border-[var(--border)] bg-[var(--fill-1)] p-4">
       <div className="flex items-center gap-2 text-[var(--text-primary)]">
         <ShieldCheck size={16} strokeWidth={1.8} />
-        <span className="text-[13px] font-semibold">What Cloud Sync saves</span>
+        <span className="text-[13px] font-semibold">{t('sync.consent.title')}</span>
       </div>
       <div className="grid grid-cols-2 gap-3 text-[12px] leading-relaxed">
         <div>
           <div className="mb-1 font-semibold text-[var(--text-secondary)]">
-            Synced
+            {t('sync.consent.syncedLabel')}
           </div>
           <ul className="flex flex-col gap-1 text-[var(--text-secondary)]">
-            <li>Spaces &amp; widget layout</li>
-            <li>Sizes &amp; positions</li>
-            <li>Colors &amp; light/dark</li>
-            <li>Widget settings</li>
+            <li>{t('sync.consent.synced.layout')}</li>
+            <li>{t('sync.consent.synced.sizes')}</li>
+            <li>{t('sync.consent.synced.colors')}</li>
+            <li>{t('sync.consent.synced.settings')}</li>
           </ul>
         </div>
         <div>
           <div className="mb-1 font-semibold text-[var(--text-secondary)]">
-            Stays on this device
+            {t('sync.consent.localLabel')}
           </div>
           <ul className="flex flex-col gap-1 text-[var(--text-tertiary)]">
-            <li>Notes &amp; sticky text</li>
-            <li>To-do item text</li>
-            <li>Clipboard &amp; inbox</li>
-            <li>Shelf files &amp; local paths</li>
+            <li>{t('sync.consent.local.notes')}</li>
+            <li>{t('sync.consent.local.todo')}</li>
+            <li>{t('sync.consent.local.clipboard')}</li>
+            <li>{t('sync.consent.local.shelf')}</li>
           </ul>
         </div>
       </div>
@@ -178,7 +180,7 @@ function ConsentPanel() {
           )}
         </button>
         <span className="text-[12px] text-[var(--text-secondary)]">
-          I understand and want to enable Cloud Sync.
+          {t('sync.consent.checkbox')}
         </span>
       </label>
     </div>
@@ -186,6 +188,7 @@ function ConsentPanel() {
 }
 
 function SignIn() {
+  const { t } = useTranslation()
   const { status, error, pendingEmail, requestOtp, verifyOtp } = useSyncStore()
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
@@ -206,11 +209,11 @@ function SignIn() {
       {!pendingEmail ? (
         <>
           <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-            Email
+            {t('sync.signIn.emailLabel')}
           </span>
           <TextField
             value={email}
-            placeholder="you@example.com"
+            placeholder={t('sync.signIn.emailPlaceholder')}
             onChange={setEmail}
           />
           <button
@@ -219,13 +222,13 @@ function SignIn() {
             onClick={() => requestOtp(email.trim())}
             className={primaryBtn}
           >
-            {sending ? 'Sending…' : 'Send code'}
+            {sending ? t('sync.signIn.sending') : t('sync.signIn.sendCode')}
           </button>
         </>
       ) : (
         <>
           <span className="text-center text-[12px] font-medium text-[var(--text-secondary)]">
-            Enter the 6-digit code sent to{' '}
+            {t('sync.signIn.codeSentTo')}{' '}
             <span className="text-[var(--text-primary)]">{pendingEmail}</span>
           </span>
           <OtpInput
@@ -243,7 +246,7 @@ function SignIn() {
               onClick={() => submitCode(code)}
               className={primaryBtn}
             >
-              {verifying ? 'Verifying…' : 'Verify & enable'}
+              {verifying ? t('sync.signIn.verifying') : t('sync.signIn.verify')}
             </button>
             <button
               type="button"
@@ -251,7 +254,7 @@ function SignIn() {
               onClick={() => requestOtp(pendingEmail)}
               className={btn}
             >
-              Resend
+              {t('sync.signIn.resend')}
             </button>
           </div>
         </>
@@ -260,14 +263,14 @@ function SignIn() {
         <span className="text-[12px] text-[var(--danger)]">{error}</span>
       )}
       <span className="text-[11px] leading-relaxed text-[var(--text-tertiary)]">
-        We email you a one-time code — no password. Your layouts sync under this
-        address; the latest change wins across devices.
+        {t('sync.signIn.disclaimer')}
       </span>
     </div>
   )
 }
 
 function SignedIn() {
+  const { t } = useTranslation()
   const { email, status, lastSyncedAt, syncNow, restoreFromCloud, signOut } =
     useSyncStore()
   const autoSync = useSettingsStore((s) => s.autoSync)
@@ -284,15 +287,19 @@ function SignedIn() {
         />
         <div className="flex flex-col">
           <span className="text-[13px] font-semibold text-[var(--text-primary)]">
-            {email || 'Signed in'}
+            {email || t('sync.signedIn.signedIn')}
           </span>
           <span className="text-[11px] text-[var(--text-tertiary)]">
-            {syncing ? 'Syncing…' : `Last synced ${relativeTime(lastSyncedAt)}`}
+            {syncing
+              ? t('sync.signedIn.syncing')
+              : t('sync.signedIn.lastSynced', {
+                  time: relativeTime(lastSyncedAt),
+                })}
           </span>
         </div>
       </div>
 
-      <FieldRow label="Auto-sync in the background">
+      <FieldRow label={t('sync.signedIn.autoSync')}>
         <Toggle checked={autoSync} onChange={setAutoSync} />
       </FieldRow>
 
@@ -305,10 +312,10 @@ function SignedIn() {
         >
           {syncing ? (
             <span className="flex items-center gap-1.5">
-              <Loader2 size={13} className="animate-spin" /> Sync now
+              <Loader2 size={13} className="animate-spin" /> {t('sync.signedIn.syncNow')}
             </span>
           ) : (
-            'Sync now'
+            t('sync.signedIn.syncNow')
           )}
         </button>
         <button
@@ -325,7 +332,9 @@ function SignedIn() {
           onMouseLeave={() => setConfirmRestore(false)}
           className={btn}
         >
-          {confirmRestore ? 'Click again to overwrite' : 'Restore from cloud'}
+          {confirmRestore
+            ? t('sync.signedIn.restoreConfirm')
+            : t('sync.signedIn.restore')}
         </button>
       </div>
 
@@ -334,13 +343,14 @@ function SignedIn() {
         onClick={() => signOut()}
         className="self-start text-[13px] font-medium text-[var(--danger)]"
       >
-        Sign out
+        {t('sync.signedIn.signOut')}
       </button>
     </div>
   )
 }
 
 export function SyncTab() {
+  const { t } = useTranslation()
   const signedIn = useSyncStore((s) => s.signedIn)
   const consented = useSettingsStore((s) => s.cloudSyncConsented)
 
@@ -350,10 +360,10 @@ export function SyncTab() {
         <Cloud size={18} strokeWidth={1.8} className="text-[var(--text-primary)]" />
         <div className="flex flex-col">
           <span className="text-[15px] font-semibold text-[var(--text-primary)]">
-            Cloud Sync
+            {t('sync.title')}
           </span>
           <span className="text-[12px] text-[var(--text-secondary)]">
-            Optional — keep your layouts across devices.
+            {t('sync.subtitle')}
           </span>
         </div>
       </div>

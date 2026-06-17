@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { LayoutGrid, Folder, X, Plus, GripVertical } from 'lucide-react'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -95,6 +96,7 @@ function SortableListItem({
   app: PinnedApp
   onRemove: () => void
 }) {
+  const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: app.path })
   const style = {
@@ -125,7 +127,7 @@ function SortableListItem({
         </button>
       </Tooltip>
       <div className="mr-1 flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/item:opacity-100">
-        <Tooltip label="Drag to reorder" side="top">
+        <Tooltip label={t('apps.dragToReorder')} side="top">
           <button
             type="button"
             {...attributes}
@@ -135,7 +137,7 @@ function SortableListItem({
             <GripVertical size={13} />
           </button>
         </Tooltip>
-        <Tooltip label="Remove" side="top">
+        <Tooltip label={t('apps.remove')} side="top">
           <button
             type="button"
             onClick={onRemove}
@@ -156,6 +158,7 @@ function SortableGridItem({
   app: PinnedApp
   onRemove: () => void
 }) {
+  const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: app.path })
   const style = {
@@ -187,7 +190,7 @@ function SortableGridItem({
           </span>
         </button>
       </Tooltip>
-      <Tooltip label="Drag to reorder" side="top" className="absolute -left-1 -top-1 z-10">
+      <Tooltip label={t('apps.dragToReorder')} side="top" className="absolute -left-1 -top-1 z-10">
         <button
           type="button"
           {...attributes}
@@ -197,7 +200,7 @@ function SortableGridItem({
           <GripVertical size={10} strokeWidth={2} />
         </button>
       </Tooltip>
-      <Tooltip label="Remove" side="top" className="absolute -right-1 -top-1 z-10">
+      <Tooltip label={t('apps.remove')} side="top" className="absolute -right-1 -top-1 z-10">
         <button
           type="button"
           onClick={onRemove}
@@ -221,6 +224,7 @@ function AddAppsContent({
   onUpdate: (patch: Partial<AppsWidgetType>) => void
   compact?: boolean
 }) {
+  const { t } = useTranslation()
   const [all, setAll] = useState<AppEntry[]>([])
   const [query, setQuery] = useState('')
 
@@ -269,8 +273,8 @@ function AddAppsContent({
         <Segmented
           value={widget.layout}
           options={[
-            { value: 'list', label: 'List' },
-            { value: 'grid', label: 'Grid' },
+            { value: 'list', label: t('apps.layout.list') },
+            { value: 'grid', label: t('apps.layout.grid') },
           ]}
           onChange={(v) =>
             onUpdate({ layout: v as AppsWidgetType['layout'] })
@@ -279,7 +283,7 @@ function AddAppsContent({
       )}
       <TextField
         value={query}
-        placeholder="Search installed apps…"
+        placeholder={t('apps.searchInstalled')}
         onChange={setQuery}
       />
       {results.length > 0 && (
@@ -298,7 +302,7 @@ function AddAppsContent({
               >
                 <span className="truncate">{a.name}</span>
                 <span className="ml-2 shrink-0">
-                  {pinned ? 'Pinned' : '+ Pin'}
+                  {pinned ? t('apps.pinned') : t('apps.pin')}
                 </span>
               </button>
             )
@@ -311,7 +315,7 @@ function AddAppsContent({
         className="flex items-center justify-center gap-1.5 rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[12px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
       >
         <Folder size={13} strokeWidth={1.8} />
-        Add a folder
+        {t('apps.addFolder')}
       </button>
     </div>
   )
@@ -320,6 +324,7 @@ function AddAppsContent({
 // --- Main renderer --------------------------------------------------------
 
 function AppsRenderer({ widget }: { widget: AppsWidgetType }) {
+  const { t } = useTranslation()
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const [addOpen, setAddOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -401,7 +406,7 @@ function AppsRenderer({ widget }: { widget: AppsWidgetType }) {
         <div className="glass flex h-full w-full flex-col items-center justify-center gap-2 rounded-[12px] border border-[var(--border)] text-[var(--text-tertiary)]">
           <LayoutGrid size={26} strokeWidth={1.5} />
           <span style={{ fontSize: 12, fontWeight: 500 }}>
-            Tap + to pin your first app
+            {t('apps.emptyHint')}
           </span>
         </div>
       ) : (
@@ -446,7 +451,7 @@ function AppsRenderer({ widget }: { widget: AppsWidgetType }) {
 
       {/* Floating "+" — always visible, lock-state independent. */}
       <Tooltip
-        label="Add apps or a folder"
+        label={t('apps.addAppsOrFolder')}
         side="top"
         className="absolute bottom-2 right-2 z-20"
       >

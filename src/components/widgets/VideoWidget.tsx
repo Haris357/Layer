@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Video as VideoIcon } from 'lucide-react'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -61,6 +62,7 @@ function VideoSettings({
   widget: VideoWidgetType
   onUpdate: (patch: Partial<VideoWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const replace = async () => {
     const next = await pickVideo()
     if (!next) return
@@ -71,16 +73,16 @@ function VideoSettings({
 
   return (
     <div className="flex w-[220px] flex-col gap-3">
-      <FieldRow label="Autoplay">
+      <FieldRow label={t('video.settings.autoplay')}>
         <Toggle
           checked={widget.autoplay}
           onChange={(v) => onUpdate({ autoplay: v })}
         />
       </FieldRow>
-      <FieldRow label="Loop">
+      <FieldRow label={t('video.settings.loop')}>
         <Toggle checked={widget.loop} onChange={(v) => onUpdate({ loop: v })} />
       </FieldRow>
-      <FieldRow label="Muted">
+      <FieldRow label={t('video.settings.muted')}>
         <Toggle
           checked={widget.muted}
           onChange={(v) => onUpdate({ muted: v })}
@@ -91,7 +93,7 @@ function VideoSettings({
         onClick={replace}
         className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[12px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
       >
-        Replace video
+        {t('video.settings.replace')}
       </button>
     </div>
   )

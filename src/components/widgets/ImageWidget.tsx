@@ -1,4 +1,5 @@
 import { Image as ImageIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import type { ImageWidget as ImageWidgetType } from '../../types/widget'
@@ -47,6 +48,7 @@ function ImageSettings({
   widget: ImageWidgetType
   onUpdate: (patch: Partial<ImageWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const replace = async () => {
     const next = await pickImage()
     if (!next) return
@@ -60,12 +62,12 @@ function ImageSettings({
       <Segmented
         value={widget.fit}
         options={[
-          { value: 'cover', label: 'Cover' },
-          { value: 'contain', label: 'Contain' },
+          { value: 'cover', label: t('image.settings.fitCover') },
+          { value: 'contain', label: t('image.settings.fitContain') },
         ]}
         onChange={(v) => onUpdate({ fit: v as ImageWidgetType['fit'] })}
       />
-      <FieldRow label={`Rounded · ${widget.rounded}px`}>
+      <FieldRow label={t('image.settings.rounded', { px: widget.rounded })}>
         <div className="w-[110px]">
           <Slider
             value={widget.rounded}
@@ -80,7 +82,7 @@ function ImageSettings({
         onClick={replace}
         className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[12px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
       >
-        Replace image
+        {t('image.settings.replace')}
       </button>
     </div>
   )

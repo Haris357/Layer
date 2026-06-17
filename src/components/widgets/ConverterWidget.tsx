@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeftRight, Repeat } from 'lucide-react'
 import type { ConverterWidget as ConverterWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
@@ -32,11 +33,11 @@ const WEIGHT: Record<string, number> = {
 const TEMP = ['C', 'F', 'K']
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'JPY', 'AUD', 'CAD', 'CNY']
 
-const CATEGORIES: { key: Category; label: string }[] = [
-  { key: 'length', label: 'Length' },
-  { key: 'weight', label: 'Weight' },
-  { key: 'temperature', label: 'Temp' },
-  { key: 'currency', label: 'Money' },
+const CATEGORIES: { key: Category; labelKey: string }[] = [
+  { key: 'length', labelKey: 'converter.categories.length' },
+  { key: 'weight', labelKey: 'converter.categories.weight' },
+  { key: 'temperature', labelKey: 'converter.categories.temperature' },
+  { key: 'currency', labelKey: 'converter.categories.currency' },
 ]
 
 function unitsFor(category: Category): string[] {
@@ -70,6 +71,7 @@ function convert(
 }
 
 function ConverterRenderer({ widget }: { widget: ConverterWidgetType }) {
+  const { t } = useTranslation()
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const [value, setValue] = useState('1')
   const [rates, setRates] = useState<Record<string, number>>({})
@@ -124,7 +126,7 @@ function ConverterRenderer({ widget }: { widget: ConverterWidgetType }) {
                 : 'text-[var(--text-secondary)] hover:bg-[var(--fill-2)]',
             )}
           >
-            {c.label}
+            {t(c.labelKey)}
           </button>
         ))}
       </div>
@@ -145,7 +147,7 @@ function ConverterRenderer({ widget }: { widget: ConverterWidgetType }) {
         />
       </div>
 
-      <Tooltip label="Swap units" side="top" className="self-center">
+      <Tooltip label={t('converter.swap')} side="top" className="self-center">
         <button
           type="button"
           onClick={swap}

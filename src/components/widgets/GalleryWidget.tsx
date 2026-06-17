@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Images } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { convertFileSrc } from '@tauri-apps/api/core'
@@ -58,6 +59,7 @@ function Media({
 }
 
 function GalleryRenderer({ widget }: { widget: GalleryWidgetType }) {
+  const { t } = useTranslation()
   const { sources, layout, interval, rounded } = widget
   const [index, setIndex] = useState(0)
 
@@ -75,7 +77,7 @@ function GalleryRenderer({ widget }: { widget: GalleryWidgetType }) {
       <div className="glass flex h-full w-full flex-col items-center justify-center gap-2 rounded-[12px] border border-[var(--border)] text-[var(--text-tertiary)]">
         <Images size={28} strokeWidth={1.5} />
         <span style={{ fontSize: 12, fontWeight: 500 }}>
-          Add media in settings
+          {t('gallery.renderer.empty')}
         </span>
       </div>
     )
@@ -188,6 +190,7 @@ function GallerySettings({
   widget: GalleryWidgetType
   onUpdate: (patch: Partial<GalleryWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const addMedia = async () => {
     const added = await pickMedia()
     if (added.length > 0) {
@@ -200,17 +203,17 @@ function GallerySettings({
       <Segmented
         value={widget.layout}
         options={[
-          { value: 'slideshow', label: 'Slides' },
-          { value: 'grid', label: 'Grid' },
-          { value: 'polaroid', label: 'Photos' },
-          { value: 'collage', label: 'Collage' },
+          { value: 'slideshow', label: t('gallery.settings.layoutSlides') },
+          { value: 'grid', label: t('gallery.settings.layoutGrid') },
+          { value: 'polaroid', label: t('gallery.settings.layoutPhotos') },
+          { value: 'collage', label: t('gallery.settings.layoutCollage') },
         ]}
         onChange={(v) =>
           onUpdate({ layout: v as GalleryWidgetType['layout'] })
         }
       />
       {widget.layout === 'slideshow' && (
-        <FieldRow label={`Slide every ${widget.interval}s`}>
+        <FieldRow label={t('gallery.settings.slideEvery', { seconds: widget.interval })}>
           <div className="w-[110px]">
             <Slider
               value={widget.interval}
@@ -221,7 +224,7 @@ function GallerySettings({
           </div>
         </FieldRow>
       )}
-      <FieldRow label={`Rounded · ${widget.rounded}px`}>
+      <FieldRow label={t('gallery.settings.rounded', { px: widget.rounded })}>
         <div className="w-[110px]">
           <Slider
             value={widget.rounded}
@@ -236,7 +239,7 @@ function GallerySettings({
         onClick={addMedia}
         className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[12px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
       >
-        Add media ({widget.sources.length})
+        {t('gallery.settings.addMedia', { count: widget.sources.length })}
       </button>
     </div>
   )

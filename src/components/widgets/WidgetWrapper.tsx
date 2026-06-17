@@ -1,4 +1,5 @@
 import { memo, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { MouseEvent } from 'react'
 import { Rnd } from 'react-rnd'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -27,6 +28,7 @@ const resizeHandleStyles: Record<string, React.CSSProperties> = {
 }
 
 function WidgetWrapperBase({ widget }: { widget: Widget }) {
+  const { t } = useTranslation()
   // Subscribe to a boolean, not the whole selectedId/widgets — so a wrapper
   // only re-renders when ITS own selected state flips, not on every selection
   // or edit elsewhere. The full array is read non-reactively during drag.
@@ -163,7 +165,7 @@ function WidgetWrapperBase({ widget }: { widget: Widget }) {
         >
           {!widget.locked && (
             <Tooltip
-              label="Drag to move"
+              label={t('common.dragToMove')}
               side="right"
               className="layer-drag-handle layer-grab absolute left-1.5 top-1.5 z-20 h-5 w-5 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
             >

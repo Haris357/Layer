@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Sun,
   CloudSun,
@@ -20,20 +21,20 @@ import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 interface CodeInfo {
   Icon: LucideIcon
-  label: string
+  labelKey: string
 }
 
 function codeInfo(code: number): CodeInfo {
-  if (code === 0) return { Icon: Sun, label: 'Clear' }
-  if (code <= 2) return { Icon: CloudSun, label: 'Partly cloudy' }
-  if (code === 3) return { Icon: Cloud, label: 'Cloudy' }
-  if (code <= 48) return { Icon: CloudFog, label: 'Fog' }
-  if (code <= 57) return { Icon: CloudRain, label: 'Drizzle' }
-  if (code <= 67) return { Icon: CloudRain, label: 'Rain' }
-  if (code <= 77) return { Icon: CloudSnow, label: 'Snow' }
-  if (code <= 82) return { Icon: CloudRain, label: 'Showers' }
-  if (code <= 86) return { Icon: CloudSnow, label: 'Snow showers' }
-  return { Icon: CloudLightning, label: 'Thunderstorm' }
+  if (code === 0) return { Icon: Sun, labelKey: 'clear' }
+  if (code <= 2) return { Icon: CloudSun, labelKey: 'partlyCloudy' }
+  if (code === 3) return { Icon: Cloud, labelKey: 'cloudy' }
+  if (code <= 48) return { Icon: CloudFog, labelKey: 'fog' }
+  if (code <= 57) return { Icon: CloudRain, labelKey: 'drizzle' }
+  if (code <= 67) return { Icon: CloudRain, labelKey: 'rain' }
+  if (code <= 77) return { Icon: CloudSnow, labelKey: 'snow' }
+  if (code <= 82) return { Icon: CloudRain, labelKey: 'showers' }
+  if (code <= 86) return { Icon: CloudSnow, labelKey: 'snowShowers' }
+  return { Icon: CloudLightning, labelKey: 'thunderstorm' }
 }
 
 interface Current {
@@ -43,6 +44,7 @@ interface Current {
 }
 
 function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
+  const { t } = useTranslation()
   const [data, setData] = useState<Current | null>(null)
   const [error, setError] = useState(false)
   const fahrenheit = widget.unit === 'f'
@@ -93,7 +95,11 @@ function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
             className="text-[var(--text-secondary)]"
             style={{ fontSize: 13, fontWeight: 500 }}
           >
-            {error ? 'Unavailable' : info ? info.label : 'Loading…'}
+            {error
+              ? t('weather.renderer.unavailable')
+              : info
+                ? t(`weather.conditions.${info.labelKey}`)
+                : t('weather.renderer.loading')}
           </span>
         </div>
         {info && (
@@ -117,7 +123,7 @@ function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
             style={{ fontSize: 12, fontWeight: 500 }}
           >
             <Wind size={12} strokeWidth={1.8} />
-            {data.wind} {fahrenheit ? 'mph' : 'km/h'}
+            {data.wind} {fahrenheit ? t('weather.renderer.mph') : t('weather.renderer.kmh')}
           </span>
         )}
       </div>
@@ -140,6 +146,7 @@ function WeatherSettings({
   widget: WeatherWidgetType
   onUpdate: (patch: Partial<WeatherWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState(widget.city)
   const [results, setResults] = useState<GeoResult[]>([])
   const [locating, setLocating] = useState(false)
@@ -150,7 +157,7 @@ function WeatherSettings({
       const loc = await detectLocation()
       if (loc) {
         onUpdate({
-          city: loc.city || 'My location',
+          city: loc.city || t('weather.settings.myLocation'),
           lat: loc.lat,
           lon: loc.lon,
         })
@@ -212,11 +219,11 @@ function WeatherSettings({
         ) : (
           <MapPin size={13} strokeWidth={2} />
         )}
-        {locating ? 'Finding you…' : 'Use my location'}
+        {locating ? t('weather.settings.findingYou') : t('weather.settings.useMyLocation')}
       </button>
       <TextField
         value={query}
-        placeholder="Search a city…"
+        placeholder={t('weather.settings.searchCity')}
         onChange={setQuery}
       />
       {results.length > 0 && (

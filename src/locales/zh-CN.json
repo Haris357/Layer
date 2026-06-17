@@ -1,0 +1,637 @@
+{
+  "common": {
+    "close": "关闭",
+    "dragToMove": "拖动以移动",
+    "quit": "退出 Layer"
+  },
+  "toolbar": {
+    "openMenu": "打开菜单",
+    "exitEdit": "退出编辑模式",
+    "lockAll": "全部锁定",
+    "unlockAll": "全部解锁",
+    "showBackgrounds": "显示背景",
+    "hideBackgrounds": "隐藏背景",
+    "resetSpace": "重置此空间",
+    "resetSpaceConfirm": "再次点击以重置此空间",
+    "spaces": "空间",
+    "notifications": "通知",
+    "notificationsNew": "通知 · {{count}} 条新消息",
+    "settings": "设置",
+    "styles": "{{name}} · 样式",
+    "styleHeader": "{{name}} 样式",
+    "spaceReset": "空间已重置"
+  },
+  "updates": {
+    "available": "Layer v{{version}} 已可用",
+    "availableBody": "打开 设置 → 检查更新 进行安装。",
+    "upToDate": "您已是最新版本 ✦",
+    "checkFailed": "无法检查更新"
+  },
+  "widgets": {
+    "note": "笔记",
+    "clock": "时钟",
+    "link": "链接",
+    "image": "图片",
+    "video": "视频",
+    "gallery": "相册",
+    "weather": "天气",
+    "stats": "状态",
+    "todo": "待办",
+    "countdown": "倒计时",
+    "worldclock": "世界时钟",
+    "calendar": "日历",
+    "apps": "应用",
+    "search": "搜索",
+    "nowplaying": "正在播放",
+    "notifications": "通知",
+    "converter": "换算器",
+    "pomodoro": "番茄钟",
+    "sticky": "便签",
+    "inbox": "收件箱",
+    "clipboard": "剪贴板",
+    "webembed": "网页嵌入",
+    "diskinfo": "磁盘信息",
+    "greeting": "问候语",
+    "shelf": "搁架",
+    "audio": "音频设备",
+    "board": "看板"
+  },
+  "settings": {
+    "title": "设置",
+    "version": "Layer v{{version}}",
+    "tabs": {
+      "general": "通用",
+      "appearance": "外观",
+      "screensaver": "屏幕保护",
+      "notch": "刘海",
+      "sync": "云同步",
+      "shortcuts": "快捷键",
+      "about": "关于"
+    },
+    "general": {
+      "snapToGrid": "组件对齐网格",
+      "gridSize": "对齐网格大小 · {{size}}px",
+      "launchOnStartup": "开机时启动 Layer",
+      "startupViaWindows": "Windows 设置 → 启动应用",
+      "hotCorner": "热角切换空间",
+      "language": "语言",
+      "languageHint": "Layer 界面使用的语言。",
+      "canvas": "画布",
+      "exportImage": "将画布导出为图片",
+      "resetSpace": "重置此空间",
+      "resetSpaceConfirm": "再次点击以清空“{{name}}”"
+    },
+    "appearance": {
+      "theme": "主题",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统",
+      "matchWallpaper": "强调色匹配壁纸",
+      "showOn": "在以下显示器上显示 Layer",
+      "showOnHint": "胶囊菜单、设置和弹窗显示在哪台显示器上。",
+      "autoPrimary": "自动（主显示器）",
+      "display": "显示器 {{n}}"
+    },
+    "screensaver": {
+      "storeNote": "在 Microsoft Store 版本中无法将 Layer 设为 Windows 屏幕保护程序（沙盒无法注册系统屏保）。您仍可使用 Ctrl+Shift+S 预览各种样式。",
+      "useAsScreensaver": "将 Layer 用作我的屏幕保护程序",
+      "style": "样式",
+      "ambient": "氛围",
+      "minimal": "极简",
+      "quote": "格言",
+      "descMinimal": "仅显示大号时钟和日期。",
+      "descQuote": "轮播的静心语句与时间。",
+      "descAmbient": "时钟、日期、实时天气和正在播放。",
+      "idleNote": "空闲时，Layer 会以上述视图铺满每块屏幕。按任意键或移动鼠标即可退出。",
+      "previewNow": "立即预览"
+    },
+    "shortcuts": {
+      "keyboard": "键盘",
+      "toggleEdit": "切换编辑模式",
+      "pressKeys": "按下按键…",
+      "quickCapture": "快速捕捉",
+      "cycleSpaces": "循环切换空间",
+      "peek": "速览（按住）",
+      "previewScreensaver": "预览屏幕保护",
+      "hotCornerNote": "您也可以将鼠标快速甩到左上角来切换空间（在通用中启用“热角”）。"
+    },
+    "about": {
+      "tagline": "桌面上一层静谧的存在",
+      "storeUpdates": "更新由 Microsoft Store 自动推送。",
+      "checkUpdates": "检查更新",
+      "checking": "正在检查更新…",
+      "upToDate": "您已是最新版本。",
+      "updateFailed": "无法检查更新。",
+      "rateStore": "在商店为 Layer 评分",
+      "store": "Microsoft Store",
+      "github": "GitHub",
+      "support": "☕ 支持 Layer"
+    },
+    "toasts": {
+      "canvasExported": "画布已导出",
+      "openFolder": "打开文件夹",
+      "exportFailed": "导出失败",
+      "exportDialogTitle": "将画布导出为图片"
+    }
+  },
+  "note": {
+    "editor": {
+      "placeholder": "开始书写"
+    },
+    "toolbar": {
+      "dragToMove": "拖动以移动",
+      "typefaceSize": "字体与字号",
+      "freewrite": "自由书写",
+      "endFreewrite": "结束自由书写",
+      "darkMode": "深色模式",
+      "lightMode": "浅色模式",
+      "fullscreen": "全屏",
+      "exitFullscreen": "退出全屏",
+      "newEntry": "新建条目",
+      "pastEntries": "历史条目"
+    },
+    "font": {
+      "size": "字号",
+      "typeface": "字体",
+      "random": "随机字体"
+    },
+    "freewrite": {
+      "title": "自由书写",
+      "description": "不停笔地写。不能退格，不能编辑——让文字持续流淌，直到时间结束。",
+      "introTitle": "只管写下去",
+      "introBody": "不能退格，不能编辑——让文字自然流淌，不要评判它们。计时结束前别停下。",
+      "hudHint": "继续写——不能回头 · 按 Esc 结束",
+      "doneToast": "自由书写完成——{{mins}} 分钟内写了 {{words}} 字 ✍",
+      "completeTitle": "自由书写完成 ✦",
+      "completeBody": "{{mins}} 分钟不间断地流畅写下 {{words}} 字。"
+    },
+    "history": {
+      "title": "条目",
+      "entryTitle": "条目标题",
+      "emptyEntry": "空条目",
+      "pin": "置顶",
+      "unpin": "取消置顶",
+      "rename": "重命名",
+      "delete": "删除"
+    },
+    "entry": {
+      "word": "{{count}} 字",
+      "words": "{{count}} 字"
+    }
+  },
+  "sticky": {
+    "placeholder": "随手记点什么…",
+    "dragToMove": "拖动以移动",
+    "colorLabel": "便签颜色",
+    "colors": {
+      "yellow": "黄色",
+      "pink": "粉色",
+      "blue": "蓝色",
+      "green": "绿色",
+      "orange": "橙色",
+      "lilac": "丁香紫"
+    }
+  },
+  "greeting": {
+    "nameLabel": "您的名字",
+    "namePlaceholder": "例如 Haris",
+    "styleLabel": "样式",
+    "alignLabel": "对齐方式",
+    "styles": {
+      "classic": "经典",
+      "serif": "衬线",
+      "gradient": "渐变",
+      "mono": "等宽",
+      "script": "手写",
+      "playfair": "展示",
+      "modern": "现代"
+    }
+  },
+  "clock": {
+    "fonts": {
+      "anurati": "Anurati",
+      "stencil": "镂空",
+      "scifi": "科幻",
+      "retro": "复古"
+    },
+    "format": {
+      "12h": "12h",
+      "24h": "24h"
+    },
+    "showSeconds": "显示秒",
+    "showDate": "显示日期"
+  },
+  "worldclock": {
+    "empty": "在设置中添加城市",
+    "removeZone": "移除时区"
+  },
+  "todo": {
+    "header": "任务 · {{done}}/{{total}}",
+    "addPlaceholder": "添加任务…",
+    "deleteTooltip": "删除任务"
+  },
+  "pomodoro": {
+    "phase": {
+      "focus": "专注",
+      "short": "短休息",
+      "long": "长休息"
+    },
+    "start": "开始",
+    "pause": "暂停",
+    "reset": "重置",
+    "skip": "跳过",
+    "skipBreak": "跳过休息",
+    "focusSound": "专注音效",
+    "soundOff": "关闭",
+    "todayLabel": "今天：",
+    "focused": "已专注",
+    "settings": {
+      "focusMin": "专注（分钟）",
+      "shortBreakMin": "短休息（分钟）",
+      "longBreakMin": "长休息（分钟）",
+      "longBreakAfter": "长休息间隔"
+    }
+  },
+  "inbox": {
+    "title": "收件箱",
+    "shortcut": "Ctrl + Shift + N",
+    "emptyHint": "在任意位置按 <b>Ctrl + Shift + N</b> 即可捕捉灵感。",
+    "markDoneTooltip": "标记完成",
+    "removeTooltip": "移除",
+    "clearDoneTooltip": "清除已完成"
+  },
+  "board": {
+    "notePlaceholder": "便笺…",
+    "addCardTooltip": "添加卡片",
+    "changeColorTooltip": "更改颜色",
+    "deleteCardTooltip": "删除卡片",
+    "connectTooltip": "拖动以连接"
+  },
+  "shelf": {
+    "title": "搁架",
+    "addFolderTooltip": "添加文件夹",
+    "addFilesTooltip": "添加文件",
+    "openTooltip": "打开 {{name}}",
+    "showInFolderTooltip": "在文件夹中显示",
+    "removeTooltip": "从搁架移除",
+    "emptyDrop": "将文件拖到此处放上搁架",
+    "emptyBrowse": "或点击浏览",
+    "dropOverlay": "放上搁架"
+  },
+  "countdown": {
+    "units": {
+      "days": "天",
+      "hrs": "时",
+      "min": "分",
+      "sec": "秒"
+    },
+    "since": "已过去",
+    "until": "距离",
+    "defaultTitle": "倒计时",
+    "eventNamePlaceholder": "事件名称"
+  },
+  "calendar": {
+    "allDay": "全天",
+    "nav": {
+      "previous": "上一个",
+      "next": "下一个",
+      "jumpToToday": "跳转到今天"
+    },
+    "view": {
+      "month": "月",
+      "week": "周",
+      "day": "日"
+    },
+    "repeat": {
+      "none": "不重复",
+      "daily": "每天",
+      "weekly": "每周",
+      "monthly": "每月",
+      "yearly": "每年"
+    },
+    "day": {
+      "free": "空闲",
+      "today": "今天",
+      "noEvents": "暂无事件",
+      "addOne": "+ 添加一个"
+    },
+    "popover": {
+      "nothingScheduled": "没有安排。",
+      "newEvent": "新建事件",
+      "repeatsLabel": "重复 {{repeat}}"
+    },
+    "editor": {
+      "editTitle": "编辑事件",
+      "newTitle": "新建事件",
+      "eventTitle": "事件标题",
+      "untitled": "无标题",
+      "allDayLabel": "全天",
+      "color": "颜色",
+      "repeats": "重复",
+      "repeatUntil": "重复至",
+      "until": "截止",
+      "notes": "备注（可选）",
+      "save": "保存",
+      "add": "添加事件",
+      "delete": "删除",
+      "readOnly": "来自订阅的日历 · 只读"
+    },
+    "settings": {
+      "title": "订阅的日历",
+      "instructions": "在下方粘贴 iCal/.ics 链接。Google：设置 →“iCal 格式的私密地址”。Proton/Outlook：日历的共享链接。",
+      "invalidLink": "请粘贴 https:// 或 webcal:// 的 .ics 链接",
+      "defaultName": "日历",
+      "loadFailed": "无法加载",
+      "synced": "已同步",
+      "on": "开",
+      "off": "关",
+      "enable": "启用",
+      "disable": "停用",
+      "removeCalendar": "移除日历",
+      "namePlaceholder": "名称（例如 工作）",
+      "urlPlaceholder": "https://…/basic.ics",
+      "add": "添加"
+    }
+  },
+  "search": {
+    "placeholder": "在网络上搜索…",
+    "engines": {
+      "google": "Google",
+      "bing": "Bing",
+      "ddg": "DDG",
+      "custom": "自定义"
+    },
+    "customPlaceholder": "https://example.com/search?q=%s"
+  },
+  "apps": {
+    "layout": {
+      "list": "列表",
+      "grid": "网格"
+    },
+    "searchInstalled": "搜索已安装的应用…",
+    "pin": "+ 固定",
+    "pinned": "已固定",
+    "addFolder": "添加文件夹",
+    "emptyHint": "点击 + 固定您的第一个应用",
+    "addAppsOrFolder": "添加应用或文件夹",
+    "dragToReorder": "拖动以重新排序",
+    "remove": "移除"
+  },
+  "clipboard": {
+    "title": "剪贴板",
+    "empty": "复制任何内容——它都会显示在这里。",
+    "noMatches": "无匹配项",
+    "search": "搜索…",
+    "copyLabel": "复制 {{label}}",
+    "pin": "置顶",
+    "unpin": "取消置顶",
+    "remove": "移除",
+    "clearUnpinned": "清除未置顶项",
+    "copied": "已复制到剪贴板",
+    "copyFailed": "无法复制"
+  },
+  "webembed": {
+    "addUrl": "在设置中添加网址",
+    "loading": "正在加载 {{host}}…",
+    "noEmbed": "不允许嵌入",
+    "openInBrowser": "在浏览器中打开",
+    "iframeTitle": "网页嵌入",
+    "urlLabel": "网址",
+    "urlPlaceholder": "一个仪表板、一个 YouTube 视频链接…",
+    "urlHint": "YouTube 主页、Google 或 X 等网站会阻止嵌入——请粘贴视频链接，或使用“在浏览器中打开”。",
+    "zoom": "缩放 · {{pct}}%",
+    "autoRefresh": "自动刷新",
+    "refresh": {
+      "off": "关闭",
+      "30s": "30s",
+      "1m": "1m",
+      "5m": "5m"
+    }
+  },
+  "nowplaying": {
+    "empty": "没有正在播放的内容",
+    "defaultSource": "正在播放",
+    "unknownTrack": "未知曲目",
+    "controls": {
+      "previous": "上一首",
+      "play": "播放",
+      "pause": "暂停",
+      "next": "下一首"
+    },
+    "settings": {
+      "artBackground": "专辑封面背景",
+      "artBackgroundDesc": "在播放器后方虚化专辑封面，并叠加匹配的色调。关闭则使用纯色主题卡片。"
+    }
+  },
+  "notifications": {
+    "title": "通知 · {{count}}",
+    "clearAll": "全部清除",
+    "empty": "暂无通知",
+    "dismiss": "忽略"
+  },
+  "audio": {
+    "output": "输出",
+    "input": "输入",
+    "empty": "未找到音频设备。",
+    "settings": {
+      "both": "两者",
+      "background": "背景"
+    }
+  },
+  "converter": {
+    "swap": "交换单位",
+    "categories": {
+      "length": "长度",
+      "weight": "重量",
+      "temperature": "温度",
+      "currency": "货币"
+    }
+  },
+  "link": {
+    "renderer": {
+      "openTooltip": "双击以打开 {{url}}",
+      "untitled": "无标题"
+    },
+    "settings": {
+      "invalidUrl": "请输入有效的网址",
+      "urlPlaceholder": "https://...",
+      "labelPlaceholder": "标签",
+      "iconSearchPlaceholder": "搜索图标…"
+    }
+  },
+  "image": {
+    "settings": {
+      "fitCover": "填充",
+      "fitContain": "适应",
+      "rounded": "圆角 · {{px}}px",
+      "replace": "替换图片"
+    }
+  },
+  "video": {
+    "settings": {
+      "autoplay": "自动播放",
+      "loop": "循环",
+      "muted": "静音",
+      "replace": "替换视频"
+    }
+  },
+  "gallery": {
+    "renderer": {
+      "empty": "在设置中添加媒体"
+    },
+    "settings": {
+      "layoutSlides": "幻灯片",
+      "layoutGrid": "网格",
+      "layoutPhotos": "照片",
+      "layoutCollage": "拼贴",
+      "slideEvery": "每 {{seconds}}s 切换",
+      "rounded": "圆角 · {{px}}px",
+      "addMedia": "添加媒体（{{count}}）"
+    }
+  },
+  "weather": {
+    "conditions": {
+      "clear": "晴",
+      "partlyCloudy": "局部多云",
+      "cloudy": "多云",
+      "fog": "雾",
+      "drizzle": "小雨",
+      "rain": "雨",
+      "snow": "雪",
+      "showers": "阵雨",
+      "snowShowers": "阵雪",
+      "thunderstorm": "雷暴"
+    },
+    "renderer": {
+      "unavailable": "不可用",
+      "loading": "加载中…",
+      "mph": "mph",
+      "kmh": "km/h"
+    },
+    "settings": {
+      "myLocation": "我的位置",
+      "findingYou": "正在定位…",
+      "useMyLocation": "使用我的位置",
+      "searchCity": "搜索城市…"
+    }
+  },
+  "stats": {
+    "system": "系统",
+    "cpu": "CPU",
+    "memory": "内存",
+    "storage": "存储",
+    "battery": "电池",
+    "chargingSuffix": " · 充电中"
+  },
+  "diskinfo": {
+    "title": "磁盘",
+    "reading": "正在读取磁盘…",
+    "noDisks": "未找到磁盘",
+    "removable": "可移动",
+    "read": "读取",
+    "write": "写入",
+    "active": "活动",
+    "freeOf": "可用 共 {{total}}",
+    "percentUsed": "已用 {{percent}}%"
+  },
+  "spaces": {
+    "heading": "空间",
+    "description": "切换布局、自行搭建、导出，或发布到画廊。",
+    "newSpace": "新建空间",
+    "import": "导入",
+    "badge": {
+      "default": "默认"
+    },
+    "actions": {
+      "save": "保存",
+      "rename": "重命名",
+      "publish": "发布到画廊",
+      "export": "导出为 ZIP",
+      "reset": "重置空间",
+      "resetConfirm": "再次点击以清空",
+      "delete": "删除"
+    },
+    "feedback": {
+      "exported": "空间已导出 ✦",
+      "exportFailed": "无法导出该空间。",
+      "imported": "已导入“{{name}}”",
+      "published": "已发布到画廊 ✦",
+      "publishFailed": "无法发布——请重试。",
+      "reset": "已重置“{{name}}”"
+    },
+    "notify": {
+      "importedTitle": "已导入 \"{{name}}\"",
+      "importedBody": "{{count}} 个组件已作为新空间添加。"
+    }
+  },
+  "notifPanel": {
+    "heading": "通知",
+    "markAllRead": "全部标为已读",
+    "clearAll": "全部清除",
+    "markRead": "标为已读",
+    "remove": "移除",
+    "empty": "全部已处理 ✦"
+  },
+  "sync": {
+    "title": "云同步",
+    "subtitle": "可选——在多台设备间保持布局一致。",
+    "consent": {
+      "title": "云同步会保存的内容",
+      "syncedLabel": "已同步",
+      "localLabel": "仅保留在本设备",
+      "synced": {
+        "layout": "空间与组件布局",
+        "sizes": "尺寸与位置",
+        "colors": "颜色与浅色/深色",
+        "settings": "组件设置"
+      },
+      "local": {
+        "notes": "笔记与便签文本",
+        "todo": "待办事项文本",
+        "clipboard": "剪贴板与收件箱",
+        "shelf": "搁架文件与本地路径"
+      },
+      "checkbox": "我已了解并希望启用云同步。"
+    },
+    "signIn": {
+      "emailLabel": "电子邮箱",
+      "emailPlaceholder": "you@example.com",
+      "sending": "正在发送…",
+      "sendCode": "发送验证码",
+      "codeSentTo": "请输入发送至以下地址的 6 位验证码",
+      "verifying": "正在验证…",
+      "verify": "验证并启用",
+      "resend": "重新发送",
+      "disclaimer": "我们会向您发送一次性验证码——无需密码。您的布局以此地址同步；多台设备间以最新更改为准。"
+    },
+    "signedIn": {
+      "signedIn": "已登录",
+      "syncing": "正在同步…",
+      "lastSynced": "上次同步于 {{time}}",
+      "autoSync": "在后台自动同步",
+      "syncNow": "立即同步",
+      "restore": "从云端恢复",
+      "restoreConfirm": "再次点击以覆盖",
+      "signOut": "退出登录"
+    }
+  },
+  "onboarding": {
+    "welcome": "欢迎使用 Layer",
+    "subtitle": "桌面上一层静谧的组件。三件快速上手的小事：",
+    "getStarted": "开始使用",
+    "steps": {
+      "hotkey": {
+        "title": "用热键唤起",
+        "body": "随时按 Ctrl + Shift + Space 将 Layer 调到前台并开始编辑。再按一次即可将它收回到应用之后。"
+      },
+      "island": {
+        "title": "岛式菜单",
+        "body": "屏幕顶部中央有一个胶囊。打开它即可添加组件——笔记、时钟、天气、应用等等。"
+      },
+      "arrange": {
+        "title": "整理你的画布",
+        "body": "通过抓取手柄拖动组件，从四角调整大小，右键查看选项。移动时组件会相互吸附对齐。"
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Globe, Loader2, ExternalLink, AppWindow } from 'lucide-react'
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
 import type { WebEmbedWidget as WebEmbedWidgetType } from '../../types/widget'
@@ -57,6 +58,7 @@ async function canEmbed(url: string): Promise<boolean> {
 }
 
 function WebEmbedRenderer({ widget }: { widget: WebEmbedWidgetType }) {
+  const { t } = useTranslation()
   const mode = useCanvasStore((s) => s.mode)
   const [reload, setReload] = useState(0)
   const [status, setStatus] = useState<'checking' | 'ok' | 'blocked'>('checking')
@@ -89,7 +91,7 @@ function WebEmbedRenderer({ widget }: { widget: WebEmbedWidgetType }) {
     return (
       <Shell>
         <Globe size={26} strokeWidth={1.5} />
-        <span style={{ fontSize: 12, fontWeight: 500 }}>Add a URL in settings</span>
+        <span style={{ fontSize: 12, fontWeight: 500 }}>{t('webembed.addUrl')}</span>
       </Shell>
     )
   }
@@ -98,7 +100,7 @@ function WebEmbedRenderer({ widget }: { widget: WebEmbedWidgetType }) {
     return (
       <Shell>
         <Loader2 size={22} strokeWidth={1.8} className="animate-spin" />
-        <span style={{ fontSize: 12, fontWeight: 500 }}>Loading {hostOf(url)}…</span>
+        <span style={{ fontSize: 12, fontWeight: 500 }}>{t('webembed.loading', { host: hostOf(url) })}</span>
       </Shell>
     )
   }
@@ -113,7 +115,7 @@ function WebEmbedRenderer({ widget }: { widget: WebEmbedWidgetType }) {
         >
           {hostOf(url)}
         </span>
-        <span style={{ fontSize: 11.5 }}>doesn’t allow embedding</span>
+        <span style={{ fontSize: 11.5 }}>{t('webembed.noEmbed')}</span>
         <button
           type="button"
           onClick={() => openUrl(url).catch(() => {})}
@@ -121,7 +123,7 @@ function WebEmbedRenderer({ widget }: { widget: WebEmbedWidgetType }) {
           style={{ pointerEvents: mode === 'edit' ? 'none' : 'auto' }}
         >
           <ExternalLink size={13} strokeWidth={2} />
-          Open in browser
+          {t('webembed.openInBrowser')}
         </button>
       </Shell>
     )
@@ -135,7 +137,7 @@ function WebEmbedRenderer({ widget }: { widget: WebEmbedWidgetType }) {
       <iframe
         key={reload}
         src={url}
-        title="Web embed"
+        title={t('webembed.iframeTitle')}
         className="h-full w-full border-0"
         // In edit mode the iframe ignores the cursor so you can select/drag the
         // tile; in view mode it's fully interactive.
@@ -167,25 +169,25 @@ function WebEmbedSettings({
   widget: WebEmbedWidgetType
   onUpdate: (patch: Partial<WebEmbedWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const zoomPct = Math.round((widget.zoom || 1) * 100)
   return (
     <div className="flex w-[252px] flex-col gap-3">
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] font-medium text-[var(--text-secondary)]">
-          URL
+          {t('webembed.urlLabel')}
         </span>
         <TextField
           value={widget.url}
-          placeholder="a dashboard, a YouTube video link…"
+          placeholder={t('webembed.urlPlaceholder')}
           onChange={(v) => onUpdate({ url: v })}
         />
         <span className="text-[10.5px] text-[var(--text-tertiary)]">
-          Sites like YouTube’s home, Google or X block embedding — paste a video
-          link, or use “Open in browser”.
+          {t('webembed.urlHint')}
         </span>
       </div>
 
-      <FieldRow label={`Zoom · ${zoomPct}%`}>
+      <FieldRow label={t('webembed.zoom', { pct: zoomPct })}>
         <div className="w-[120px]">
           <Slider
             value={zoomPct}
@@ -198,21 +200,21 @@ function WebEmbedSettings({
 
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] font-medium text-[var(--text-secondary)]">
-          Auto-refresh
+          {t('webembed.autoRefresh')}
         </span>
         <Segmented
           value={String(widget.refreshSec)}
           options={[
-            { value: '0', label: 'Off' },
-            { value: '30', label: '30s' },
-            { value: '60', label: '1m' },
-            { value: '300', label: '5m' },
+            { value: '0', label: t('webembed.refresh.off') },
+            { value: '30', label: t('webembed.refresh.30s') },
+            { value: '60', label: t('webembed.refresh.1m') },
+            { value: '300', label: t('webembed.refresh.5m') },
           ]}
           onChange={(v) => onUpdate({ refreshSec: Number(v) })}
         />
       </div>
 
-      <Tooltip label="Open in browser">
+      <Tooltip label={t('webembed.openInBrowser')}>
         <button
           type="button"
           onClick={() => {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, useDragControls } from 'framer-motion'
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart'
 import { save } from '@tauri-apps/plugin-dialog'
@@ -30,10 +31,11 @@ import { useMonitorStore, useAnchorMonitor } from '../store/monitorStore'
 import { useToastStore } from '../store/toastStore'
 import { getUpdate } from '../lib/updater'
 import { runUpdate } from '../lib/updateFlow'
-import { Toggle, Slider, FieldRow, Segmented } from './ui'
+import { Toggle, Slider, FieldRow, Segmented, Select } from './ui'
 import { SyncTab } from './SyncTab'
 import { useNotchStore, type NotchModuleId } from '../notch/notchStore'
 import { IS_STORE } from '../lib/dist'
+import { LANGUAGES, changeLanguage, type LanguageCode } from '../lib/i18n'
 
 // ☕ Support link — shown only in the direct-download build (the Microsoft Store
 // rejects external donation/payment links).
@@ -63,16 +65,17 @@ type TabId =
   | 'shortcuts'
   | 'about'
 
-const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
-  { id: 'general', label: 'General', icon: SlidersHorizontal },
-  { id: 'appearance', label: 'Appearance', icon: Palette },
-  { id: 'screensaver', label: 'Screensaver', icon: MonitorPlay },
+// Labels come from i18n (settings.tabs.<id>) at render time.
+const TABS: { id: TabId; icon: LucideIcon }[] = [
+  { id: 'general', icon: SlidersHorizontal },
+  { id: 'appearance', icon: Palette },
+  { id: 'screensaver', icon: MonitorPlay },
   // Notch/Dock is parked — its tab is hidden from release builds while the
   // feature is finished. The panel code below stays so re-enabling is one line.
-  // { id: 'notch', label: 'Notch', icon: PanelTop },
-  { id: 'sync', label: 'Cloud Sync', icon: Cloud },
-  { id: 'shortcuts', label: 'Shortcuts', icon: Keyboard },
-  { id: 'about', label: 'About', icon: Info },
+  // { id: 'notch', icon: PanelTop },
+  { id: 'sync', icon: Cloud },
+  { id: 'shortcuts', icon: Keyboard },
+  { id: 'about', icon: Info },
 ]
 
 function buildAccelerator(e: KeyboardEvent): string | null {
@@ -112,6 +115,9 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export function SettingsModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
+  const language = useSettingsStore((s) => s.language)
+  const setLanguage = useSettingsStore((s) => s.setLanguage)
   const gridSize = useSettingsStore((s) => s.gridSize)
   const snapEnabled = useSettingsStore((s) => s.snapEnabled)
   const hotkey = useSettingsStore((s) => s.hotkey)
@@ -184,12 +190,12 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
   const checkUpdates = async () => {
     setUpdateBusy(true)
-    setUpdateMsg('Checking for updates…')
+    setUpdateMsg(t('settings.about.checking'))
     try {
       const update = await getUpdate()
       setUpdateBusy(false)
       if (!update) {
-        setUpdateMsg("You're on the latest version.")
+        setUpdateMsg(t('settings.about.upToDate'))
         return
       }
       // Hand off to the toast flow: it downloads in the background and offers a
@@ -199,13 +205,13 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
       runUpdate(update)
     } catch {
       setUpdateBusy(false)
-      setUpdateMsg('Could not check for updates.')
+      setUpdateMsg(t('settings.about.updateFailed'))
     }
   }
 
   const exportImage = async () => {
     const path = await save({
-      title: 'Export canvas as image',
+      title: t('settings.toasts.exportDialogTitle'),
       defaultPath: 'layer-canvas.png',
       filters: [{ name: 'PNG image', extensions: ['png'] }],
     })
@@ -215,12 +221,12 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
       captureScreen(path)
         .then(() =>
           useToastStore.getState().showToast({
-            message: 'Canvas exported',
+            message: t('settings.toasts.canvasExported'),
             icon: 'success',
             duration: 7000,
             actions: [
               {
-                label: 'Open folder',
+                label: t('settings.toasts.openFolder'),
                 onClick: () => showInFolder(path).catch(() => {}),
               },
             ],
@@ -229,7 +235,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         .catch(() =>
           useToastStore
             .getState()
-            .showToast({ message: 'Export failed', icon: 'error' }),
+            .showToast({ message: t('settings.toasts.exportFailed'), icon: 'error' }),
         )
     }, 250)
   }
@@ -278,28 +284,28 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
             className="select-none px-2 pb-3 pt-1 text-[var(--text-primary)]"
             style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.8px' }}
           >
-            Settings
+            {t('settings.title')}
           </div>
-          {TABS.map((t) => {
-            const active = tab === t.id
+          {TABS.map((tb) => {
+            const active = tab === tb.id
             return (
               <button
-                key={t.id}
+                key={tb.id}
                 type="button"
-                onClick={() => setTab(t.id)}
+                onClick={() => setTab(tb.id)}
                 className={`flex items-center gap-2.5 rounded-[9px] px-2.5 py-2 text-[13px] font-medium transition-colors ${
                   active
                     ? 'bg-[var(--fill-3)] text-[var(--text-primary)]'
                     : 'text-[var(--text-secondary)] hover:bg-[var(--fill-2)]'
                 }`}
               >
-                <t.icon size={15} strokeWidth={2} />
-                {t.label}
+                <tb.icon size={15} strokeWidth={2} />
+                {t(`settings.tabs.${tb.id}`)}
               </button>
             )
           })}
           <div className="mt-auto px-2 text-[10px] text-[var(--text-tertiary)]">
-            Layer v{version}
+            {t('settings.version', { version })}
           </div>
         </div>
 
@@ -311,7 +317,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onPointerDown={(e) => dragControls.start(e)}
-              title="Drag to move"
+              title={t('common.dragToMove')}
               className="flex h-7 w-7 cursor-grab items-center justify-center rounded-[7px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-secondary)] active:cursor-grabbing"
             >
               <GripVertical size={16} />
@@ -319,7 +325,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              title="Close"
+              title={t('common.close')}
               className="flex h-7 w-7 items-center justify-center rounded-[7px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
             >
               <X size={17} />
@@ -329,10 +335,10 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           <div className="flex flex-1 flex-col overflow-y-auto p-6">
           {tab === 'general' && (
             <div className="flex flex-col gap-5">
-              <FieldRow label="Snap widgets to grid">
+              <FieldRow label={t('settings.general.snapToGrid')}>
                 <Toggle checked={snapEnabled} onChange={setSnapEnabled} />
               </FieldRow>
-              <FieldRow label={`Snap grid size · ${gridSize}px`}>
+              <FieldRow label={t('settings.general.gridSize', { size: gridSize })}>
                 <div className="w-[160px]">
                   <Slider
                     value={gridSize}
@@ -343,27 +349,47 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 </div>
               </FieldRow>
               {IS_STORE ? (
-                <FieldRow label="Launch Layer on startup">
+                <FieldRow label={t('settings.general.launchOnStartup')}>
                   <span className="text-[11.5px] text-[var(--text-tertiary)]">
-                    Windows Settings → Startup apps
+                    {t('settings.general.startupViaWindows')}
                   </span>
                 </FieldRow>
               ) : (
-                <FieldRow label="Launch Layer on startup">
+                <FieldRow label={t('settings.general.launchOnStartup')}>
                   <Toggle checked={autostart} onChange={toggleAutostart} />
                 </FieldRow>
               )}
-              <FieldRow label="Hot corner switches spaces">
+              <FieldRow label={t('settings.general.hotCorner')}>
                 <Toggle checked={hotCorner} onChange={setHotCorner} />
               </FieldRow>
+
               <div className="flex flex-col gap-2">
-                <SectionTitle>Canvas</SectionTitle>
+                <SectionTitle>{t('settings.general.language')}</SectionTitle>
+                <span className="text-[11.5px] text-[var(--text-tertiary)]">
+                  {t('settings.general.languageHint')}
+                </span>
+                <Select
+                  className="w-[220px]"
+                  value={language}
+                  options={LANGUAGES.map((l) => ({
+                    value: l.code,
+                    label: l.label,
+                  }))}
+                  onChange={(v) => {
+                    setLanguage(v)
+                    changeLanguage(v as LanguageCode)
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <SectionTitle>{t('settings.general.canvas')}</SectionTitle>
                 <button
                   type="button"
                   onClick={() => exportImage().catch(() => {})}
                   className={ghostBtn}
                 >
-                  Export canvas as image
+                  {t('settings.general.exportImage')}
                 </button>
                 <button
                   type="button"
@@ -378,8 +404,10 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   }
                 >
                   {confirmReset
-                    ? `Click again to clear “${activeSpaceName}”`
-                    : 'Reset this space'}
+                    ? t('settings.general.resetSpaceConfirm', {
+                        name: activeSpaceName,
+                      })
+                    : t('settings.general.resetSpace')}
                 </button>
               </div>
             </div>
@@ -388,18 +416,18 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           {tab === 'appearance' && (
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <SectionTitle>Theme</SectionTitle>
+                <SectionTitle>{t('settings.appearance.theme')}</SectionTitle>
                 <Segmented
                   value={theme}
                   options={[
-                    { value: 'light', label: 'Light' },
-                    { value: 'dark', label: 'Dark' },
-                    { value: 'system', label: 'System' },
+                    { value: 'light', label: t('settings.appearance.light') },
+                    { value: 'dark', label: t('settings.appearance.dark') },
+                    { value: 'system', label: t('settings.appearance.system') },
                   ]}
                   onChange={(v) => setTheme(v as 'light' | 'dark' | 'system')}
                 />
               </div>
-              <FieldRow label="Match accent to wallpaper">
+              <FieldRow label={t('settings.appearance.matchWallpaper')}>
                 <div className="flex items-center gap-2">
                   {wallpaperLoading && (
                     <Loader2
@@ -417,9 +445,9 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
               {monitors.length > 1 && (
                 <div className="flex flex-col gap-2">
-                  <SectionTitle>Show Layer on</SectionTitle>
+                  <SectionTitle>{t('settings.appearance.showOn')}</SectionTitle>
                   <span className="text-[11.5px] text-[var(--text-tertiary)]">
-                    Which monitor the pill, Settings and pop‑ups appear on.
+                    {t('settings.appearance.showOnHint')}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     <button
@@ -431,7 +459,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                           : 'border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]'
                       }`}
                     >
-                      Auto (primary)
+                      {t('settings.appearance.autoPrimary')}
                     </button>
                     {monitors.map((m, i) => {
                       const active = uiMonitor === i
@@ -450,7 +478,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                           }`}
                         >
                           <span className="text-[12px] font-semibold">
-                            Display {i + 1}
+                            {t('settings.appearance.display', { n: i + 1 })}
                           </span>
                           <span
                             className="text-[10px]"
@@ -471,13 +499,10 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
             <div className="flex flex-col gap-5">
               {IS_STORE ? (
                 <div className="rounded-[10px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2.5 text-[12px] leading-relaxed text-[var(--text-secondary)]">
-                  Setting Layer as your Windows screensaver isn’t available in
-                  the Microsoft Store version (the sandbox can’t register a
-                  system screensaver). You can still preview the styles with{' '}
-                  <strong>Ctrl+Shift+S</strong>.
+                  {t('settings.screensaver.storeNote')}
                 </div>
               ) : (
-                <FieldRow label="Use Layer as my screensaver">
+                <FieldRow label={t('settings.screensaver.useAsScreensaver')}>
                   <Toggle
                     checked={screensaverEnabled}
                     onChange={setScreensaverEnabled}
@@ -486,15 +511,9 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               )}
 
               <div className="flex flex-col gap-2">
-                <SectionTitle>Style</SectionTitle>
+                <SectionTitle>{t('settings.screensaver.style')}</SectionTitle>
                 <div className="flex flex-wrap gap-1.5">
-                  {(
-                    [
-                      ['ambient', 'Ambient'],
-                      ['minimal', 'Minimal'],
-                      ['quote', 'Quote'],
-                    ] as const
-                  ).map(([value, label]) => {
+                  {(['ambient', 'minimal', 'quote'] as const).map((value) => {
                     const active = screensaverTheme === value
                     return (
                       <button
@@ -507,57 +526,56 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                             : 'border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]'
                         }`}
                       >
-                        {label}
+                        {t(`settings.screensaver.${value}`)}
                       </button>
                     )
                   })}
                 </div>
                 <span className="text-[11.5px] text-[var(--text-tertiary)]">
                   {screensaverTheme === 'minimal'
-                    ? 'Just a large clock and date.'
+                    ? t('settings.screensaver.descMinimal')
                     : screensaverTheme === 'quote'
-                      ? 'A rotating calm line with the time.'
-                      : 'Clock, date, live weather and now-playing.'}
+                      ? t('settings.screensaver.descQuote')
+                      : t('settings.screensaver.descAmbient')}
                 </span>
               </div>
 
               <p className="text-[12.5px] leading-relaxed text-[var(--text-secondary)]">
-                When idle, Layer fills every screen with the view above. Any key
-                or mouse movement dismisses it.
+                {t('settings.screensaver.idleNote')}
               </p>
               <button
                 type="button"
                 onClick={() => previewScreensaver().catch(() => {})}
                 className={ghostBtn}
               >
-                Preview now
+                {t('settings.screensaver.previewNow')}
               </button>
             </div>
           )}
 
           {tab === 'shortcuts' && (
             <div className="flex flex-col gap-1">
-              <SectionTitle>Keyboard</SectionTitle>
+              <SectionTitle>{t('settings.shortcuts.keyboard')}</SectionTitle>
               <div className="mt-1 flex items-center justify-between border-b border-[var(--border)] py-2.5">
                 <span className="text-[13px] text-[var(--text-primary)]">
-                  Toggle edit mode
+                  {t('settings.shortcuts.toggleEdit')}
                 </span>
                 <button
                   type="button"
                   onClick={() => setCapturing(true)}
                   className="rounded-[7px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--border-strong)]"
                 >
-                  {capturing ? 'Press keys…' : hotkey}
+                  {capturing ? t('settings.shortcuts.pressKeys') : hotkey}
                 </button>
               </div>
               {[
-                { label: 'Quick capture', combo: 'Ctrl+Shift+N' },
-                { label: 'Cycle spaces', combo: 'Ctrl+Shift+E' },
-                { label: 'Peek (hold)', combo: 'Ctrl+Shift+`' },
-                { label: 'Preview screensaver', combo: 'Ctrl+Shift+S' },
+                { label: t('settings.shortcuts.quickCapture'), combo: 'Ctrl+Shift+N' },
+                { label: t('settings.shortcuts.cycleSpaces'), combo: 'Ctrl+Shift+E' },
+                { label: t('settings.shortcuts.peek'), combo: 'Ctrl+Shift+`' },
+                { label: t('settings.shortcuts.previewScreensaver'), combo: 'Ctrl+Shift+S' },
               ].map((s) => (
                 <div
-                  key={s.label}
+                  key={s.combo}
                   className="flex items-center justify-between border-b border-[var(--border)] py-2.5 last:border-0"
                 >
                   <span className="text-[13px] text-[var(--text-primary)]">
@@ -567,8 +585,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 </div>
               ))}
               <p className="mt-3 text-[11.5px] text-[var(--text-tertiary)]">
-                You can also flick the mouse to the top-left corner to switch
-                spaces (enable “Hot corner” in General).
+                {t('settings.shortcuts.hotCornerNote')}
               </p>
             </div>
           )}
@@ -580,15 +597,15 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   className="text-[var(--text-primary)]"
                   style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.8px' }}
                 >
-                  Layer v{version}
+                  {t('settings.version', { version })}
                 </div>
                 <div className="text-[14px] text-[var(--text-secondary)]">
-                  a quiet layer on your desktop
+                  {t('settings.about.tagline')}
                 </div>
               </div>
               {IS_STORE ? (
                 <span className="text-[12px] text-[var(--text-secondary)]">
-                  Updates are delivered automatically by the Microsoft Store.
+                  {t('settings.about.storeUpdates')}
                 </span>
               ) : (
                 <div className="flex items-center gap-3">
@@ -598,7 +615,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                     onClick={() => checkUpdates()}
                     className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] disabled:opacity-50"
                   >
-                    Check for updates
+                    {t('settings.about.checkUpdates')}
                   </button>
                   {updateMsg && (
                     <span className="text-[12px] text-[var(--text-secondary)]">
@@ -623,7 +640,9 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                     <i className="h-[7px] w-[7px] rounded-[1px]" style={{ background: '#00a4ef' }} />
                     <i className="h-[7px] w-[7px] rounded-[1px]" style={{ background: '#ffb900' }} />
                   </span>
-                  {IS_STORE ? 'Rate Layer on the Store' : 'Microsoft Store'}
+                  {IS_STORE
+                    ? t('settings.about.rateStore')
+                    : t('settings.about.store')}
                 </button>
                 <button
                   type="button"
@@ -634,7 +653,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   }
                   className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
                 >
-                  GitHub
+                  {t('settings.about.github')}
                 </button>
                 {!IS_STORE && SUPPORT_ENABLED && (
                   <button
@@ -642,7 +661,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                     onClick={() => openUrl(SUPPORT_URL).catch(() => {})}
                     className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
                   >
-                    ☕ Support Layer
+                    {t('settings.about.support')}
                   </button>
                 )}
               </div>
@@ -653,7 +672,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 className="mt-2 self-start text-[13px] font-medium"
                 style={{ color: 'var(--danger)' }}
               >
-                Quit Layer
+                {t('common.quit')}
               </button>
             </div>
           )}

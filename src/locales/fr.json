@@ -1,0 +1,637 @@
+{
+  "common": {
+    "close": "Fermer",
+    "dragToMove": "Glisser pour déplacer",
+    "quit": "Quitter Layer"
+  },
+  "toolbar": {
+    "openMenu": "Ouvrir le menu",
+    "exitEdit": "Quitter le mode édition",
+    "lockAll": "Tout verrouiller",
+    "unlockAll": "Tout déverrouiller",
+    "showBackgrounds": "Afficher les arrière-plans",
+    "hideBackgrounds": "Masquer les arrière-plans",
+    "resetSpace": "Réinitialiser cet espace",
+    "resetSpaceConfirm": "Cliquez à nouveau pour réinitialiser cet espace",
+    "spaces": "Espaces",
+    "notifications": "Notifications",
+    "notificationsNew": "Notifications · {{count}} nouvelle(s)",
+    "settings": "Paramètres",
+    "styles": "{{name}} · styles",
+    "styleHeader": "Style {{name}}",
+    "spaceReset": "Espace réinitialisé"
+  },
+  "updates": {
+    "available": "Layer v{{version}} est disponible",
+    "availableBody": "Ouvrez Paramètres → Rechercher des mises à jour pour l’installer.",
+    "upToDate": "Vous utilisez la dernière version ✦",
+    "checkFailed": "Impossible de rechercher des mises à jour"
+  },
+  "widgets": {
+    "note": "Note",
+    "clock": "Horloge",
+    "link": "Lien",
+    "image": "Image",
+    "video": "Vidéo",
+    "gallery": "Galerie",
+    "weather": "Météo",
+    "stats": "Statistiques",
+    "todo": "À faire",
+    "countdown": "Compte à rebours",
+    "worldclock": "Horloge mondiale",
+    "calendar": "Calendrier",
+    "apps": "Applications",
+    "search": "Recherche",
+    "nowplaying": "En cours de lecture",
+    "notifications": "Notifications",
+    "converter": "Convertisseur",
+    "pomodoro": "Pomodoro",
+    "sticky": "Pense-bête",
+    "inbox": "Boîte de réception",
+    "clipboard": "Presse-papiers",
+    "webembed": "Intégration web",
+    "diskinfo": "Infos disque",
+    "greeting": "Salutation",
+    "shelf": "Étagère",
+    "audio": "Périphériques audio",
+    "board": "Tableau"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "version": "Layer v{{version}}",
+    "tabs": {
+      "general": "Général",
+      "appearance": "Apparence",
+      "screensaver": "Écran de veille",
+      "notch": "Encoche",
+      "sync": "Synchronisation cloud",
+      "shortcuts": "Raccourcis",
+      "about": "À propos"
+    },
+    "general": {
+      "snapToGrid": "Aligner les widgets sur la grille",
+      "gridSize": "Taille de la grille d’alignement · {{size}}px",
+      "launchOnStartup": "Lancer Layer au démarrage",
+      "startupViaWindows": "Paramètres Windows → Applications de démarrage",
+      "hotCorner": "Le coin actif change d’espace",
+      "language": "Langue",
+      "languageHint": "La langue utilisée par l’interface de Layer.",
+      "canvas": "Toile",
+      "exportImage": "Exporter la toile en image",
+      "resetSpace": "Réinitialiser cet espace",
+      "resetSpaceConfirm": "Cliquez à nouveau pour effacer « {{name}} »"
+    },
+    "appearance": {
+      "theme": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système",
+      "matchWallpaper": "Adapter la couleur d’accent au fond d’écran",
+      "showOn": "Afficher Layer sur",
+      "showOnHint": "L’écran sur lequel apparaissent la pastille, les Paramètres et les fenêtres contextuelles.",
+      "autoPrimary": "Auto (principal)",
+      "display": "Écran {{n}}"
+    },
+    "screensaver": {
+      "storeNote": "Définir Layer comme écran de veille Windows n’est pas disponible dans la version du Microsoft Store (le bac à sable ne peut pas enregistrer d’écran de veille système). Vous pouvez tout de même prévisualiser les styles avec Ctrl+Shift+S.",
+      "useAsScreensaver": "Utiliser Layer comme écran de veille",
+      "style": "Style",
+      "ambient": "Ambiant",
+      "minimal": "Minimal",
+      "quote": "Citation",
+      "descMinimal": "Une grande horloge et la date, rien de plus.",
+      "descQuote": "Une phrase apaisante en rotation avec l’heure.",
+      "descAmbient": "Horloge, date, météo en direct et lecture en cours.",
+      "idleNote": "En cas d’inactivité, Layer remplit chaque écran avec la vue ci-dessus. Une touche ou un mouvement de souris la fait disparaître.",
+      "previewNow": "Prévisualiser maintenant"
+    },
+    "shortcuts": {
+      "keyboard": "Clavier",
+      "toggleEdit": "Activer/désactiver le mode édition",
+      "pressKeys": "Appuyez sur des touches…",
+      "quickCapture": "Capture rapide",
+      "cycleSpaces": "Parcourir les espaces",
+      "peek": "Aperçu (maintenir)",
+      "previewScreensaver": "Prévisualiser l’écran de veille",
+      "hotCornerNote": "Vous pouvez aussi amener la souris dans le coin supérieur gauche pour changer d’espace (activez « Coin actif » dans Général)."
+    },
+    "about": {
+      "tagline": "une couche discrète sur votre bureau",
+      "storeUpdates": "Les mises à jour sont fournies automatiquement par le Microsoft Store.",
+      "checkUpdates": "Rechercher des mises à jour",
+      "checking": "Recherche de mises à jour…",
+      "upToDate": "Vous utilisez la dernière version.",
+      "updateFailed": "Impossible de rechercher des mises à jour.",
+      "rateStore": "Noter Layer sur le Store",
+      "store": "Microsoft Store",
+      "github": "GitHub",
+      "support": "☕ Soutenir Layer"
+    },
+    "toasts": {
+      "canvasExported": "Toile exportée",
+      "openFolder": "Ouvrir le dossier",
+      "exportFailed": "Échec de l’exportation",
+      "exportDialogTitle": "Exporter la toile en image"
+    }
+  },
+  "note": {
+    "editor": {
+      "placeholder": "Commencez à écrire"
+    },
+    "toolbar": {
+      "dragToMove": "Glisser pour déplacer",
+      "typefaceSize": "Police et taille",
+      "freewrite": "Écriture libre",
+      "endFreewrite": "Terminer l’écriture libre",
+      "darkMode": "Mode sombre",
+      "lightMode": "Mode clair",
+      "fullscreen": "Plein écran",
+      "exitFullscreen": "Quitter le plein écran",
+      "newEntry": "Nouvelle entrée",
+      "pastEntries": "Entrées passées"
+    },
+    "font": {
+      "size": "Taille",
+      "typeface": "Police",
+      "random": "Police aléatoire"
+    },
+    "freewrite": {
+      "title": "Écriture libre",
+      "description": "Écrivez sans vous arrêter. Pas de retour arrière, pas de correction — laissez simplement les mots couler jusqu’à la fin du temps.",
+      "introTitle": "Continuez simplement d’écrire",
+      "introBody": "Pas de retour arrière, pas de correction — laissez les mots couler sans les juger. Ne vous arrêtez pas avant la fin du minuteur.",
+      "hudHint": "Continuez d’écrire — pas de retour en arrière · Esc pour terminer",
+      "doneToast": "Écriture libre terminée — {{words}} mots en {{mins}} min ✍",
+      "completeTitle": "Écriture libre terminée ✦",
+      "completeBody": "{{words}} mots en {{mins}} minutes de flux ininterrompu."
+    },
+    "history": {
+      "title": "Entrées",
+      "entryTitle": "Titre de l’entrée",
+      "emptyEntry": "Entrée vide",
+      "pin": "Épingler",
+      "unpin": "Désépingler",
+      "rename": "Renommer",
+      "delete": "Supprimer"
+    },
+    "entry": {
+      "word": "{{count}} mot",
+      "words": "{{count}} mots"
+    }
+  },
+  "sticky": {
+    "placeholder": "Notez quelque chose…",
+    "dragToMove": "Glisser pour déplacer",
+    "colorLabel": "Couleur du pense-bête",
+    "colors": {
+      "yellow": "Jaune",
+      "pink": "Rose",
+      "blue": "Bleu",
+      "green": "Vert",
+      "orange": "Orange",
+      "lilac": "Lilas"
+    }
+  },
+  "greeting": {
+    "nameLabel": "Votre nom",
+    "namePlaceholder": "ex. Haris",
+    "styleLabel": "Style",
+    "alignLabel": "Alignement",
+    "styles": {
+      "classic": "Classique",
+      "serif": "Serif",
+      "gradient": "Dégradé",
+      "mono": "Mono",
+      "script": "Script",
+      "playfair": "Display",
+      "modern": "Moderne"
+    }
+  },
+  "clock": {
+    "fonts": {
+      "anurati": "Anurati",
+      "stencil": "Stencil",
+      "scifi": "Sci-fi",
+      "retro": "Rétro"
+    },
+    "format": {
+      "12h": "12h",
+      "24h": "24h"
+    },
+    "showSeconds": "Afficher les secondes",
+    "showDate": "Afficher la date"
+  },
+  "worldclock": {
+    "empty": "Ajoutez une ville dans les paramètres",
+    "removeZone": "Supprimer le fuseau"
+  },
+  "todo": {
+    "header": "TÂCHES · {{done}}/{{total}}",
+    "addPlaceholder": "Ajouter une tâche…",
+    "deleteTooltip": "Supprimer la tâche"
+  },
+  "pomodoro": {
+    "phase": {
+      "focus": "Concentration",
+      "short": "Pause courte",
+      "long": "Pause longue"
+    },
+    "start": "Démarrer",
+    "pause": "Pause",
+    "reset": "Réinitialiser",
+    "skip": "Passer",
+    "skipBreak": "Passer la pause",
+    "focusSound": "Son de concentration",
+    "soundOff": "Désactivé",
+    "todayLabel": "Aujourd’hui :",
+    "focused": "concentré",
+    "settings": {
+      "focusMin": "Concentration (min)",
+      "shortBreakMin": "Pause courte (min)",
+      "longBreakMin": "Pause longue (min)",
+      "longBreakAfter": "Pause longue après"
+    }
+  },
+  "inbox": {
+    "title": "Boîte de réception",
+    "shortcut": "Ctrl + Shift + N",
+    "emptyHint": "Appuyez sur <b>Ctrl + Shift + N</b> n’importe où pour capturer une idée.",
+    "markDoneTooltip": "Marquer comme terminé",
+    "removeTooltip": "Supprimer",
+    "clearDoneTooltip": "Effacer les terminés"
+  },
+  "board": {
+    "notePlaceholder": "Note…",
+    "addCardTooltip": "Ajouter une carte",
+    "changeColorTooltip": "Changer la couleur",
+    "deleteCardTooltip": "Supprimer la carte",
+    "connectTooltip": "Glisser pour connecter"
+  },
+  "shelf": {
+    "title": "Étagère",
+    "addFolderTooltip": "Ajouter un dossier",
+    "addFilesTooltip": "Ajouter des fichiers",
+    "openTooltip": "Ouvrir {{name}}",
+    "showInFolderTooltip": "Afficher dans le dossier",
+    "removeTooltip": "Retirer de l’étagère",
+    "emptyDrop": "Déposez des fichiers ici pour les ranger sur l’étagère",
+    "emptyBrowse": "ou cliquez pour parcourir",
+    "dropOverlay": "Déposer sur l’étagère"
+  },
+  "countdown": {
+    "units": {
+      "days": "jours",
+      "hrs": "h",
+      "min": "min",
+      "sec": "sec"
+    },
+    "since": "depuis",
+    "until": "jusqu’à",
+    "defaultTitle": "Compte à rebours",
+    "eventNamePlaceholder": "Nom de l’événement"
+  },
+  "calendar": {
+    "allDay": "Toute la journée",
+    "nav": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "jumpToToday": "Aller à aujourd’hui"
+    },
+    "view": {
+      "month": "Mois",
+      "week": "Semaine",
+      "day": "Jour"
+    },
+    "repeat": {
+      "none": "Ne se répète pas",
+      "daily": "Tous les jours",
+      "weekly": "Toutes les semaines",
+      "monthly": "Tous les mois",
+      "yearly": "Tous les ans"
+    },
+    "day": {
+      "free": "Libre",
+      "today": "Aujourd’hui",
+      "noEvents": "Aucun événement",
+      "addOne": "+ En ajouter un"
+    },
+    "popover": {
+      "nothingScheduled": "Rien de prévu.",
+      "newEvent": "Nouvel événement",
+      "repeatsLabel": "se répète {{repeat}}"
+    },
+    "editor": {
+      "editTitle": "Modifier l’événement",
+      "newTitle": "Nouvel événement",
+      "eventTitle": "Titre de l’événement",
+      "untitled": "Sans titre",
+      "allDayLabel": "Toute la journée",
+      "color": "Couleur",
+      "repeats": "Se répète",
+      "repeatUntil": "Répéter jusqu’au",
+      "until": "Jusqu’au",
+      "notes": "Notes (facultatif)",
+      "save": "Enregistrer",
+      "add": "Ajouter l’événement",
+      "delete": "Supprimer",
+      "readOnly": "Provenant d’un calendrier abonné · lecture seule"
+    },
+    "settings": {
+      "title": "Calendriers abonnés",
+      "instructions": "Collez un lien iCal/.ics ci-dessous. Google : Paramètres → « Adresse secrète au format iCal ». Proton/Outlook : le lien de partage du calendrier.",
+      "invalidLink": "Collez un lien .ics en https:// ou webcal://",
+      "defaultName": "Calendrier",
+      "loadFailed": "Échec du chargement",
+      "synced": "Synchronisé",
+      "on": "Activé",
+      "off": "Désactivé",
+      "enable": "Activer",
+      "disable": "Désactiver",
+      "removeCalendar": "Supprimer le calendrier",
+      "namePlaceholder": "Nom (ex. Travail)",
+      "urlPlaceholder": "https://…/basic.ics",
+      "add": "Ajouter"
+    }
+  },
+  "search": {
+    "placeholder": "Rechercher sur le web…",
+    "engines": {
+      "google": "Google",
+      "bing": "Bing",
+      "ddg": "DDG",
+      "custom": "Personnalisé"
+    },
+    "customPlaceholder": "https://example.com/search?q=%s"
+  },
+  "apps": {
+    "layout": {
+      "list": "Liste",
+      "grid": "Grille"
+    },
+    "searchInstalled": "Rechercher des applications installées…",
+    "pin": "+ Épingler",
+    "pinned": "Épinglées",
+    "addFolder": "Ajouter un dossier",
+    "emptyHint": "Appuyez sur + pour épingler votre première application",
+    "addAppsOrFolder": "Ajouter des applications ou un dossier",
+    "dragToReorder": "Glisser pour réorganiser",
+    "remove": "Supprimer"
+  },
+  "clipboard": {
+    "title": "Presse-papiers",
+    "empty": "Copiez n’importe quoi — cela apparaîtra ici.",
+    "noMatches": "Aucun résultat",
+    "search": "Rechercher…",
+    "copyLabel": "Copier {{label}}",
+    "pin": "Épingler",
+    "unpin": "Désépingler",
+    "remove": "Supprimer",
+    "clearUnpinned": "Effacer les non épinglés",
+    "copied": "Copié dans le presse-papiers",
+    "copyFailed": "Impossible de copier"
+  },
+  "webembed": {
+    "addUrl": "Ajoutez une URL dans les paramètres",
+    "loading": "Chargement de {{host}}…",
+    "noEmbed": "n’autorise pas l’intégration",
+    "openInBrowser": "Ouvrir dans le navigateur",
+    "iframeTitle": "Intégration web",
+    "urlLabel": "URL",
+    "urlPlaceholder": "un tableau de bord, un lien de vidéo YouTube…",
+    "urlHint": "Des sites comme la page d’accueil de YouTube, Google ou X bloquent l’intégration — collez un lien de vidéo, ou utilisez « Ouvrir dans le navigateur ».",
+    "zoom": "Zoom · {{pct}}%",
+    "autoRefresh": "Actualisation auto",
+    "refresh": {
+      "off": "Désactivé",
+      "30s": "30s",
+      "1m": "1m",
+      "5m": "5m"
+    }
+  },
+  "nowplaying": {
+    "empty": "Aucune lecture en cours",
+    "defaultSource": "EN COURS DE LECTURE",
+    "unknownTrack": "Piste inconnue",
+    "controls": {
+      "previous": "Précédent",
+      "play": "Lecture",
+      "pause": "Pause",
+      "next": "Suivant"
+    },
+    "settings": {
+      "artBackground": "Arrière-plan de la pochette",
+      "artBackgroundDesc": "Floute la pochette de l’album derrière le lecteur avec un voile de couleur assorti. Désactivez pour une carte au thème uni."
+    }
+  },
+  "notifications": {
+    "title": "NOTIFICATIONS · {{count}}",
+    "clearAll": "Tout effacer",
+    "empty": "Aucune notification",
+    "dismiss": "Ignorer"
+  },
+  "audio": {
+    "output": "Sortie",
+    "input": "Entrée",
+    "empty": "Aucun périphérique audio trouvé.",
+    "settings": {
+      "both": "Les deux",
+      "background": "Arrière-plan"
+    }
+  },
+  "converter": {
+    "swap": "Inverser les unités",
+    "categories": {
+      "length": "Longueur",
+      "weight": "Poids",
+      "temperature": "Temp.",
+      "currency": "Monnaie"
+    }
+  },
+  "link": {
+    "renderer": {
+      "openTooltip": "Double-cliquez pour ouvrir {{url}}",
+      "untitled": "Sans titre"
+    },
+    "settings": {
+      "invalidUrl": "Saisissez une URL valide",
+      "urlPlaceholder": "https://...",
+      "labelPlaceholder": "Libellé",
+      "iconSearchPlaceholder": "Rechercher des icônes…"
+    }
+  },
+  "image": {
+    "settings": {
+      "fitCover": "Remplir",
+      "fitContain": "Contenir",
+      "rounded": "Arrondi · {{px}}px",
+      "replace": "Remplacer l’image"
+    }
+  },
+  "video": {
+    "settings": {
+      "autoplay": "Lecture automatique",
+      "loop": "Boucle",
+      "muted": "Muet",
+      "replace": "Remplacer la vidéo"
+    }
+  },
+  "gallery": {
+    "renderer": {
+      "empty": "Ajoutez des médias dans les paramètres"
+    },
+    "settings": {
+      "layoutSlides": "Diapositives",
+      "layoutGrid": "Grille",
+      "layoutPhotos": "Photos",
+      "layoutCollage": "Collage",
+      "slideEvery": "Diapositive toutes les {{seconds}}s",
+      "rounded": "Arrondi · {{px}}px",
+      "addMedia": "Ajouter des médias ({{count}})"
+    }
+  },
+  "weather": {
+    "conditions": {
+      "clear": "Dégagé",
+      "partlyCloudy": "Partiellement nuageux",
+      "cloudy": "Nuageux",
+      "fog": "Brouillard",
+      "drizzle": "Bruine",
+      "rain": "Pluie",
+      "snow": "Neige",
+      "showers": "Averses",
+      "snowShowers": "Averses de neige",
+      "thunderstorm": "Orage"
+    },
+    "renderer": {
+      "unavailable": "Indisponible",
+      "loading": "Chargement…",
+      "mph": "mph",
+      "kmh": "km/h"
+    },
+    "settings": {
+      "myLocation": "Ma position",
+      "findingYou": "Localisation en cours…",
+      "useMyLocation": "Utiliser ma position",
+      "searchCity": "Rechercher une ville…"
+    }
+  },
+  "stats": {
+    "system": "SYSTÈME",
+    "cpu": "CPU",
+    "memory": "Mémoire",
+    "storage": "Stockage",
+    "battery": "Batterie",
+    "chargingSuffix": " · en charge"
+  },
+  "diskinfo": {
+    "title": "Disques",
+    "reading": "Lecture des disques…",
+    "noDisks": "Aucun disque trouvé",
+    "removable": "amovible",
+    "read": "LECTURE",
+    "write": "ÉCRITURE",
+    "active": "ACTIF",
+    "freeOf": "libres sur {{total}}",
+    "percentUsed": "{{percent}} % utilisés"
+  },
+  "spaces": {
+    "heading": "Espaces",
+    "description": "Changez de disposition, créez la vôtre, exportez-les ou publiez-les dans la galerie.",
+    "newSpace": "Nouvel espace",
+    "import": "Importer",
+    "badge": {
+      "default": "Par défaut"
+    },
+    "actions": {
+      "save": "Enregistrer",
+      "rename": "Renommer",
+      "publish": "Publier dans la galerie",
+      "export": "Exporter en ZIP",
+      "reset": "Réinitialiser l’espace",
+      "resetConfirm": "Cliquez à nouveau pour effacer",
+      "delete": "Supprimer"
+    },
+    "feedback": {
+      "exported": "Espace exporté ✦",
+      "exportFailed": "Impossible d’exporter l’espace.",
+      "imported": "« {{name}} » importé",
+      "published": "Publié dans la galerie ✦",
+      "publishFailed": "Échec de la publication — réessayez.",
+      "reset": "« {{name}} » réinitialisé"
+    },
+    "notify": {
+      "importedTitle": "« {{name}} » importé",
+      "importedBody": "{{count}} widgets ajoutés en tant que nouvel espace."
+    }
+  },
+  "notifPanel": {
+    "heading": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "clearAll": "Tout effacer",
+    "markRead": "Marquer comme lu",
+    "remove": "Supprimer",
+    "empty": "Tout est à jour ✦"
+  },
+  "sync": {
+    "title": "Synchronisation cloud",
+    "subtitle": "Facultatif — conservez vos dispositions sur tous vos appareils.",
+    "consent": {
+      "title": "Ce que la synchronisation cloud enregistre",
+      "syncedLabel": "Synchronisé",
+      "localLabel": "Reste sur cet appareil",
+      "synced": {
+        "layout": "Espaces et disposition des widgets",
+        "sizes": "Tailles et positions",
+        "colors": "Couleurs et clair/sombre",
+        "settings": "Paramètres des widgets"
+      },
+      "local": {
+        "notes": "Notes et texte des pense-bêtes",
+        "todo": "Texte des tâches à faire",
+        "clipboard": "Presse-papiers et boîte de réception",
+        "shelf": "Fichiers de l’étagère et chemins locaux"
+      },
+      "checkbox": "Je comprends et souhaite activer la synchronisation cloud."
+    },
+    "signIn": {
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "you@example.com",
+      "sending": "Envoi…",
+      "sendCode": "Envoyer le code",
+      "codeSentTo": "Saisissez le code à 6 chiffres envoyé à",
+      "verifying": "Vérification…",
+      "verify": "Vérifier et activer",
+      "resend": "Renvoyer",
+      "disclaimer": "Nous vous envoyons un code à usage unique par e-mail — pas de mot de passe. Vos dispositions se synchronisent sous cette adresse ; la dernière modification l’emporte sur tous les appareils."
+    },
+    "signedIn": {
+      "signedIn": "Connecté",
+      "syncing": "Synchronisation…",
+      "lastSynced": "Dernière synchronisation {{time}}",
+      "autoSync": "Synchronisation auto en arrière-plan",
+      "syncNow": "Synchroniser maintenant",
+      "restore": "Restaurer depuis le cloud",
+      "restoreConfirm": "Cliquez à nouveau pour écraser",
+      "signOut": "Se déconnecter"
+    }
+  },
+  "onboarding": {
+    "welcome": "Bienvenue dans Layer",
+    "subtitle": "Une couche discrète de widgets sur votre bureau. Trois choses rapides :",
+    "getStarted": "Commencer",
+    "steps": {
+      "hotkey": {
+        "title": "Invoquer avec un raccourci",
+        "body": "Appuyez sur Ctrl + Shift + Space à tout moment pour amener Layer au premier plan et commencer à éditer. Appuyez à nouveau pour le replacer derrière vos applications."
+      },
+      "island": {
+        "title": "Le menu îlot",
+        "body": "Une pastille se trouve en haut au centre de votre écran. Ouvrez-la pour ajouter des widgets — notes, horloges, météo, applications, et plus encore."
+      },
+      "arrange": {
+        "title": "Organisez votre toile",
+        "body": "Glissez les widgets par leur poignée, redimensionnez-les depuis les coins, faites un clic droit pour les options. Les widgets s’alignent les uns sur les autres lorsque vous les déplacez."
+      }
+    }
+  }
+}

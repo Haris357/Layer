@@ -1,7 +1,7 @@
 {
   "name": "layer",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -25,10 +25,12 @@
     "clsx": "^2.1.1",
     "firebase": "^12.13.0",
     "framer-motion": "^11.11.17",
+    "i18next": "^26.3.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.454.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.8",
     "react-rnd": "^10.4.14",
     "tailwind-merge": "^2.5.4",
     "zustand": "^5.0.1"

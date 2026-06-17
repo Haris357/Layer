@@ -144,6 +144,47 @@ jobs:
             --title "Layer ${{ github.ref_name }}" `
             --notes-file notes.md
 
+      # Prepend this release's notes to the "## Changelog" section of the
+      # Layer-releases README so it stays current on every release. Best effort:
+      # the release is already published, so a hiccup here doesn't fail it.
+      - name: Update Layer-releases changelog
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $notes = (Get-Content notes.md -Raw) -replace "`r", ""
+          $lines = $notes -split "`n"
+          # Title = first "## ..." heading; body = the bullet lines.
+          $title = (($lines | Where-Object { $_ -match '^\s*##\s+' } | Select-Object -First 1) -replace '^\s*##\s+', '').Trim()
+          $bullets = ($lines | Where-Object { $_ -match '^\s*-\s+' }) -join "`n"
+          $entry = "### $tag — $title`n$bullets`n"
+
+          git clone "https://x-access-token:$env:GH_TOKEN@github.com/Haris357/Layer-releases.git" relrepo
+          $readmePath = "relrepo/README.md"
+          $readme = Get-Content $readmePath -Raw
+          if ($readme -match [regex]::Escape("### $tag ")) {
+            Write-Host "Changelog already has $tag — skipping."
+          } else {
+            $anchor = "## Changelog"
+            if ($readme.Contains($anchor)) {
+              # Literal replace (no regex) so titles with $ or emoji are safe.
+              $readme = $readme.Replace($anchor, "$anchor`n`n$entry")
+            } else {
+              $readme = "$readme`n`n$anchor`n`n$entry"
+            }
+            Set-Content -Path $readmePath -Value $readme -Encoding utf8 -NoNewline
+            Push-Location relrepo
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add README.md
+            git commit -m "Changelog: Layer $tag"
+            git push
+            Pop-Location
+            Write-Host "Changelog updated for $tag."
+          }
+
       # Tell everyone on the download list about the new version. Best effort —
       # a mail hiccup won't mark the release failed (it's already published).
       - name: Install announcement deps

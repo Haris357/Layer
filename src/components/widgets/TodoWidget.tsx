@@ -1,15 +1,18 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ListChecks, Plus, X, Check } from 'lucide-react'
 import type { TodoWidget as TodoWidgetType, TodoItem } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
 import { uid } from '../../lib/utils'
 import { cn } from '../../lib/utils'
 import { fireConfetti } from '../../lib/confetti'
+import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
 
 function TodoRenderer({ widget }: { widget: TodoWidgetType }) {
+  const { t } = useTranslation()
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const [draft, setDraft] = useState('')
 
@@ -40,7 +43,7 @@ function TodoRenderer({ widget }: { widget: TodoWidgetType }) {
       <div className="mb-2 flex items-center gap-1.5 text-[var(--text-tertiary)]">
         <ListChecks size={13} strokeWidth={1.8} />
         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.3px' }}>
-          TASKS · {done}/{widget.items.length}
+          {t('todo.header', { done, total: widget.items.length })}
         </span>
       </div>
 
@@ -86,15 +89,17 @@ function TodoRenderer({ widget }: { widget: TodoWidgetType }) {
                   : 'var(--text-primary)',
               }}
             />
-            <button
-              type="button"
-              onClick={() =>
-                setItems(widget.items.filter((i) => i.id !== item.id))
-              }
-              className="shrink-0 text-[var(--text-tertiary)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--danger)]"
-            >
-              <X size={13} />
-            </button>
+            <Tooltip label={t('todo.deleteTooltip')} side="top" className="shrink-0">
+              <button
+                type="button"
+                onClick={() =>
+                  setItems(widget.items.filter((i) => i.id !== item.id))
+                }
+                className="text-[var(--text-tertiary)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--danger)]"
+              >
+                <X size={13} />
+              </button>
+            </Tooltip>
           </div>
         ))}
       </div>
@@ -108,7 +113,7 @@ function TodoRenderer({ widget }: { widget: TodoWidgetType }) {
           onKeyDown={(e) => {
             if (e.key === 'Enter') add()
           }}
-          placeholder="Add a task…"
+          placeholder={t('todo.addPlaceholder')}
           className="min-w-0 flex-1 bg-transparent text-[13px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
         />
       </div>

@@ -66,6 +66,22 @@ function nextZIndex(widgets: Widget[]): number {
   return widgets.reduce((max, w) => Math.max(max, w.zIndex), 0) + 1
 }
 
+// Re-pack every widget's zIndex into a clean 1..N by current stacking order,
+// forcing `id` to the top or bottom. Crucially this keeps all z-indices
+// POSITIVE: a negative zIndex (the old "send to back" used min-1) drops a
+// widget behind the canvas, so the transparent window turns click-through over
+// it and it can't be selected, typed in, or clicked — it looks "stuck".
+function restack(widgets: Widget[], id: string, to: 'front' | 'back'): Widget[] {
+  const target = widgets.find((w) => w.id === id)
+  if (!target) return widgets
+  const ordered = [...widgets]
+    .filter((w) => w.id !== id)
+    .sort((a, b) => a.zIndex - b.zIndex)
+  const seq = to === 'front' ? [...ordered, target] : [target, ...ordered]
+  const z = new Map(seq.map((w, i) => [w.id, i + 1]))
+  return widgets.map((w) => ({ ...w, zIndex: z.get(w.id) ?? w.zIndex }))
+}
+
 // Strip widgets whose type isn't registered anymore (e.g. saved data that
 // references a widget we've since removed). Keeps the canvas from crashing
 // on stale persisted state.
@@ -99,7 +115,17 @@ const KNOWN_TYPES: ReadonlySet<string> = new Set([
   'board',
 ])
 function pruneUnknown(widgets: Widget[]): Widget[] {
-  return widgets.filter((w) => KNOWN_TYPES.has(w.type))
+  return healZ(widgets.filter((w) => KNOWN_TYPES.has(w.type)))
+}
+
+// Self-heal saved layouts: if any widget has a non-positive zIndex (the old
+// "send to back" bug wrote negatives, which made the widget click-through and
+// stuck), re-pack the whole set into a clean positive 1..N by current order.
+function healZ(widgets: Widget[]): Widget[] {
+  if (widgets.every((w) => w.zIndex >= 1)) return widgets
+  const ordered = [...widgets].sort((a, b) => a.zIndex - b.zIndex)
+  const z = new Map(ordered.map((w, i) => [w.id, i + 1]))
+  return widgets.map((w) => ({ ...w, zIndex: z.get(w.id) ?? w.zIndex }))
 }
 
 export const useCanvasStore = create<CanvasState>((set, get) => {
@@ -250,26 +276,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     bringToFront: (id) => {
       pushHistory()
-      set((state) => ({
-        widgets: state.widgets.map((w) =>
-          w.id === id ? { ...w, zIndex: nextZIndex(state.widgets) } : w,
-        ),
-      }))
+      set((state) => ({ widgets: restack(state.widgets, id, 'front') }))
     },
 
     sendToBack: (id) => {
       pushHistory()
-      set((state) => {
-        const min = state.widgets.reduce(
-          (acc, w) => Math.min(acc, w.zIndex),
-          0,
-        )
-        return {
-          widgets: state.widgets.map((w) =>
-            w.id === id ? { ...w, zIndex: min - 1 } : w,
-          ),
-        }
-      })
+      set((state) => ({ widgets: restack(state.widgets, id, 'back') }))
     },
 
     lockAll: (locked) => {

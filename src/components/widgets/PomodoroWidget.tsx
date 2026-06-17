@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Play, Pause, RotateCcw, Timer, Volume2, VolumeX } from 'lucide-react'
 import type { PomodoroWidget as PomodoroWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
@@ -19,12 +20,6 @@ import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 type Phase = 'focus' | 'short' | 'long'
 
-const PHASE_LABEL: Record<Phase, string> = {
-  focus: 'Focus',
-  short: 'Short break',
-  long: 'Long break',
-}
-
 const PHASE_TINT: Record<Phase, string> = {
   focus: '#d65a5a',
   short: '#3aa37c',
@@ -44,7 +39,13 @@ function fmt(seconds: number): string {
 }
 
 function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
+  const { t } = useTranslation()
   const updateWidget = useCanvasStore((s) => s.updateWidget)
+  const phaseLabels: Record<Phase, string> = {
+    focus: t('pomodoro.phase.focus'),
+    short: t('pomodoro.phase.short'),
+    long: t('pomodoro.phase.long'),
+  }
 
   // Reset daily count when the day rolls over.
   useEffect(() => {
@@ -177,7 +178,7 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
     const next = AMBIENT_SOUNDS[(i + 1) % AMBIENT_SOUNDS.length]
     if (next) updateWidget(widget.id, { sound: next.value })
   }
-  const soundLabel = AMBIENT_SOUNDS.find((s) => s.value === sound)?.label ?? 'Off'
+  const soundLabel = AMBIENT_SOUNDS.find((s) => s.value === sound)?.label ?? t('pomodoro.soundOff')
 
   const reset = () => {
     setRunning(false)
@@ -202,7 +203,7 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
         className="text-[10px] font-bold uppercase tracking-[1.5px]"
         style={{ color: tint }}
       >
-        {PHASE_LABEL[phase]}
+        {phaseLabels[phase]}
       </div>
 
       <div
@@ -252,7 +253,7 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
       </div>
 
       <div className="mt-1 flex items-center gap-1.5">
-        <Tooltip label={running ? 'Pause' : 'Start'}>
+        <Tooltip label={running ? t('pomodoro.pause') : t('pomodoro.start')}>
           <button
             type="button"
             onClick={() => {
@@ -269,7 +270,7 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
             )}
           </button>
         </Tooltip>
-        <Tooltip label="Reset">
+        <Tooltip label={t('pomodoro.reset')}>
           <button
             type="button"
             onClick={reset}
@@ -279,19 +280,19 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
           </button>
         </Tooltip>
         {phase !== 'focus' && (
-          <Tooltip label="Skip break">
+          <Tooltip label={t('pomodoro.skipBreak')}>
             <button
               type="button"
               onClick={skipToFocus}
               className="rounded-[6px] px-2 py-1 text-[11px] font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
             >
-              Skip
+              {t('pomodoro.skip')}
             </button>
           </Tooltip>
         )}
       </div>
 
-      <Tooltip label="Focus sound">
+      <Tooltip label={t('pomodoro.focusSound')}>
         <button
           type="button"
           onClick={cycleSound}
@@ -310,11 +311,11 @@ function PomodoroRenderer({ widget }: { widget: PomodoroWidgetType }) {
         className="text-[var(--text-tertiary)]"
         style={{ fontSize: 11 }}
       >
-        Today:{' '}
+        {t('pomodoro.todayLabel')}{' '}
         <span className="font-semibold text-[var(--text-secondary)]">
           {completedToday}
         </span>{' '}
-        focused
+        {t('pomodoro.focused')}
       </div>
     </div>
   )
@@ -327,6 +328,7 @@ function PomodoroSettings({
   widget: PomodoroWidgetType
   onUpdate: (patch: Partial<PomodoroWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   const num = (
     label: string,
     value: number,
@@ -353,17 +355,17 @@ function PomodoroSettings({
   )
   return (
     <div className="flex w-[220px] flex-col gap-1.5">
-      {num('Focus (min)', widget.workMinutes, (v) =>
+      {num(t('pomodoro.settings.focusMin'), widget.workMinutes, (v) =>
         onUpdate({ workMinutes: v }),
       )}
-      {num('Short break (min)', widget.shortBreak, (v) =>
+      {num(t('pomodoro.settings.shortBreakMin'), widget.shortBreak, (v) =>
         onUpdate({ shortBreak: v }),
       )}
-      {num('Long break (min)', widget.longBreak, (v) =>
+      {num(t('pomodoro.settings.longBreakMin'), widget.longBreak, (v) =>
         onUpdate({ longBreak: v }),
       )}
       {num(
-        'Long break after',
+        t('pomodoro.settings.longBreakAfter'),
         widget.cyclesUntilLong,
         (v) => onUpdate({ cyclesUntilLong: v }),
         2,
@@ -372,7 +374,7 @@ function PomodoroSettings({
 
       <div className="mt-1 flex flex-col gap-1.5">
         <span className="text-[11px] font-medium text-[var(--text-secondary)]">
-          Focus sound
+          {t('pomodoro.focusSound')}
         </span>
         <div className="flex flex-wrap gap-1">
           {AMBIENT_SOUNDS.map((s) => {

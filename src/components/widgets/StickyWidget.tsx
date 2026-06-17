@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { StickyNote } from 'lucide-react'
 import type {
   StickyWidget as StickyWidgetType,
@@ -31,6 +32,7 @@ const COLORS: StickyColor[] = [
 ]
 
 function StickyRenderer({ widget }: { widget: StickyWidgetType }) {
+  const { t } = useTranslation()
   const updateWidget = useCanvasStore((s) => s.updateWidget)
   const palette = COLOR_STYLES[widget.color] ?? COLOR_STYLES.yellow
   const { ref, syncKey, onChange } = useUncontrolledText(widget.text, (v) =>
@@ -46,7 +48,7 @@ function StickyRenderer({ widget }: { widget: StickyWidgetType }) {
       }}
     >
       <Tooltip
-        label="Drag to move"
+        label={t('sticky.dragToMove')}
         side="top"
         className="layer-drag-handle layer-grab absolute left-0 right-0 top-0 h-5"
       >
@@ -57,7 +59,7 @@ function StickyRenderer({ widget }: { widget: StickyWidgetType }) {
         ref={ref}
         defaultValue={widget.text}
         onChange={onChange}
-        placeholder="Jot something down…"
+        placeholder={t('sticky.placeholder')}
         spellCheck={false}
         className="absolute inset-0 mt-5 resize-none border-0 bg-transparent px-3.5 py-2.5 outline-none"
         style={{
@@ -81,14 +83,15 @@ function StickySettings({
   widget: StickyWidgetType
   onUpdate: (patch: Partial<StickyWidgetType>) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex w-[200px] flex-col gap-2">
       <span className="text-[11px] font-medium text-[var(--text-tertiary)]">
-        Sticky color
+        {t('sticky.colorLabel')}
       </span>
       <div className="flex flex-wrap gap-1.5">
         {COLORS.map((c) => (
-          <Tooltip key={c} label={c}>
+          <Tooltip key={c} label={t(`sticky.colors.${c}`)}>
             <button
               type="button"
               onClick={() => onUpdate({ color: c })}
