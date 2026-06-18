@@ -90,8 +90,11 @@ export function notesToHtml(md) {
   return out.join('\n')
 }
 
-export function announceEmail({ version, notesHtml }) {
+export function announceEmail({ version, notesHtml, unsubscribeUrl }) {
   const v = String(version).replace(/^v/, '')
+  const unsub = unsubscribeUrl
+    ? ` <a href="${unsubscribeUrl}" style="color:${FAINT};text-decoration:underline;">Unsubscribe</a>.`
+    : ''
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f4f4f5;">
@@ -179,7 +182,7 @@ export function announceEmail({ version, notesHtml }) {
               <td style="padding:34px 44px 40px;font-family:${FONT};">
                 <p style="margin:0;font-size:12px;line-height:1.5;color:${FAINT};">
                   You're getting this because you downloaded Layer from our
-                  website. — made with care by Haris.
+                  website. — made with care by Haris.${unsub}
                 </p>
               </td>
             </tr>
