@@ -288,7 +288,8 @@
     "since": "seit",
     "until": "bis",
     "defaultTitle": "Countdown",
-    "eventNamePlaceholder": "Ereignisname"
+    "eventNamePlaceholder": "Ereignisname",
+    "defaultEventName": "Mein Ereignis"
   },
   "calendar": {
     "allDay": "Ganztägig",
@@ -421,6 +422,10 @@
     "settings": {
       "artBackground": "Albumcover-Hintergrund",
       "artBackgroundDesc": "Das Albumcover hinter dem Player mit einem passenden Farbschleier verschwimmen lassen. Ausschalten für eine schlichte, designkonforme Karte."
+    },
+    "volume": {
+      "min": "MIN",
+      "max": "MAX"
     }
   },
   "notifications": {
@@ -457,7 +462,8 @@
       "urlPlaceholder": "https://...",
       "labelPlaceholder": "Bezeichnung",
       "iconSearchPlaceholder": "Symbole suchen…"
-    }
+    },
+    "defaultLabel": "Neuer Link"
   },
   "image": {
     "settings": {
@@ -632,6 +638,168 @@
         "title": "Gestalte deine Arbeitsfläche",
         "body": "Ziehe Widgets an ihrem Griff, ändere die Größe an den Ecken, klicke mit der rechten Maustaste für Optionen. Widgets rasten beim Verschieben aneinander ein."
       }
+    }
+  },
+  "contextMenu": {
+    "duplicate": "Duplizieren",
+    "lock": "Sperren",
+    "unlock": "Entsperren",
+    "bringToFront": "In den Vordergrund",
+    "sendToBack": "In den Hintergrund",
+    "delete": "Löschen",
+    "background": "Hintergrund",
+    "opacity": "Deckkraft · {{pct}}%",
+    "color": "Farbe",
+    "reset": "zurücksetzen",
+    "theme": "Design",
+    "auto": "Automatisch",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "customColor": "Eigene Farbe",
+    "accent": "Akzent {{hex}}"
+  },
+  "canvas": {
+    "emptyAddWidget": "↑ Füge dein erstes Widget über das Menü oben hinzu"
+  },
+  "commandPalette": {
+    "placeholder": "Widget hinzufügen…",
+    "noResults": "Keine passenden Widgets"
+  },
+  "dialog": {
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen"
+  },
+  "publishDialog": {
+    "title": "In der Galerie veröffentlichen",
+    "description": "erscheint in der öffentlichen Galerie mit einem Screenshot deiner Arbeitsfläche.",
+    "authorLabel": "Dein Name",
+    "authorPlaceholder": "Anonym",
+    "descriptionLabel": "Beschreibung",
+    "descriptionPlaceholder": "Was macht dieses Layout besonders…",
+    "publish": "Veröffentlichen",
+    "cancel": "Abbrechen"
+  },
+  "quickCapture": {
+    "savedToInbox": "Im Posteingang gespeichert: {{text}}",
+    "title": "Schnellerfassung",
+    "placeholder": "Woran denkst du gerade?",
+    "helper": "In deinem Posteingang-Widget gespeichert",
+    "saveHint": "speichern",
+    "cancelHint": "abbrechen"
+  },
+  "toastUi": {
+    "dismiss": "Schließen"
+  },
+  "screensaver": {
+    "night": "Gute Nacht",
+    "morning": "Guten Morgen",
+    "afternoon": "Guten Tag",
+    "evening": "Guten Abend",
+    "wClear": "Klar",
+    "wPartlyCloudy": "Teilweise bewölkt",
+    "wCloudy": "Bewölkt",
+    "wFog": "Nebel",
+    "wDrizzle": "Nieselregen",
+    "wRain": "Regen",
+    "wSnow": "Schnee",
+    "wShowers": "Schauer",
+    "wSnowShowers": "Schneeschauer",
+    "wThunderstorm": "Gewitter",
+    "exitHint": "Maus bewegen oder Taste drücken zum Beenden"
+  },
+  "toasts": {
+    "updateInstalling": "Installation läuft — Layer wird neu gestartet…",
+    "updateInstallFailed": "Das Update konnte nicht installiert werden.",
+    "updateDownloading": "Layer v{{version}} wird heruntergeladen",
+    "updateReady": "Layer v{{version}} ist bereit",
+    "updateFailed": "Update fehlgeschlagen — versuche es erneut in den Einstellungen.",
+    "updateAvailable": "Layer v{{version}} ist verfügbar",
+    "published": "In der Galerie veröffentlicht",
+    "widgetDeleted": "Widget gelöscht",
+    "allLocked": "Alle Widgets gesperrt",
+    "allUnlocked": "Alle Widgets entsperrt",
+    "spaceSwitched": "Bereich · {{name}}",
+    "calIn10min": "In 10 Min · {{title}}",
+    "calStartingNow": "Beginnt jetzt · {{title}}"
+  },
+  "notify": {
+    "publishTitle": "„{{name}}“ in der Galerie veröffentlicht ✦",
+    "publishBody": "Du findest es unter „Neueste“ auf layer-desktop.web.app/spaces.",
+    "battery20Title": "Akku bei 20 %",
+    "battery20Body": "Vielleicht Zeit zum Aufladen.",
+    "battery10Title": "Akku bei 10 %",
+    "battery10Body": "Zeit zum Aufladen.",
+    "batteryFullTitle": "Akku vollständig geladen",
+    "batteryFullBody": "Du kannst jetzt das Ladegerät abziehen.",
+    "calToday": "Heute: {{title}}",
+    "cal10min": "In 10 Min: {{title}}",
+    "calNow": "Beginnt jetzt: {{title}}",
+    "upvoteOne": "Jemand hat „{{name}}“ hochgevotet 🎉",
+    "upvoteMany": "{{count}} neue Upvotes für „{{name}}“ 🎉",
+    "milestoneTitle": "„{{name}}“ hat {{count}} Upvotes erreicht ✦",
+    "milestoneBody": "Glückwunsch — dieser Bereich findet seine Leute.",
+    "updatedTitle": "Du nutzt jetzt Layer v{{version}} ✦",
+    "updatedBody": "Update erfolgreich installiert.",
+    "availableTitle": "Layer v{{version}} ist verfügbar",
+    "availableBody": "Klicke auf die Benachrichtigung oder Einstellungen → Nach Updates suchen, um zu installieren."
+  },
+  "syncErrors": {
+    "format": "Diese E-Mail-Adresse sieht nicht richtig aus.",
+    "undeliverable": "Diese E-Mail-Adresse kann keine Mails empfangen — überprüfe die Adresse.",
+    "rateLimited": "Zu viele Codes angefordert. Versuche es später erneut.",
+    "cooldown": "Bitte warte einen Moment, bevor du einen weiteren Code anforderst.",
+    "expired": "Dieser Code ist abgelaufen. Fordere einen neuen an.",
+    "tooManyAttempts": "Zu viele Versuche. Fordere einen neuen Code an.",
+    "invalid": "Dieser Code ist nicht richtig.",
+    "sendFailed": "Code konnte nicht gesendet werden.",
+    "network": "Netzwerkfehler. Versuche es erneut.",
+    "noEmail": "Fordere zuerst einen Code an.",
+    "verifyFailed": "Verifizierung fehlgeschlagen.",
+    "signInFailed": "Anmeldung fehlgeschlagen. Versuche es erneut.",
+    "syncFailed": "Synchronisierung fehlgeschlagen. Wird erneut versucht.",
+    "restoreFailed": "Wiederherstellung aus der Cloud fehlgeschlagen."
+  },
+  "dock": {
+    "label": "DOCK",
+    "notifications": "Benachrichtigungen",
+    "editWidgets": "Widgets bearbeiten",
+    "unpinHint": "Lösen (automatisches Ausblenden erlauben)",
+    "pinHint": "Geöffnet anheften"
+  },
+  "notch": {
+    "npUnknown": "Unbekannt",
+    "npIdle": "Nichts wird abgespielt",
+    "npHint": "Starte etwas, um es hier zu steuern",
+    "sysReading": "Wird gelesen…",
+    "cpu": "CPU",
+    "memory": "Arbeitsspeicher",
+    "disk": "Festplatte",
+    "searchApps": "Apps suchen…",
+    "noApps": "Keine Apps gefunden.",
+    "weatherUnavailable": "Wetter nicht verfügbar.",
+    "locating": "Standort wird ermittelt…",
+    "notifEmpty": "Du bist auf dem neuesten Stand.",
+    "markRead": "Als gelesen markieren",
+    "clipEmpty": "Zwischenablage-Verlauf ist leer.",
+    "copied": "✓ Kopiert",
+    "pinnedHint": "Angeheftet · Rechtsklick zum Lösen",
+    "copyHint": "Klicken zum Kopieren · Rechtsklick zum Anheften",
+    "noEvents": "Heute keine Termine.",
+    "theme": "Design",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System",
+    "previewScreensaver": "Bildschirmschoner-Vorschau",
+    "hotCorner": "Aktive Ecke",
+    "on": "Ein",
+    "off": "Aus",
+    "enableHint": "Aktiviere ein Modul in Einstellungen → Notch."
+  },
+  "widgetStyles": {
+    "clock": {
+      "analog": "Analog",
+      "digital": "Digital",
+      "display": "Anzeige"
     }
   }
 }

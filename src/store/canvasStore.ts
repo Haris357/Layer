@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Mode, NewWidget, Space, Widget } from '../types/widget'
 import { uid } from '../lib/utils'
 import { deleteAsset, isTauri } from '../lib/ipc'
+import i18n from '../lib/i18n'
 import { useToastStore } from './toastStore'
 
 function widgetAssets(widget: Widget): string[] {
@@ -191,7 +192,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       // window passes so an undo can fully restore image/video widgets.
       let undone = false
       useToastStore.getState().showToast({
-        message: 'Widget deleted',
+        message: i18n.t('toasts.widgetDeleted'),
         icon: 'undo',
         duration: 6000,
         actions: [
@@ -291,7 +292,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         selectedId: locked ? null : state.selectedId,
       }))
       useToastStore.getState().showToast({
-        message: locked ? 'All widgets locked' : 'All widgets unlocked',
+        message: locked
+          ? i18n.t('toasts.allLocked')
+          : i18n.t('toasts.allUnlocked'),
         icon: 'lock',
       })
     },
@@ -376,7 +379,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       if (!next) return
       get().switchSpace(next.id)
       useToastStore.getState().showToast({
-        message: `Space · ${next.name}`,
+        message: i18n.t('toasts.spaceSwitched', { name: next.name }),
         icon: 'success',
         duration: 1800,
       })

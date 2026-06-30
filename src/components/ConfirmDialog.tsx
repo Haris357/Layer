@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface ConfirmDialogProps {
   title: string
@@ -11,10 +12,11 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({
   title,
   message,
-  confirmLabel = 'Confirm',
+  confirmLabel,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation()
   return (
     <div
       data-hit
@@ -47,7 +49,7 @@ export function ConfirmDialog({
             onClick={onCancel}
             className="rounded-[8px] px-3 py-1.5 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)]"
           >
-            Cancel
+            {t('dialog.cancel')}
           </button>
           <button
             type="button"
@@ -58,7 +60,7 @@ export function ConfirmDialog({
               color: '#1a1a1f',
             }}
           >
-            {confirmLabel}
+            {confirmLabel ?? t('dialog.confirm')}
           </button>
         </div>
       </motion.div>

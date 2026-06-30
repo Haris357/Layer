@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import {
   Copy,
@@ -39,6 +40,7 @@ interface MenuItem {
 }
 
 export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
+  const { t } = useTranslation()
   const widget = useCanvasStore((s) =>
     s.widgets.find((w) => w.id === widgetId),
   )
@@ -150,24 +152,28 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
   }
 
   const items: MenuItem[] = [
-    { label: 'Duplicate', icon: Copy, action: run(() => duplicateWidget(widgetId)) },
     {
-      label: widget.locked ? 'Unlock' : 'Lock',
+      label: t('contextMenu.duplicate'),
+      icon: Copy,
+      action: run(() => duplicateWidget(widgetId)),
+    },
+    {
+      label: widget.locked ? t('contextMenu.unlock') : t('contextMenu.lock'),
       icon: widget.locked ? Unlock : Lock,
       action: run(() => toggleLock(widgetId)),
     },
     {
-      label: 'Bring to Front',
+      label: t('contextMenu.bringToFront'),
       icon: ArrowUpToLine,
       action: run(() => bringToFront(widgetId)),
     },
     {
-      label: 'Send to Back',
+      label: t('contextMenu.sendToBack'),
       icon: ArrowDownToLine,
       action: run(() => sendToBack(widgetId)),
     },
     {
-      label: 'Delete',
+      label: t('contextMenu.delete'),
       icon: Trash2,
       action: run(() => deleteWidget(widgetId)),
       danger: true,
@@ -211,7 +217,7 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
             className="text-[var(--text-secondary)]"
             style={{ fontSize: 11, fontWeight: 600 }}
           >
-            Background
+            {t('contextMenu.background')}
           </span>
           <Toggle
             checked={hasBg}
@@ -224,7 +230,7 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
           className="text-[var(--text-secondary)]"
           style={{ fontSize: 11, fontWeight: 600 }}
         >
-          Opacity · {Math.round(opacity * 100)}%
+          {t('contextMenu.opacity', { pct: Math.round(opacity * 100) })}
         </span>
         <Slider
           value={opacity}
@@ -244,14 +250,14 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
               className="text-[var(--text-secondary)]"
               style={{ fontSize: 11, fontWeight: 600 }}
             >
-              Color
+              {t('contextMenu.color')}
             </span>
             <div className="flex items-center gap-1.5">
               {PRESET_ACCENTS.map((hex) => (
                 <button
                   key={hex}
                   type="button"
-                  aria-label={`Accent ${hex}`}
+                  aria-label={t('contextMenu.accent', { hex })}
                   onClick={() => updateWidget(widgetId, { accent: hex })}
                   className="h-[18px] w-[18px] rounded-full transition-transform hover:scale-110"
                   style={{
@@ -272,7 +278,7 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
                   outline: '1px solid var(--border)',
                   outlineOffset: 1,
                 }}
-                title="Custom color"
+                title={t('contextMenu.customColor')}
               >
                 <input
                   type="color"
@@ -290,7 +296,7 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
                   onClick={() => updateWidget(widgetId, { accent: undefined })}
                   className="ml-auto text-[11px] font-medium text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)]"
                 >
-                  reset
+                  {t('contextMenu.reset')}
                 </button>
               )}
             </div>
@@ -300,14 +306,14 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
               className="text-[var(--text-secondary)]"
               style={{ fontSize: 11, fontWeight: 600 }}
             >
-              Theme
+              {t('contextMenu.theme')}
             </span>
             <Segmented
               value={widget.appearance ?? 'auto'}
               options={[
-                { value: 'auto', label: 'Auto' },
-                { value: 'light', label: 'Light' },
-                { value: 'dark', label: 'Dark' },
+                { value: 'auto', label: t('contextMenu.auto') },
+                { value: 'light', label: t('contextMenu.light') },
+                { value: 'dark', label: t('contextMenu.dark') },
               ]}
               onChange={(v) => updateWidget(widgetId, { appearance: v })}
             />

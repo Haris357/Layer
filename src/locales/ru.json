@@ -288,7 +288,8 @@
     "since": "прошло с",
     "until": "до",
     "defaultTitle": "Обратный отсчёт",
-    "eventNamePlaceholder": "Название события"
+    "eventNamePlaceholder": "Название события",
+    "defaultEventName": "Моё событие"
   },
   "calendar": {
     "allDay": "Весь день",
@@ -421,6 +422,10 @@
     "settings": {
       "artBackground": "Фон из обложки альбома",
       "artBackgroundDesc": "Размыть обложку альбома за плеером с подходящим цветовым оттенком. Отключите для простой тематической карточки."
+    },
+    "volume": {
+      "min": "MIN",
+      "max": "MAX"
     }
   },
   "notifications": {
@@ -457,7 +462,8 @@
       "urlPlaceholder": "https://...",
       "labelPlaceholder": "Метка",
       "iconSearchPlaceholder": "Поиск иконок…"
-    }
+    },
+    "defaultLabel": "Новая ссылка"
   },
   "image": {
     "settings": {
@@ -632,6 +638,168 @@
         "title": "Расположите свой холст",
         "body": "Перетаскивайте виджеты за ручку, изменяйте размер за углы, щёлкайте правой кнопкой для параметров. Виджеты привязываются друг к другу при перемещении."
       }
+    }
+  },
+  "contextMenu": {
+    "duplicate": "Дублировать",
+    "lock": "Заблокировать",
+    "unlock": "Разблокировать",
+    "bringToFront": "На передний план",
+    "sendToBack": "На задний план",
+    "delete": "Удалить",
+    "background": "Фон",
+    "opacity": "Непрозрачность · {{pct}}%",
+    "color": "Цвет",
+    "reset": "сбросить",
+    "theme": "Тема",
+    "auto": "Авто",
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "customColor": "Свой цвет",
+    "accent": "Акцент {{hex}}"
+  },
+  "canvas": {
+    "emptyAddWidget": "↑ Добавьте первый виджет из меню вверху"
+  },
+  "commandPalette": {
+    "placeholder": "Добавить виджет…",
+    "noResults": "Нет подходящих виджетов"
+  },
+  "dialog": {
+    "confirm": "Подтвердить",
+    "cancel": "Отмена"
+  },
+  "publishDialog": {
+    "title": "Опубликовать в галерее",
+    "description": "появится в публичной галерее со снимком вашего холста.",
+    "authorLabel": "Ваше имя",
+    "authorPlaceholder": "Аноним",
+    "descriptionLabel": "Описание",
+    "descriptionPlaceholder": "Чем хорош этот макет…",
+    "publish": "Опубликовать",
+    "cancel": "Отмена"
+  },
+  "quickCapture": {
+    "savedToInbox": "Сохранено во Входящие: {{text}}",
+    "title": "Быстрая заметка",
+    "placeholder": "О чём вы думаете?",
+    "helper": "Сохранено в виджет «Входящие»",
+    "saveHint": "сохранить",
+    "cancelHint": "отмена"
+  },
+  "toastUi": {
+    "dismiss": "Закрыть"
+  },
+  "screensaver": {
+    "night": "Доброй ночи",
+    "morning": "Доброе утро",
+    "afternoon": "Добрый день",
+    "evening": "Добрый вечер",
+    "wClear": "Ясно",
+    "wPartlyCloudy": "Переменная облачность",
+    "wCloudy": "Облачно",
+    "wFog": "Туман",
+    "wDrizzle": "Морось",
+    "wRain": "Дождь",
+    "wSnow": "Снег",
+    "wShowers": "Ливни",
+    "wSnowShowers": "Снежные заряды",
+    "wThunderstorm": "Гроза",
+    "exitHint": "подвигайте мышью или нажмите клавишу, чтобы выйти"
+  },
+  "toasts": {
+    "updateInstalling": "Установка — Layer перезапустится…",
+    "updateInstallFailed": "Не удалось установить обновление.",
+    "updateDownloading": "Загрузка Layer v{{version}}",
+    "updateReady": "Layer v{{version}} готов",
+    "updateFailed": "Не удалось обновить — повторите из Настроек.",
+    "updateAvailable": "Доступна версия Layer v{{version}}",
+    "published": "Опубликовано в галерее",
+    "widgetDeleted": "Виджет удалён",
+    "allLocked": "Все виджеты заблокированы",
+    "allUnlocked": "Все виджеты разблокированы",
+    "spaceSwitched": "Пространство · {{name}}",
+    "calIn10min": "Через 10 мин · {{title}}",
+    "calStartingNow": "Начинается сейчас · {{title}}"
+  },
+  "notify": {
+    "publishTitle": "«{{name}}» опубликовано в галерее ✦",
+    "publishBody": "Ищите в разделе «Новое» на layer-desktop.web.app/spaces.",
+    "battery20Title": "Заряд батареи 20%",
+    "battery20Body": "Возможно, пора подключить зарядку.",
+    "battery10Title": "Заряд батареи 10%",
+    "battery10Body": "Пора подключить зарядку.",
+    "batteryFullTitle": "Батарея полностью заряжена",
+    "batteryFullBody": "Теперь можно отключить зарядку.",
+    "calToday": "Сегодня: {{title}}",
+    "cal10min": "Через 10 мин: {{title}}",
+    "calNow": "Начинается сейчас: {{title}}",
+    "upvoteOne": "Кто-то проголосовал за «{{name}}» 🎉",
+    "upvoteMany": "{{count}} новых голосов за «{{name}}» 🎉",
+    "milestoneTitle": "«{{name}}» набрало {{count}} голосов ✦",
+    "milestoneBody": "Поздравляем — это пространство находит своих людей.",
+    "updatedTitle": "Теперь у вас Layer v{{version}} ✦",
+    "updatedBody": "Обновление успешно установлено.",
+    "availableTitle": "Доступна версия Layer v{{version}}",
+    "availableBody": "Нажмите на уведомление или Настройки → Проверить обновления, чтобы установить."
+  },
+  "syncErrors": {
+    "format": "Похоже, этот адрес электронной почты некорректен.",
+    "undeliverable": "Этот адрес не может получать письма — проверьте его.",
+    "rateLimited": "Запрошено слишком много кодов. Повторите позже.",
+    "cooldown": "Подождите немного перед запросом нового кода.",
+    "expired": "Срок действия кода истёк. Запросите новый.",
+    "tooManyAttempts": "Слишком много попыток. Запросите новый код.",
+    "invalid": "Неверный код.",
+    "sendFailed": "Не удалось отправить код.",
+    "network": "Ошибка сети. Повторите попытку.",
+    "noEmail": "Сначала запросите код.",
+    "verifyFailed": "Не удалось проверить.",
+    "signInFailed": "Не удалось войти. Повторите попытку.",
+    "syncFailed": "Синхронизация не удалась. Повторим попытку.",
+    "restoreFailed": "Не удалось восстановить из облака."
+  },
+  "dock": {
+    "label": "DOCK",
+    "notifications": "Уведомления",
+    "editWidgets": "Изменить виджеты",
+    "unpinHint": "Открепить (разрешить авто-скрытие)",
+    "pinHint": "Закрепить открытым"
+  },
+  "notch": {
+    "npUnknown": "Неизвестно",
+    "npIdle": "Ничего не воспроизводится",
+    "npHint": "Запустите что-нибудь, чтобы управлять отсюда",
+    "sysReading": "Чтение…",
+    "cpu": "CPU",
+    "memory": "Память",
+    "disk": "Диск",
+    "searchApps": "Поиск приложений…",
+    "noApps": "Приложения не найдены.",
+    "weatherUnavailable": "Погода недоступна.",
+    "locating": "Определение местоположения…",
+    "notifEmpty": "Вы всё просмотрели.",
+    "markRead": "Отметить прочитанным",
+    "clipEmpty": "История буфера обмена пуста.",
+    "copied": "✓ Скопировано",
+    "pinnedHint": "Закреплено · правый клик, чтобы открепить",
+    "copyHint": "Клик, чтобы скопировать · правый клик, чтобы закрепить",
+    "noEvents": "Сегодня событий нет.",
+    "theme": "Тема",
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "system": "Системная",
+    "previewScreensaver": "Просмотр заставки",
+    "hotCorner": "Активный угол",
+    "on": "Вкл.",
+    "off": "Выкл.",
+    "enableHint": "Включите модуль в Настройки → Вырез."
+  },
+  "widgetStyles": {
+    "clock": {
+      "analog": "Аналоговые",
+      "digital": "Цифровые",
+      "display": "Дисплей"
     }
   }
 }

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Bell, Pin, Pencil, X } from 'lucide-react'
+import { Tooltip } from '../components/Tooltip'
 import { getSystemStats, type SystemStats } from '../lib/ipc'
 import { useNotificationStore } from '../store/notificationStore'
 import { useNotchStore, type NotchModuleId } from '../notch/notchStore'
@@ -42,6 +44,7 @@ function Battery({ pct, charging }: { pct: number; charging: boolean }) {
 
 // ---- the dock ---------------------------------------------------------------
 export function Dock() {
+  const { t } = useTranslation()
   const modules = useNotchStore((s) => s.modules)
   const enabledIds = modules.filter((m) => m.enabled).map((m) => m.id)
 
@@ -141,21 +144,22 @@ export function Dock() {
                 className="flex w-[70px] flex-col items-center gap-2.5 px-2 py-3"
               >
                 {/* notifications */}
-                <button
-                  type="button"
-                  onClick={() => openFeature('notifications')}
-                  className="flex w-full flex-col items-center gap-0.5 rounded-[10px] py-1 hover:bg-[var(--fill-2)]"
-                  title="Notifications"
-                >
-                  <div className="relative">
-                    <Bell size={16} className="text-[var(--text-secondary)]" strokeWidth={1.8} />
-                    {unread > 0 && (
-                      <span className="absolute -right-1.5 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[var(--green,#30d158)] px-1 text-[8px] font-bold text-black">
-                        {unread > 9 ? '9+' : unread}
-                      </span>
-                    )}
-                  </div>
-                </button>
+                <Tooltip label={t('dock.notifications')} side="left">
+                  <button
+                    type="button"
+                    onClick={() => openFeature('notifications')}
+                    className="flex w-full flex-col items-center gap-0.5 rounded-[10px] py-1 hover:bg-[var(--fill-2)]"
+                  >
+                    <div className="relative">
+                      <Bell size={16} className="text-[var(--text-secondary)]" strokeWidth={1.8} />
+                      {unread > 0 && (
+                        <span className="absolute -right-1.5 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[var(--green,#30d158)] px-1 text-[8px] font-bold text-black">
+                          {unread > 9 ? '9+' : unread}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                </Tooltip>
 
                 <div className="h-px w-7 bg-[var(--border)]" />
 
@@ -201,24 +205,26 @@ export function Dock() {
 
                 {/* edit (only on desktop) + pin */}
                 {desktopForeground && (
+                  <Tooltip label={t('dock.editWidgets')} side="left">
+                    <button
+                      type="button"
+                      onClick={() => useCanvasStore.getState().setMode('edit')}
+                      className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-[var(--fill-1)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
+                    >
+                      <Pencil size={16} strokeWidth={1.8} />
+                    </button>
+                  </Tooltip>
+                )}
+                <Tooltip label={pinned ? t('dock.unpinHint') : t('dock.pinHint')} side="left">
                   <button
                     type="button"
-                    onClick={() => useCanvasStore.getState().setMode('edit')}
-                    title="Edit widgets"
-                    className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-[var(--fill-1)] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
+                    onClick={() => setPinned((p) => !p)}
+                    className="flex h-9 w-9 items-center justify-center rounded-[11px] transition-colors"
+                    style={pinned ? { background: 'var(--accent)', color: '#fff' } : { background: 'var(--fill-1)', color: 'var(--text-secondary)' }}
                   >
-                    <Pencil size={16} strokeWidth={1.8} />
+                    <Pin size={15} strokeWidth={1.8} />
                   </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setPinned((p) => !p)}
-                  title={pinned ? 'Unpin (allow auto-hide)' : 'Pin open'}
-                  className="flex h-9 w-9 items-center justify-center rounded-[11px] transition-colors"
-                  style={pinned ? { background: 'var(--accent)', color: '#fff' } : { background: 'var(--fill-1)', color: 'var(--text-secondary)' }}
-                >
-                  <Pin size={15} strokeWidth={1.8} />
-                </button>
+                </Tooltip>
               </motion.div>
             ) : (
               <motion.div

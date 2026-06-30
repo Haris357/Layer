@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { listen } from '@tauri-apps/api/event'
 import { Inbox } from 'lucide-react'
@@ -10,6 +11,7 @@ import { MonitorLayer } from './MonitorLayer'
 // "quick-capture") and pops a centred input. Anything saved drops into
 // the Inbox widget.
 export function QuickCaptureModal() {
+  const { t: tr } = useTranslation()
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -41,8 +43,9 @@ export function QuickCaptureModal() {
     const t = text.trim()
     if (t) {
       add(t)
+      const captured = t.length > 36 ? t.slice(0, 36) + '…' : t
       showToast({
-        message: `Saved to Inbox: ${t.length > 36 ? t.slice(0, 36) + '…' : t}`,
+        message: tr('quickCapture.savedToInbox', { text: captured }),
         icon: 'success',
       })
     }
@@ -73,7 +76,7 @@ export function QuickCaptureModal() {
               <span
                 className="text-[11px] font-semibold uppercase tracking-[1.2px]"
               >
-                Quick capture
+                {tr('quickCapture.title')}
               </span>
             </div>
             <input
@@ -84,21 +87,21 @@ export function QuickCaptureModal() {
                 if (e.key === 'Enter') save()
                 else if (e.key === 'Escape') cancel()
               }}
-              placeholder="What's on your mind?"
+              placeholder={tr('quickCapture.placeholder')}
               className="bg-transparent text-[18px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
               style={{ letterSpacing: '-0.4px' }}
             />
             <div className="flex items-center justify-between text-[10.5px] text-[var(--text-tertiary)]">
-              <span>Saved to your Inbox widget</span>
+              <span>{tr('quickCapture.helper')}</span>
               <span>
                 <kbd className="rounded-[4px] bg-[var(--fill-2)] px-1 py-0.5">
                   Enter
                 </kbd>{' '}
-                save ·{' '}
+                {tr('quickCapture.saveHint')} ·{' '}
                 <kbd className="rounded-[4px] bg-[var(--fill-2)] px-1 py-0.5">
                   Esc
                 </kbd>{' '}
-                cancel
+                {tr('quickCapture.cancelHint')}
               </span>
             </div>
           </motion.div>

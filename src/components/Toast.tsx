@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowUpCircle,
@@ -47,6 +48,7 @@ function ToastItem({
   toast: ActiveToast
   onDismiss: (id: number) => void
 }) {
+  const { t } = useTranslation()
   const Icon = toast.icon ? ICONS[toast.icon] : null
   const tint = toast.icon ? COLORS[toast.icon] : 'var(--accent)'
   const determinate = typeof toast.progress === 'number'
@@ -120,7 +122,7 @@ function ToastItem({
       {!determinate && (
         <button
           type="button"
-          aria-label="Dismiss"
+          aria-label={t('toastUi.dismiss')}
           onClick={() => onDismiss(toast.id)}
           className="shrink-0 rounded-[7px] p-1 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
         >

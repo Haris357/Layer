@@ -10,6 +10,7 @@ import {
   openUrl,
 } from './ipc'
 import { notify } from './notify'
+import i18n from './i18n'
 import { useToastStore } from '../store/toastStore'
 import { rememberMySpace } from '../hooks/useGalleryNotifications'
 
@@ -115,12 +116,12 @@ export async function publishToGallery(opts: {
   rememberMySpace(ref.id)
   notify({
     kind: 'publish',
-    title: `"${opts.space.name}" published to the gallery ✦`,
-    body: 'Look for it under Newest at layer-desktop.web.app/spaces.',
+    title: i18n.t('notify.publishTitle', { name: opts.space.name }),
+    body: i18n.t('notify.publishBody'),
     spaceId: ref.id,
   })
   useToastStore.getState().showToast({
-    message: 'Published to the gallery',
+    message: i18n.t('toasts.published'),
     icon: 'success',
     duration: 7000,
     actions: [

@@ -288,7 +288,8 @@
     "since": "経過",
     "until": "まで",
     "defaultTitle": "カウントダウン",
-    "eventNamePlaceholder": "イベント名"
+    "eventNamePlaceholder": "イベント名",
+    "defaultEventName": "マイイベント"
   },
   "calendar": {
     "allDay": "終日",
@@ -421,6 +422,10 @@
     "settings": {
       "artBackground": "アルバムアートの背景",
       "artBackgroundDesc": "プレーヤーの背後にアルバムアートをぼかして表示し、調和した色合いを重ねます。オフにすると、シンプルなテーマカラーのカードになります。"
+    },
+    "volume": {
+      "min": "MIN",
+      "max": "MAX"
     }
   },
   "notifications": {
@@ -457,7 +462,8 @@
       "urlPlaceholder": "https://...",
       "labelPlaceholder": "ラベル",
       "iconSearchPlaceholder": "アイコンを検索…"
-    }
+    },
+    "defaultLabel": "新しいリンク"
   },
   "image": {
     "settings": {
@@ -632,6 +638,168 @@
         "title": "キャンバスを整える",
         "body": "グリップハンドルでウィジェットをドラッグし、角からサイズ変更、右クリックでオプションを表示。動かすとウィジェット同士がスナップします。"
       }
+    }
+  },
+  "contextMenu": {
+    "duplicate": "複製",
+    "lock": "ロック",
+    "unlock": "ロック解除",
+    "bringToFront": "最前面へ移動",
+    "sendToBack": "最背面へ移動",
+    "delete": "削除",
+    "background": "背景",
+    "opacity": "不透明度 · {{pct}}%",
+    "color": "カラー",
+    "reset": "リセット",
+    "theme": "テーマ",
+    "auto": "自動",
+    "light": "ライト",
+    "dark": "ダーク",
+    "customColor": "カスタムカラー",
+    "accent": "アクセント {{hex}}"
+  },
+  "canvas": {
+    "emptyAddWidget": "↑ 上部のメニューから最初のウィジェットを追加"
+  },
+  "commandPalette": {
+    "placeholder": "ウィジェットを追加…",
+    "noResults": "一致するウィジェットがありません"
+  },
+  "dialog": {
+    "confirm": "確認",
+    "cancel": "キャンセル"
+  },
+  "publishDialog": {
+    "title": "ギャラリーに公開",
+    "description": "は、キャンバスのスクリーンショットとともに公開ギャラリーに表示されます。",
+    "authorLabel": "あなたの名前",
+    "authorPlaceholder": "匿名",
+    "descriptionLabel": "説明",
+    "descriptionPlaceholder": "このレイアウトの魅力は…",
+    "publish": "公開",
+    "cancel": "キャンセル"
+  },
+  "quickCapture": {
+    "savedToInbox": "受信箱に保存しました: {{text}}",
+    "title": "クイックキャプチャ",
+    "placeholder": "今、何を考えていますか？",
+    "helper": "受信箱ウィジェットに保存しました",
+    "saveHint": "保存",
+    "cancelHint": "キャンセル"
+  },
+  "toastUi": {
+    "dismiss": "閉じる"
+  },
+  "screensaver": {
+    "night": "おやすみなさい",
+    "morning": "おはようございます",
+    "afternoon": "こんにちは",
+    "evening": "こんばんは",
+    "wClear": "快晴",
+    "wPartlyCloudy": "晴れ時々曇り",
+    "wCloudy": "曇り",
+    "wFog": "霧",
+    "wDrizzle": "霧雨",
+    "wRain": "雨",
+    "wSnow": "雪",
+    "wShowers": "にわか雨",
+    "wSnowShowers": "にわか雪",
+    "wThunderstorm": "雷雨",
+    "exitHint": "マウスを動かすかキーを押して終了"
+  },
+  "toasts": {
+    "updateInstalling": "インストール中 — Layer が再起動します…",
+    "updateInstallFailed": "アップデートをインストールできませんでした。",
+    "updateDownloading": "Layer v{{version}} をダウンロード中",
+    "updateReady": "Layer v{{version}} の準備ができました",
+    "updateFailed": "アップデートに失敗しました — 設定から再試行してください。",
+    "updateAvailable": "Layer v{{version}} が利用可能です",
+    "published": "ギャラリーに公開しました",
+    "widgetDeleted": "ウィジェットを削除しました",
+    "allLocked": "すべてのウィジェットをロックしました",
+    "allUnlocked": "すべてのウィジェットのロックを解除しました",
+    "spaceSwitched": "スペース · {{name}}",
+    "calIn10min": "10分後 · {{title}}",
+    "calStartingNow": "まもなく開始 · {{title}}"
+  },
+  "notify": {
+    "publishTitle": "「{{name}}」をギャラリーに公開しました ✦",
+    "publishBody": "layer-desktop.web.app/spaces の「最新」からご覧いただけます。",
+    "battery20Title": "バッテリー残量 20%",
+    "battery20Body": "そろそろ充電する時間かもしれません。",
+    "battery10Title": "バッテリー残量 10%",
+    "battery10Body": "充電する時間です。",
+    "batteryFullTitle": "バッテリーが満充電になりました",
+    "batteryFullBody": "充電器を外しても大丈夫です。",
+    "calToday": "今日: {{title}}",
+    "cal10min": "10分後: {{title}}",
+    "calNow": "まもなく開始: {{title}}",
+    "upvoteOne": "誰かが「{{name}}」に高評価しました 🎉",
+    "upvoteMany": "「{{name}}」に {{count}} 件の新しい高評価 🎉",
+    "milestoneTitle": "「{{name}}」が {{count}} 件の高評価に達しました ✦",
+    "milestoneBody": "おめでとうございます — そのスペースが多くの人に届いています。",
+    "updatedTitle": "Layer v{{version}} になりました ✦",
+    "updatedBody": "アップデートが正常にインストールされました。",
+    "availableTitle": "Layer v{{version}} が利用可能です",
+    "availableBody": "トーストをクリックするか、設定 → アップデートを確認 からインストールしてください。"
+  },
+  "syncErrors": {
+    "format": "そのメールアドレスは正しくないようです。",
+    "undeliverable": "そのメールアドレスはメールを受信できません — アドレスを確認してください。",
+    "rateLimited": "コードのリクエストが多すぎます。後でもう一度お試しください。",
+    "cooldown": "別のコードをリクエストする前に少しお待ちください。",
+    "expired": "そのコードは期限切れです。新しいコードをリクエストしてください。",
+    "tooManyAttempts": "試行回数が多すぎます。新しいコードをリクエストしてください。",
+    "invalid": "そのコードは正しくありません。",
+    "sendFailed": "コードを送信できませんでした。",
+    "network": "ネットワークエラー。もう一度お試しください。",
+    "noEmail": "まずコードをリクエストしてください。",
+    "verifyFailed": "確認できませんでした。",
+    "signInFailed": "サインインできませんでした。もう一度お試しください。",
+    "syncFailed": "同期に失敗しました。再試行します。",
+    "restoreFailed": "クラウドから復元できませんでした。"
+  },
+  "dock": {
+    "label": "DOCK",
+    "notifications": "通知",
+    "editWidgets": "ウィジェットを編集",
+    "unpinHint": "固定を解除（自動非表示を許可）",
+    "pinHint": "開いたまま固定"
+  },
+  "notch": {
+    "npUnknown": "不明",
+    "npIdle": "再生中のものはありません",
+    "npHint": "何かを再生するとここで操作できます",
+    "sysReading": "読み込み中…",
+    "cpu": "CPU",
+    "memory": "メモリ",
+    "disk": "ディスク",
+    "searchApps": "アプリを検索…",
+    "noApps": "アプリが見つかりません。",
+    "weatherUnavailable": "天気を取得できません。",
+    "locating": "位置情報を取得中…",
+    "notifEmpty": "すべて確認済みです。",
+    "markRead": "既読にする",
+    "clipEmpty": "クリップボード履歴は空です。",
+    "copied": "✓ コピーしました",
+    "pinnedHint": "固定済み · 右クリックで固定解除",
+    "copyHint": "クリックでコピー · 右クリックで固定",
+    "noEvents": "今日の予定はありません。",
+    "theme": "テーマ",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム",
+    "previewScreensaver": "スクリーンセーバーをプレビュー",
+    "hotCorner": "ホットコーナー",
+    "on": "オン",
+    "off": "オフ",
+    "enableHint": "設定 → ノッチ でモジュールを有効にしてください。"
+  },
+  "widgetStyles": {
+    "clock": {
+      "analog": "アナログ",
+      "digital": "デジタル",
+      "display": "ディスプレイ"
     }
   }
 }

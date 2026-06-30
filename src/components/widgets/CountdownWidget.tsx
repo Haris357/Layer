@@ -4,6 +4,7 @@ import { Timer, Hourglass } from 'lucide-react'
 import type { CountdownWidget as CountdownWidgetType } from '../../types/widget'
 import { TextField } from '../ui'
 import { cn } from '../../lib/utils'
+import i18n from '../../lib/i18n'
 import { notify } from '../../lib/notify'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
@@ -174,7 +175,7 @@ export const countdownDefinition: WidgetDefinition<CountdownWidgetType> = {
     width: 300,
     height: 150,
     locked: false,
-    label: 'My event',
+    label: i18n.t('countdown.defaultEventName'),
     target: daysFromNow(30),
     background: true,
   }),

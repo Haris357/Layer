@@ -20,15 +20,13 @@ import {
 import {
   COLORS,
   COLOR_OPTIONS,
-  MONTHS,
-  WEEKDAYS_MIN,
-  WEEKDAYS_SHORT,
   addDays,
   eventsOnDay,
   fmtTime,
   sameDay,
   startOfDay,
 } from '../../lib/calendar'
+import { months, weekdays, dateLocale } from '../../lib/locale'
 import { cn } from '../../lib/utils'
 import { Menu } from '../Menu'
 import { Tooltip } from '../Tooltip'
@@ -72,7 +70,7 @@ function MonthView({
   return (
     <div className="flex flex-1 flex-col">
       <div className="grid grid-cols-7 gap-0.5">
-        {WEEKDAYS_MIN.map((w, i) => (
+        {weekdays('narrow').map((w, i) => (
           <span
             key={i}
             className="text-center text-[var(--text-tertiary)]"
@@ -183,7 +181,7 @@ function WeekView({
                     : 'var(--text-secondary)',
                 }}
               >
-                {(WEEKDAYS_SHORT[d.getDay()] ?? '').toUpperCase()}
+                {(weekdays('short')[d.getDay()] ?? '').toUpperCase()}
               </span>
               <span
                 className="flex h-[22px] w-[22px] items-center justify-center rounded-full transition-transform group-hover/row:scale-105"
@@ -263,7 +261,7 @@ function DayView({
           className="text-[var(--text-primary)]"
           style={{ fontSize: 12.5, fontWeight: 700 }}
         >
-          {WEEKDAYS_SHORT[cursor.getDay()]}, {MONTHS[cursor.getMonth()]}{' '}
+          {weekdays('short')[cursor.getDay()]}, {months('long')[cursor.getMonth()]}{' '}
           {cursor.getDate()}
           {isToday && (
             <span
@@ -360,7 +358,7 @@ function DayPopover({
             className="text-[var(--text-primary)]"
             style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.4px' }}
           >
-            {WEEKDAYS_SHORT[date.getDay()]}, {MONTHS[date.getMonth()]}{' '}
+            {weekdays('short')[date.getDay()]}, {months('long')[date.getMonth()]}{' '}
             {date.getDate()}
           </span>
           <Tooltip label={t('common.close')} side="bottom">
@@ -471,7 +469,7 @@ function EventEditor({
     const ev = initial as CalendarEvent
     const when = ev.allDay
       ? t('calendar.allDay')
-      : new Date(ev.start).toLocaleString([], {
+      : new Date(ev.start).toLocaleString(dateLocale(), {
           dateStyle: 'medium',
           timeStyle: 'short',
         })
@@ -710,18 +708,18 @@ function CalendarRenderer() {
   >(null)
 
   const headerTitle = useMemo(() => {
-    if (view === 'month') return `${MONTHS[cursor.getMonth()]} ${cursor.getFullYear()}`
+    if (view === 'month') return `${months('long')[cursor.getMonth()]} ${cursor.getFullYear()}`
     if (view === 'week') {
       const sunday = addDays(cursor, -cursor.getDay())
       const sat = addDays(sunday, 6)
       const sameMonth = sunday.getMonth() === sat.getMonth()
-      const a = MONTHS[sunday.getMonth()] ?? ''
-      const b = MONTHS[sat.getMonth()] ?? ''
+      const a = months('long')[sunday.getMonth()] ?? ''
+      const b = months('long')[sat.getMonth()] ?? ''
       return sameMonth
         ? `${a.slice(0, 3)} ${sunday.getDate()}–${sat.getDate()}`
         : `${a.slice(0, 3)} ${sunday.getDate()} – ${b.slice(0, 3)} ${sat.getDate()}`
     }
-    return `${MONTHS[cursor.getMonth()]} ${cursor.getDate()}`
+    return `${months('long')[cursor.getMonth()]} ${cursor.getDate()}`
   }, [view, cursor])
 
   const shift = (dir: -1 | 1) => {

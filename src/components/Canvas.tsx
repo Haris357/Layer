@@ -1,10 +1,12 @@
 import type { MouseEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useCanvasStore } from '../store/canvasStore'
 import { GridBackground } from './GridBackground'
 import { GuideLines } from './GuideLines'
 import { WidgetWrapper } from './widgets/WidgetWrapper'
 
 export function Canvas() {
+  const { t } = useTranslation()
   const widgets = useCanvasStore((s) => s.widgets)
   const mode = useCanvasStore((s) => s.mode)
   const selectedId = useCanvasStore((s) => s.selectedId)
@@ -31,7 +33,7 @@ export function Canvas() {
             className="text-[var(--text-tertiary)]"
             style={{ fontSize: 16, fontWeight: 500 }}
           >
-            ↑ Add your first widget from the menu at the top
+            {t('canvas.emptyAddWidget')}
           </span>
         </div>
       )}

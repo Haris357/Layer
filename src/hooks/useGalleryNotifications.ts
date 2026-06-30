@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { doc, onSnapshot, type Unsubscribe } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { notify } from '../lib/notify'
+import i18n from '../lib/i18n'
 
 const KEY_IDS = 'layer-my-templates'
 const KEY_BASELINE = 'layer-my-templates-baseline'
@@ -69,8 +70,8 @@ export function useGalleryNotifications(): void {
               kind: 'upvote',
               title:
                 delta === 1
-                  ? `Someone upvoted "${name}" 🎉`
-                  : `${delta} new upvotes on "${name}" 🎉`,
+                  ? i18n.t('notify.upvoteOne', { name })
+                  : i18n.t('notify.upvoteMany', { count: delta, name }),
               spaceId: id,
             })
           }
@@ -79,8 +80,8 @@ export function useGalleryNotifications(): void {
           if (crossed) {
             notify({
               kind: 'milestone',
-              title: `"${name}" hit ${crossed} upvotes ✦`,
-              body: 'Congrats — that space is finding its people.',
+              title: i18n.t('notify.milestoneTitle', { name, count: crossed }),
+              body: i18n.t('notify.milestoneBody'),
               spaceId: id,
               dedupe: `milestone-${id}-${crossed}`,
             })

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { useCanvasStore } from '../store/canvasStore'
@@ -8,6 +9,7 @@ import { cn } from '../lib/utils'
 import { MonitorLayer } from './MonitorLayer'
 
 export function CommandPalette() {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [index, setIndex] = useState(0)
@@ -91,7 +93,7 @@ export function CommandPalette() {
                     add(results[index])
                   }
                 }}
-                placeholder="Add a widget…"
+                placeholder={t('commandPalette.placeholder')}
                 className="flex-1 bg-transparent text-[14px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
               />
               <kbd
@@ -105,7 +107,7 @@ export function CommandPalette() {
                 <div
                   className="px-3 py-3 text-[13px] text-[var(--text-tertiary)]"
                 >
-                  No widgets match
+                  {t('commandPalette.noResults')}
                 </div>
               )}
               {results.map((d, i) => (

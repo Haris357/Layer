@@ -1,11 +1,8 @@
 import type { CalendarEvent, EventColor } from '../store/eventsStore'
+import { months, dateLocale } from './locale'
 
-export const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-export const WEEKDAYS_MIN = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-export const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
+// Month/weekday names now come from lib/locale (Intl, follows the UI language).
+// Import { months, weekdays } from './locale' directly where you need them.
 
 export const COLORS: Record<EventColor, string> = {
   blue: '#5b8def',
@@ -119,9 +116,12 @@ export function nextOccurrenceAfter(
 }
 
 export function fmtTime(d: Date): string {
-  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+  return d.toLocaleTimeString(dateLocale(), {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 }
 
 export function fmtMonthYear(y: number, m: number): string {
-  return `${MONTHS[m]} ${y}`
+  return `${months('long')[m]} ${y}`
 }

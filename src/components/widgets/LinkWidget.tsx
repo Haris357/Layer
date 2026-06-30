@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import type { LinkWidget as LinkWidgetType } from '../../types/widget'
 import { openUrl } from '../../lib/ipc'
+import i18n from '../../lib/i18n'
 import { TextField } from '../ui'
 import { Tooltip } from '../Tooltip'
 import { cn } from '../../lib/utils'
@@ -186,7 +187,7 @@ export const linkDefinition: WidgetDefinition<LinkWidgetType> = {
     height: 52,
     locked: false,
     url: '',
-    label: 'New Link',
+    label: i18n.t('link.defaultLabel'),
     iconKey: 'Link',
     background: true,
   }),

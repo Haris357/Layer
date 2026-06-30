@@ -288,7 +288,8 @@
     "since": "da",
     "until": "a",
     "defaultTitle": "Conto alla rovescia",
-    "eventNamePlaceholder": "Nome evento"
+    "eventNamePlaceholder": "Nome evento",
+    "defaultEventName": "Il mio evento"
   },
   "calendar": {
     "allDay": "Tutto il giorno",
@@ -421,6 +422,10 @@
     "settings": {
       "artBackground": "Sfondo con copertina album",
       "artBackgroundDesc": "Sfoca la copertina dell'album dietro il player con una tinta di colore abbinata. Disattiva per una scheda semplice a tema."
+    },
+    "volume": {
+      "min": "MIN",
+      "max": "MAX"
     }
   },
   "notifications": {
@@ -457,7 +462,8 @@
       "urlPlaceholder": "https://...",
       "labelPlaceholder": "Etichetta",
       "iconSearchPlaceholder": "Cerca icone…"
-    }
+    },
+    "defaultLabel": "Nuovo collegamento"
   },
   "image": {
     "settings": {
@@ -632,6 +638,168 @@
         "title": "Organizza la tua tela",
         "body": "Trascina i widget dalla loro maniglia, ridimensionali dagli angoli, clicca con il tasto destro per le opzioni. I widget si agganciano tra loro mentre li sposti."
       }
+    }
+  },
+  "contextMenu": {
+    "duplicate": "Duplica",
+    "lock": "Blocca",
+    "unlock": "Sblocca",
+    "bringToFront": "Porta in primo piano",
+    "sendToBack": "Porta in fondo",
+    "delete": "Elimina",
+    "background": "Sfondo",
+    "opacity": "Opacità · {{pct}}%",
+    "color": "Colore",
+    "reset": "reimposta",
+    "theme": "Tema",
+    "auto": "Automatico",
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "customColor": "Colore personalizzato",
+    "accent": "Accento {{hex}}"
+  },
+  "canvas": {
+    "emptyAddWidget": "↑ Aggiungi il tuo primo widget dal menu in alto"
+  },
+  "commandPalette": {
+    "placeholder": "Aggiungi un widget…",
+    "noResults": "Nessun widget corrispondente"
+  },
+  "dialog": {
+    "confirm": "Conferma",
+    "cancel": "Annulla"
+  },
+  "publishDialog": {
+    "title": "Pubblica nella galleria",
+    "description": "apparirà nella galleria pubblica con uno screenshot della tua tela.",
+    "authorLabel": "Il tuo nome",
+    "authorPlaceholder": "Anonimo",
+    "descriptionLabel": "Descrizione",
+    "descriptionPlaceholder": "Cosa rende bello questo layout…",
+    "publish": "Pubblica",
+    "cancel": "Annulla"
+  },
+  "quickCapture": {
+    "savedToInbox": "Salvato nella Posta in arrivo: {{text}}",
+    "title": "Acquisizione rapida",
+    "placeholder": "Cosa ti passa per la mente?",
+    "helper": "Salvato nel tuo widget Posta in arrivo",
+    "saveHint": "salva",
+    "cancelHint": "annulla"
+  },
+  "toastUi": {
+    "dismiss": "Ignora"
+  },
+  "screensaver": {
+    "night": "Buonanotte",
+    "morning": "Buongiorno",
+    "afternoon": "Buon pomeriggio",
+    "evening": "Buonasera",
+    "wClear": "Sereno",
+    "wPartlyCloudy": "Parzialmente nuvoloso",
+    "wCloudy": "Nuvoloso",
+    "wFog": "Nebbia",
+    "wDrizzle": "Pioggerella",
+    "wRain": "Pioggia",
+    "wSnow": "Neve",
+    "wShowers": "Rovesci",
+    "wSnowShowers": "Rovesci di neve",
+    "wThunderstorm": "Temporale",
+    "exitHint": "muovi il mouse o premi un tasto per uscire"
+  },
+  "toasts": {
+    "updateInstalling": "Installazione — Layer si riavvierà…",
+    "updateInstallFailed": "Impossibile installare l'aggiornamento.",
+    "updateDownloading": "Download di Layer v{{version}} in corso",
+    "updateReady": "Layer v{{version}} è pronto",
+    "updateFailed": "Aggiornamento non riuscito — riprova dalle Impostazioni.",
+    "updateAvailable": "Layer v{{version}} è disponibile",
+    "published": "Pubblicato nella galleria",
+    "widgetDeleted": "Widget eliminato",
+    "allLocked": "Tutti i widget bloccati",
+    "allUnlocked": "Tutti i widget sbloccati",
+    "spaceSwitched": "Spazio · {{name}}",
+    "calIn10min": "Tra 10 min · {{title}}",
+    "calStartingNow": "Inizia ora · {{title}}"
+  },
+  "notify": {
+    "publishTitle": "\"{{name}}\" pubblicato nella galleria ✦",
+    "publishBody": "Cercalo tra i più recenti su layer-desktop.web.app/spaces.",
+    "battery20Title": "Batteria al 20%",
+    "battery20Body": "Forse è il momento di collegare l'alimentazione.",
+    "battery10Title": "Batteria al 10%",
+    "battery10Body": "È ora di collegare l'alimentazione.",
+    "batteryFullTitle": "Batteria completamente carica",
+    "batteryFullBody": "Ora puoi scollegare l'alimentazione.",
+    "calToday": "Oggi: {{title}}",
+    "cal10min": "Tra 10 min: {{title}}",
+    "calNow": "Inizia ora: {{title}}",
+    "upvoteOne": "Qualcuno ha votato \"{{name}}\" 🎉",
+    "upvoteMany": "{{count}} nuovi voti positivi su \"{{name}}\" 🎉",
+    "milestoneTitle": "\"{{name}}\" ha raggiunto {{count}} voti positivi ✦",
+    "milestoneBody": "Congratulazioni — quello spazio sta trovando il suo pubblico.",
+    "updatedTitle": "Ora hai Layer v{{version}} ✦",
+    "updatedBody": "Aggiornamento installato correttamente.",
+    "availableTitle": "Layer v{{version}} è disponibile",
+    "availableBody": "Clicca sulla notifica, oppure vai su Impostazioni → Controlla aggiornamenti, per installare."
+  },
+  "syncErrors": {
+    "format": "Questa email non sembra corretta.",
+    "undeliverable": "Questa email non può ricevere messaggi — controlla l'indirizzo.",
+    "rateLimited": "Troppi codici richiesti. Riprova più tardi.",
+    "cooldown": "Attendi un momento prima di richiedere un altro codice.",
+    "expired": "Quel codice è scaduto. Richiedine uno nuovo.",
+    "tooManyAttempts": "Troppi tentativi. Richiedi un nuovo codice.",
+    "invalid": "Quel codice non è corretto.",
+    "sendFailed": "Impossibile inviare il codice.",
+    "network": "Errore di rete. Riprova.",
+    "noEmail": "Richiedi prima un codice.",
+    "verifyFailed": "Impossibile verificare.",
+    "signInFailed": "Impossibile accedere. Riprova.",
+    "syncFailed": "Sincronizzazione non riuscita. Verrà ritentata.",
+    "restoreFailed": "Impossibile ripristinare dal cloud."
+  },
+  "dock": {
+    "label": "DOCK",
+    "notifications": "Notifiche",
+    "editWidgets": "Modifica widget",
+    "unpinHint": "Sblocca (consenti nascondi automatico)",
+    "pinHint": "Mantieni aperto"
+  },
+  "notch": {
+    "npUnknown": "Sconosciuto",
+    "npIdle": "Nessuna riproduzione",
+    "npHint": "Avvia qualcosa per controllarlo qui",
+    "sysReading": "Lettura…",
+    "cpu": "CPU",
+    "memory": "Memoria",
+    "disk": "Disco",
+    "searchApps": "Cerca app…",
+    "noApps": "Nessuna app trovata.",
+    "weatherUnavailable": "Meteo non disponibile.",
+    "locating": "Localizzazione…",
+    "notifEmpty": "Sei al passo con tutto.",
+    "markRead": "Segna come letto",
+    "clipEmpty": "La cronologia degli appunti è vuota.",
+    "copied": "✓ Copiato",
+    "pinnedHint": "Fissato · clic destro per sganciare",
+    "copyHint": "Clicca per copiare · clic destro per fissare",
+    "noEvents": "Nessun evento oggi.",
+    "theme": "Tema",
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "system": "Sistema",
+    "previewScreensaver": "Anteprima salvaschermo",
+    "hotCorner": "Angolo attivo",
+    "on": "Attivo",
+    "off": "Disattivo",
+    "enableHint": "Attiva un modulo in Impostazioni → Notch."
+  },
+  "widgetStyles": {
+    "clock": {
+      "analog": "Analogico",
+      "digital": "Digitale",
+      "display": "Display"
     }
   }
 }

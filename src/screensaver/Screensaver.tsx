@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { invoke } from '@tauri-apps/api/core'
 import {
   Sun,
@@ -29,28 +30,32 @@ const QUOTES = [
   'Almost everything works again if you unplug it.',
 ]
 import { ipLocation, systemLocation, type GeoLocation } from '../lib/location'
+import { dateLocale } from '../lib/locale'
 import './screensaver.css'
 
-function greeting(h: number): string {
-  if (h < 5) return 'Good night'
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  if (h < 22) return 'Good evening'
-  return 'Good night'
+// Returns an i18n key under the `screensaver` namespace; resolved via t() at
+// render time (this module-level helper can't call the hook itself).
+function greetingKey(h: number): string {
+  if (h < 5) return 'night'
+  if (h < 12) return 'morning'
+  if (h < 17) return 'afternoon'
+  if (h < 22) return 'evening'
+  return 'night'
 }
 
-// Same weather-code mapping the Weather widget uses.
-function codeInfo(code: number): { Icon: LucideIcon; label: string } {
-  if (code === 0) return { Icon: Sun, label: 'Clear' }
-  if (code <= 2) return { Icon: CloudSun, label: 'Partly cloudy' }
-  if (code === 3) return { Icon: Cloud, label: 'Cloudy' }
-  if (code <= 48) return { Icon: CloudFog, label: 'Fog' }
-  if (code <= 57) return { Icon: CloudRain, label: 'Drizzle' }
-  if (code <= 67) return { Icon: CloudRain, label: 'Rain' }
-  if (code <= 77) return { Icon: CloudSnow, label: 'Snow' }
-  if (code <= 82) return { Icon: CloudRain, label: 'Showers' }
-  if (code <= 86) return { Icon: CloudSnow, label: 'Snow showers' }
-  return { Icon: CloudLightning, label: 'Thunderstorm' }
+// Same weather-code mapping the Weather widget uses. `labelKey` is an i18n key
+// under the `screensaver` namespace, resolved via t() at render time.
+function codeInfo(code: number): { Icon: LucideIcon; labelKey: string } {
+  if (code === 0) return { Icon: Sun, labelKey: 'wClear' }
+  if (code <= 2) return { Icon: CloudSun, labelKey: 'wPartlyCloudy' }
+  if (code === 3) return { Icon: Cloud, labelKey: 'wCloudy' }
+  if (code <= 48) return { Icon: CloudFog, labelKey: 'wFog' }
+  if (code <= 57) return { Icon: CloudRain, labelKey: 'wDrizzle' }
+  if (code <= 67) return { Icon: CloudRain, labelKey: 'wRain' }
+  if (code <= 77) return { Icon: CloudSnow, labelKey: 'wSnow' }
+  if (code <= 82) return { Icon: CloudRain, labelKey: 'wShowers' }
+  if (code <= 86) return { Icon: CloudSnow, labelKey: 'wSnowShowers' }
+  return { Icon: CloudLightning, labelKey: 'wThunderstorm' }
 }
 
 interface Weather {
@@ -155,6 +160,7 @@ function useNowPlaying(active: boolean): NowPlaying | null {
 // Calm, self-contained ambient view shown when Layer runs as the Windows
 // screensaver. Any key or mouse activity dismisses it.
 export function Screensaver() {
+  const { t } = useTranslation()
   const [now, setNow] = useState(() => new Date())
   const [theme, setTheme] = useState<SsTheme>('ambient')
   const [quote, setQuote] = useState(
@@ -221,7 +227,7 @@ export function Screensaver() {
   let h12 = h24 % 12
   if (h12 === 0) h12 = 12
   const ampm = h24 < 12 ? 'AM' : 'PM'
-  const date = now.toLocaleDateString(undefined, {
+  const date = now.toLocaleDateString(dateLocale(), {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -234,7 +240,7 @@ export function Screensaver() {
   const playing = !!(np?.hasSession && np.title)
 
   const hint = (
-    <div className="ss-hint">move the mouse or press a key to exit</div>
+    <div className="ss-hint">{t('screensaver.exitHint')}</div>
   )
 
   // ── Minimal: stark, flat black, one huge thin clock anchored bottom-left ──
@@ -283,7 +289,7 @@ export function Screensaver() {
       <div className="ss-aurora c" />
 
       <div className="ss-content">
-        <p className="ss-greeting">{greeting(h24)}</p>
+        <p className="ss-greeting">{t(`screensaver.${greetingKey(h24)}`)}</p>
         <h1 className="ss-time">
           {h12}
           <span className="ss-colon">:</span>
@@ -296,7 +302,7 @@ export function Screensaver() {
           <div className="ss-weather">
             <wInfo.Icon size={26} strokeWidth={1.5} />
             <span className="ss-temp">{weather.temp}°</span>
-            <span>{wInfo.label}</span>
+            <span>{t(`screensaver.${wInfo.labelKey}`)}</span>
             {weather.city && (
               <>
                 <span className="ss-dot">·</span>

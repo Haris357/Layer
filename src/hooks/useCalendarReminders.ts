@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useEventsStore } from '../store/eventsStore'
 import { nextOccurrenceAfter, dayKey } from '../lib/calendar'
 import { notify } from '../lib/notify'
+import i18n from '../lib/i18n'
 import { useToastStore } from '../store/toastStore'
 
 // A glanceable reminder toast with a 5-minute snooze.
@@ -42,7 +43,7 @@ export function useCalendarReminders(): void {
           window.setTimeout(() => {
             notify({
               kind: 'calendar',
-              title: `Today: ${e.title}`,
+              title: i18n.t('notify.calToday', { title: e.title }),
               dedupe: `cal-allday-${e.id}-${k}`,
             })
           }, fireAt - now),
@@ -56,14 +57,14 @@ export function useCalendarReminders(): void {
           window.setTimeout(() => {
             notify({
               kind: 'calendar',
-              title: `In 10 min: ${e.title}`,
+              title: i18n.t('notify.cal10min', { title: e.title }),
               body: next.toLocaleTimeString([], {
                 hour: 'numeric',
                 minute: '2-digit',
               }),
               dedupe: `cal-10-${e.id}-${k}`,
             })
-            reminderToast(`In 10 min · ${e.title}`)
+            reminderToast(i18n.t('toasts.calIn10min', { title: e.title }))
           }, tenBefore - now),
         )
       }
@@ -72,10 +73,10 @@ export function useCalendarReminders(): void {
           window.setTimeout(() => {
             notify({
               kind: 'calendar',
-              title: `Starting now: ${e.title}`,
+              title: i18n.t('notify.calNow', { title: e.title }),
               dedupe: `cal-start-${e.id}-${k}`,
             })
-            reminderToast(`Starting now · ${e.title}`)
+            reminderToast(i18n.t('toasts.calStartingNow', { title: e.title }))
           }, ts - now),
         )
       }

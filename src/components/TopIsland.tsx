@@ -404,7 +404,9 @@ export function TopIsland() {
                                       onClick={() => handleAdd(def, s.patch)}
                                       className="cursor-pointer rounded-[7px] px-2.5 py-2 text-left text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)] focus:bg-[var(--fill-2)] focus:text-[var(--text-primary)] focus:outline-none active:scale-[0.98]"
                                     >
-                                      {s.label}
+                                      {t(`widgetStyles.${def.type}.${s.key}`, {
+                                        defaultValue: s.label,
+                                      })}
                                     </button>
                                   ))}
                                 </div>

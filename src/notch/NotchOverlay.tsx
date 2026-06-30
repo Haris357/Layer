@@ -1,6 +1,8 @@
 import { useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Pencil } from 'lucide-react'
+import { Tooltip } from '../components/Tooltip'
 import { useNotchStore } from './notchStore'
 import { NOTCH_MODULES } from './modules'
 import { useLiveActivities } from './useLiveActivities'
@@ -16,6 +18,7 @@ const spring = { type: 'spring', stiffness: 380, damping: 34 } as const
 // window, which contended with the main window's z-order pinning and froze the
 // whole app.
 export function NotchOverlay() {
+  const { t } = useTranslation()
   const expanded = useNotchStore((s) => s.expanded)
   const setExpanded = useNotchStore((s) => s.setExpanded)
   const activeModule = useNotchStore((s) => s.activeModule)
@@ -109,14 +112,15 @@ export function NotchOverlay() {
                 })}
                 <div className="flex-1" />
                 {desktopForeground && (
-                  <button
-                    type="button"
-                    title="Edit widgets"
-                    onClick={() => useCanvasStore.getState().setMode('edit')}
-                    className="flex h-8 w-8 items-center justify-center rounded-[9px] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
-                  >
-                    <Pencil size={15} strokeWidth={1.8} />
-                  </button>
+                  <Tooltip label={t('dock.editWidgets')} side="bottom">
+                    <button
+                      type="button"
+                      onClick={() => useCanvasStore.getState().setMode('edit')}
+                      className="flex h-8 w-8 items-center justify-center rounded-[9px] text-[var(--text-secondary)] hover:bg-[var(--fill-2)]"
+                    >
+                      <Pencil size={15} strokeWidth={1.8} />
+                    </button>
+                  </Tooltip>
                 )}
               </div>
 
@@ -126,7 +130,7 @@ export function NotchOverlay() {
                   <ActiveView />
                 ) : (
                   <div className="text-[12px] text-[var(--text-tertiary)]">
-                    Enable a module in Settings → Notch.
+                    {t('notch.enableHint')}
                   </div>
                 )}
               </div>

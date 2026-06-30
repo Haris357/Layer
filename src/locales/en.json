@@ -4,6 +4,24 @@
     "dragToMove": "Drag to move",
     "quit": "Quit Layer"
   },
+  "contextMenu": {
+    "duplicate": "Duplicate",
+    "lock": "Lock",
+    "unlock": "Unlock",
+    "bringToFront": "Bring to front",
+    "sendToBack": "Send to back",
+    "delete": "Delete",
+    "background": "Background",
+    "opacity": "Opacity · {{pct}}%",
+    "color": "Color",
+    "reset": "reset",
+    "theme": "Theme",
+    "auto": "Auto",
+    "light": "Light",
+    "dark": "Dark",
+    "customColor": "Custom color",
+    "accent": "Accent {{hex}}"
+  },
   "toolbar": {
     "openMenu": "Open menu",
     "exitEdit": "Exit edit mode",
@@ -288,7 +306,8 @@
     "since": "since",
     "until": "until",
     "defaultTitle": "Countdown",
-    "eventNamePlaceholder": "Event name"
+    "eventNamePlaceholder": "Event name",
+    "defaultEventName": "My event"
   },
   "calendar": {
     "allDay": "All day",
@@ -421,6 +440,10 @@
     "settings": {
       "artBackground": "Album-art background",
       "artBackgroundDesc": "Blur the album art behind the player with a matching color wash. Turn off for a plain themed card."
+    },
+    "volume": {
+      "min": "MIN",
+      "max": "MAX"
     }
   },
   "notifications": {
@@ -457,7 +480,8 @@
       "urlPlaceholder": "https://...",
       "labelPlaceholder": "Label",
       "iconSearchPlaceholder": "Search icons…"
-    }
+    },
+    "defaultLabel": "New Link"
   },
   "image": {
     "settings": {
@@ -632,6 +656,150 @@
         "title": "Arrange your canvas",
         "body": "Drag widgets by their grip handle, resize from the corners, right-click for options. Widgets snap to each other as you move them."
       }
+    }
+  },
+  "canvas": {
+    "emptyAddWidget": "↑ Add your first widget from the menu at the top"
+  },
+  "commandPalette": {
+    "placeholder": "Add a widget…",
+    "noResults": "No widgets match"
+  },
+  "dialog": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "publishDialog": {
+    "title": "Publish to gallery",
+    "description": "will appear in the public gallery with a screenshot of your canvas.",
+    "authorLabel": "Your name",
+    "authorPlaceholder": "Anonymous",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "What makes this layout nice…",
+    "publish": "Publish",
+    "cancel": "Cancel"
+  },
+  "quickCapture": {
+    "savedToInbox": "Saved to Inbox: {{text}}",
+    "title": "Quick capture",
+    "placeholder": "What's on your mind?",
+    "helper": "Saved to your Inbox widget",
+    "saveHint": "save",
+    "cancelHint": "cancel"
+  },
+  "toastUi": {
+    "dismiss": "Dismiss"
+  },
+  "screensaver": {
+    "night": "Good night",
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "wClear": "Clear",
+    "wPartlyCloudy": "Partly cloudy",
+    "wCloudy": "Cloudy",
+    "wFog": "Fog",
+    "wDrizzle": "Drizzle",
+    "wRain": "Rain",
+    "wSnow": "Snow",
+    "wShowers": "Showers",
+    "wSnowShowers": "Snow showers",
+    "wThunderstorm": "Thunderstorm",
+    "exitHint": "move the mouse or press a key to exit"
+  },
+  "toasts": {
+    "updateInstalling": "Installing — Layer will restart…",
+    "updateInstallFailed": "Could not install the update.",
+    "updateDownloading": "Downloading Layer v{{version}}",
+    "updateReady": "Layer v{{version}} is ready",
+    "updateFailed": "Update failed — try again from Settings.",
+    "updateAvailable": "Layer v{{version}} is available",
+    "published": "Published to the gallery",
+    "widgetDeleted": "Widget deleted",
+    "allLocked": "All widgets locked",
+    "allUnlocked": "All widgets unlocked",
+    "spaceSwitched": "Space · {{name}}",
+    "calIn10min": "In 10 min · {{title}}",
+    "calStartingNow": "Starting now · {{title}}"
+  },
+  "notify": {
+    "publishTitle": "\"{{name}}\" published to the gallery ✦",
+    "publishBody": "Look for it under Newest at layer-desktop.web.app/spaces.",
+    "battery20Title": "Battery at 20%",
+    "battery20Body": "Might be time to plug in.",
+    "battery10Title": "Battery at 10%",
+    "battery10Body": "Time to plug in.",
+    "batteryFullTitle": "Battery fully charged",
+    "batteryFullBody": "You can unplug now.",
+    "calToday": "Today: {{title}}",
+    "cal10min": "In 10 min: {{title}}",
+    "calNow": "Starting now: {{title}}",
+    "upvoteOne": "Someone upvoted \"{{name}}\" 🎉",
+    "upvoteMany": "{{count}} new upvotes on \"{{name}}\" 🎉",
+    "milestoneTitle": "\"{{name}}\" hit {{count}} upvotes ✦",
+    "milestoneBody": "Congrats — that space is finding its people.",
+    "updatedTitle": "You're now on Layer v{{version}} ✦",
+    "updatedBody": "Update installed successfully.",
+    "availableTitle": "Layer v{{version}} is available",
+    "availableBody": "Click the toast, or Settings → Check for updates, to install."
+  },
+  "syncErrors": {
+    "format": "That email doesn’t look right.",
+    "undeliverable": "That email can’t receive mail — check the address.",
+    "rateLimited": "Too many codes requested. Try again later.",
+    "cooldown": "Please wait a moment before requesting another code.",
+    "expired": "That code expired. Request a new one.",
+    "tooManyAttempts": "Too many tries. Request a new code.",
+    "invalid": "That code isn’t right.",
+    "sendFailed": "Could not send code.",
+    "network": "Network error. Try again.",
+    "noEmail": "Request a code first.",
+    "verifyFailed": "Could not verify.",
+    "signInFailed": "Could not sign in. Try again.",
+    "syncFailed": "Sync failed. Will retry.",
+    "restoreFailed": "Could not restore from cloud."
+  },
+  "dock": {
+    "label": "DOCK",
+    "notifications": "Notifications",
+    "editWidgets": "Edit widgets",
+    "unpinHint": "Unpin (allow auto-hide)",
+    "pinHint": "Pin open"
+  },
+  "notch": {
+    "npUnknown": "Unknown",
+    "npIdle": "Nothing playing",
+    "npHint": "Start something to control it here",
+    "sysReading": "Reading…",
+    "cpu": "CPU",
+    "memory": "Memory",
+    "disk": "Disk",
+    "searchApps": "Search apps…",
+    "noApps": "No apps found.",
+    "weatherUnavailable": "Weather unavailable.",
+    "locating": "Locating…",
+    "notifEmpty": "You’re all caught up.",
+    "markRead": "Mark read",
+    "clipEmpty": "Clipboard history is empty.",
+    "copied": "✓ Copied",
+    "pinnedHint": "Pinned · right-click to unpin",
+    "copyHint": "Click to copy · right-click to pin",
+    "noEvents": "No events today.",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "previewScreensaver": "Preview screensaver",
+    "hotCorner": "Hot corner",
+    "on": "On",
+    "off": "Off",
+    "enableHint": "Enable a module in Settings → Notch."
+  },
+  "widgetStyles": {
+    "clock": {
+      "analog": "Analog",
+      "digital": "Digital",
+      "display": "Display"
     }
   }
 }

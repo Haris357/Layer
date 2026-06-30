@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../store/settingsStore'
 import { setNotchHitbox, isTauri } from '../lib/ipc'
 
@@ -10,6 +11,7 @@ const spring = { type: 'spring', stiffness: 380, damping: 34 } as const
 // freezing the app (after the main window's pin-loop fix). The full UI — from
 // the design mockup — comes next once this foundation is proven stable.
 export function DockRoot() {
+  const { t } = useTranslation()
   const theme = useSettingsStore((s) => s.theme)
 
   // Match the app's theme (shared localStorage / same WebView2 profile).
@@ -94,7 +96,7 @@ export function DockRoot() {
               />
             ))}
             <div className="mt-1 text-[9px] font-semibold tracking-wide text-[var(--text-secondary)]">
-              DOCK
+              {t('dock.label')}
             </div>
           </>
         ) : (

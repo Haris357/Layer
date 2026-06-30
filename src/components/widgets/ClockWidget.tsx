@@ -7,6 +7,7 @@ import type {
 } from '../../types/widget'
 import { Segmented, Toggle, FieldRow } from '../ui'
 import { cn } from '../../lib/utils'
+import { dateLocale } from '../../lib/locale'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
 interface FontSpec {
@@ -122,7 +123,7 @@ function DigitalClock({
   const minutes = pad(now.getMinutes())
   const seconds = pad(now.getSeconds())
   const ampm = h24 >= 12 ? 'PM' : 'AM'
-  const dateStr = now.toLocaleDateString('en-US', {
+  const dateStr = now.toLocaleDateString(dateLocale(), {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -273,10 +274,10 @@ function DisplayClock({
   const now = useNow()
   const font = clockFont(widget.font)
   const day = now
-    .toLocaleDateString('en-US', { weekday: 'long' })
+    .toLocaleDateString(dateLocale(), { weekday: 'long' })
     .toUpperCase()
   const dateStr = now
-    .toLocaleDateString('en-US', {
+    .toLocaleDateString(dateLocale(), {
       month: 'long',
       day: 'numeric',
       year: 'numeric',

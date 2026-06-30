@@ -6,6 +6,7 @@ import type {
   WorldZone,
 } from '../../types/widget'
 import { uid } from '../../lib/utils'
+import { dateLocale } from '../../lib/locale'
 import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 
@@ -25,7 +26,7 @@ const COMMON_ZONES: { label: string; tz: string }[] = [
 
 function zoneTime(tz: string, now: Date): string {
   try {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat(dateLocale(), {
       timeZone: tz,
       hour: 'numeric',
       minute: '2-digit',
@@ -38,7 +39,7 @@ function zoneTime(tz: string, now: Date): string {
 
 function zoneDay(tz: string, now: Date): string {
   try {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat(dateLocale(), {
       timeZone: tz,
       weekday: 'short',
     }).format(now)

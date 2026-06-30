@@ -4,6 +4,7 @@ import { getUpdate } from '../lib/updater'
 import { runUpdate } from '../lib/updateFlow'
 import { useToastStore } from '../store/toastStore'
 import { notify } from '../lib/notify'
+import i18n from '../lib/i18n'
 
 const VERSION_KEY = 'layer-last-version'
 const TOAST_KEY = 'layer-update-toast'
@@ -22,8 +23,8 @@ export function useUpdateNotifications(): void {
         if (last && last !== current) {
           notify({
             kind: 'update',
-            title: `You're now on Layer v${current} ✦`,
-            body: 'Update installed successfully.',
+            title: i18n.t('notify.updatedTitle', { version: current }),
+            body: i18n.t('notify.updatedBody'),
             dedupe: `installed-${current}`,
           })
         }
@@ -42,8 +43,8 @@ export function useUpdateNotifications(): void {
           // Keep a record in the notifications panel…
           notify({
             kind: 'update',
-            title: `Layer v${u.version} is available`,
-            body: 'Click the toast, or Settings → Check for updates, to install.',
+            title: i18n.t('notify.availableTitle', { version: u.version }),
+            body: i18n.t('notify.availableBody'),
             dedupe: `available-${u.version}`,
           })
           // …and surface a one-tap toast — but only once per version so it
@@ -55,7 +56,7 @@ export function useUpdateNotifications(): void {
               /* ignore */
             }
             useToastStore.getState().showToast({
-              message: `Layer v${u.version} is available`,
+              message: i18n.t('toasts.updateAvailable', { version: u.version }),
               icon: 'update',
               actions: [
                 { label: 'Update now', primary: true, onClick: () => runUpdate(u) },

@@ -10,6 +10,7 @@ import { fetchState, mergeRestore, uploadState } from '../lib/sync'
 import { useCanvasStore } from './canvasStore'
 import { useSettingsStore } from './settingsStore'
 import { isTauri } from '../lib/ipc'
+import i18n from '../lib/i18n'
 import { uid as randomId } from '../lib/utils'
 import type { SpacesFile } from '../types/widget'
 
@@ -36,15 +37,21 @@ interface SyncState {
   restoreFromCloud: () => Promise<void>
 }
 
-// Friendly messages for the error codes the backend returns.
-const ERRORS: Record<string, string> = {
-  format: 'That email doesn’t look right.',
-  undeliverable: 'That email can’t receive mail — check the address.',
-  rate_limited: 'Too many codes requested. Try again later.',
-  cooldown: 'Please wait a moment before requesting another code.',
-  expired: 'That code expired. Request a new one.',
-  too_many_attempts: 'Too many tries. Request a new code.',
-  invalid: 'That code isn’t right.',
+// Maps the error codes the backend returns to i18n keys; resolved at lookup
+// time so messages follow the active language.
+const ERROR_KEYS: Record<string, string> = {
+  format: 'syncErrors.format',
+  undeliverable: 'syncErrors.undeliverable',
+  rate_limited: 'syncErrors.rateLimited',
+  cooldown: 'syncErrors.cooldown',
+  expired: 'syncErrors.expired',
+  too_many_attempts: 'syncErrors.tooManyAttempts',
+  invalid: 'syncErrors.invalid',
+}
+
+function errorMessage(code: string | undefined, fallbackKey: string): string {
+  const key = (code && ERROR_KEYS[code]) || fallbackKey
+  return i18n.t(key)
 }
 
 async function postJson(
@@ -128,13 +135,16 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       const { ok, data } = await postJson('/api/send-otp', { email })
       if (!ok) {
         const reason = (data.reason || data.error) as string
-        set({ status: 'error', error: ERRORS[reason] || 'Could not send code.' })
+        set({
+          status: 'error',
+          error: errorMessage(reason, 'syncErrors.sendFailed'),
+        })
         return false
       }
       set({ status: 'idle', pendingEmail: email, error: null })
       return true
     } catch {
-      set({ status: 'error', error: 'Network error. Try again.' })
+      set({ status: 'error', error: i18n.t('syncErrors.network') })
       return false
     }
   },
@@ -142,7 +152,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   verifyOtp: async (code) => {
     const email = get().pendingEmail
     if (!email) {
-      set({ status: 'error', error: 'Request a code first.' })
+      set({ status: 'error', error: i18n.t('syncErrors.noEmail') })
       return false
     }
     set({ status: 'verifying', error: null })
@@ -150,7 +160,10 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       const { ok, data } = await postJson('/api/verify-otp', { email, code })
       if (!ok || !data.token) {
         const reason = (data.error as string) || 'invalid'
-        set({ status: 'error', error: ERRORS[reason] || 'Could not verify.' })
+        set({
+          status: 'error',
+          error: errorMessage(reason, 'syncErrors.verifyFailed'),
+        })
         return false
       }
       await signInWithCustomToken(auth, data.token as string)
@@ -161,7 +174,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       await pullOnSignIn()
       return true
     } catch {
-      set({ status: 'error', error: 'Could not sign in. Try again.' })
+      set({ status: 'error', error: i18n.t('syncErrors.signInFailed') })
       return false
     }
   },
@@ -190,7 +203,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       useSettingsStore.getState().setLastSyncedAt(savedAt)
       set({ status: 'idle', lastSyncedAt: savedAt })
     } catch {
-      set({ status: 'error', error: 'Sync failed. Will retry.' })
+      set({ status: 'error', error: i18n.t('syncErrors.syncFailed') })
     }
   },
 
@@ -217,7 +230,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       useSettingsStore.getState().setLastSyncedAt(now)
       set({ status: 'idle', lastSyncedAt: now })
     } catch {
-      set({ status: 'error', error: 'Could not restore from cloud.' })
+      set({ status: 'error', error: i18n.t('syncErrors.restoreFailed') })
     }
   },
 }))

@@ -1,6 +1,7 @@
 import type { Update } from '@tauri-apps/plugin-updater'
 import { useToastStore } from '../store/toastStore'
 import { downloadUpdate, applyUpdate } from './updater'
+import i18n from './i18n'
 
 function mb(bytes: number): string {
   return (bytes / 1048576).toFixed(1)
@@ -15,7 +16,7 @@ let running = false
 async function relaunchNow(u: Update, id: number): Promise<void> {
   const { update } = useToastStore.getState()
   update(id, {
-    message: 'Installing — Layer will restart…',
+    message: i18n.t('toasts.updateInstalling'),
     detail: undefined,
     actions: undefined,
     progress: undefined,
@@ -24,7 +25,7 @@ async function relaunchNow(u: Update, id: number): Promise<void> {
     await applyUpdate(u) // installs + relaunches; the process exits from here
   } catch {
     update(id, {
-      message: 'Could not install the update.',
+      message: i18n.t('toasts.updateInstallFailed'),
       icon: 'error',
       actions: undefined,
       duration: 6000,
@@ -41,7 +42,7 @@ export async function runUpdate(u: Update): Promise<void> {
   running = true
   const { showToast, update, dismiss } = useToastStore.getState()
   const id = showToast({
-    message: `Downloading Layer v${u.version}`,
+    message: i18n.t('toasts.updateDownloading', { version: u.version }),
     icon: 'update',
     duration: 0, // sticky while it downloads
     progress: 0,
@@ -60,7 +61,7 @@ export async function runUpdate(u: Update): Promise<void> {
     running = false
     // Downloaded and ready — the user chooses when to relaunch.
     update(id, {
-      message: `Layer v${u.version} is ready`,
+      message: i18n.t('toasts.updateReady', { version: u.version }),
       icon: 'success',
       progress: undefined,
       detail: undefined,
@@ -79,7 +80,7 @@ export async function runUpdate(u: Update): Promise<void> {
     running = false
     dismiss(id)
     showToast({
-      message: 'Update failed — try again from Settings.',
+      message: i18n.t('toasts.updateFailed'),
       icon: 'error',
       duration: 6000,
     })

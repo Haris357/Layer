@@ -288,7 +288,8 @@
     "since": "已过去",
     "until": "距离",
     "defaultTitle": "倒计时",
-    "eventNamePlaceholder": "事件名称"
+    "eventNamePlaceholder": "事件名称",
+    "defaultEventName": "我的活动"
   },
   "calendar": {
     "allDay": "全天",
@@ -421,6 +422,10 @@
     "settings": {
       "artBackground": "专辑封面背景",
       "artBackgroundDesc": "在播放器后方虚化专辑封面，并叠加匹配的色调。关闭则使用纯色主题卡片。"
+    },
+    "volume": {
+      "min": "MIN",
+      "max": "MAX"
     }
   },
   "notifications": {
@@ -457,7 +462,8 @@
       "urlPlaceholder": "https://...",
       "labelPlaceholder": "标签",
       "iconSearchPlaceholder": "搜索图标…"
-    }
+    },
+    "defaultLabel": "新链接"
   },
   "image": {
     "settings": {
@@ -632,6 +638,168 @@
         "title": "整理你的画布",
         "body": "通过抓取手柄拖动组件，从四角调整大小，右键查看选项。移动时组件会相互吸附对齐。"
       }
+    }
+  },
+  "contextMenu": {
+    "duplicate": "复制",
+    "lock": "锁定",
+    "unlock": "解锁",
+    "bringToFront": "置于顶层",
+    "sendToBack": "置于底层",
+    "delete": "删除",
+    "background": "背景",
+    "opacity": "不透明度 · {{pct}}%",
+    "color": "颜色",
+    "reset": "重置",
+    "theme": "主题",
+    "auto": "自动",
+    "light": "浅色",
+    "dark": "深色",
+    "customColor": "自定义颜色",
+    "accent": "强调色 {{hex}}"
+  },
+  "canvas": {
+    "emptyAddWidget": "↑ 从顶部菜单添加你的第一个小组件"
+  },
+  "commandPalette": {
+    "placeholder": "添加小组件…",
+    "noResults": "没有匹配的小组件"
+  },
+  "dialog": {
+    "confirm": "确认",
+    "cancel": "取消"
+  },
+  "publishDialog": {
+    "title": "发布到图库",
+    "description": "将带着你画布的截图出现在公共图库中。",
+    "authorLabel": "你的名字",
+    "authorPlaceholder": "匿名",
+    "descriptionLabel": "描述",
+    "descriptionPlaceholder": "这个布局的亮点是什么…",
+    "publish": "发布",
+    "cancel": "取消"
+  },
+  "quickCapture": {
+    "savedToInbox": "已保存到收件箱：{{text}}",
+    "title": "快速记录",
+    "placeholder": "你在想什么？",
+    "helper": "已保存到你的收件箱小组件",
+    "saveHint": "保存",
+    "cancelHint": "取消"
+  },
+  "toastUi": {
+    "dismiss": "关闭"
+  },
+  "screensaver": {
+    "night": "晚安",
+    "morning": "早上好",
+    "afternoon": "下午好",
+    "evening": "晚上好",
+    "wClear": "晴朗",
+    "wPartlyCloudy": "局部多云",
+    "wCloudy": "多云",
+    "wFog": "雾",
+    "wDrizzle": "毛毛雨",
+    "wRain": "雨",
+    "wSnow": "雪",
+    "wShowers": "阵雨",
+    "wSnowShowers": "阵雪",
+    "wThunderstorm": "雷暴",
+    "exitHint": "移动鼠标或按任意键退出"
+  },
+  "toasts": {
+    "updateInstalling": "正在安装 — Layer 将重新启动…",
+    "updateInstallFailed": "无法安装更新。",
+    "updateDownloading": "正在下载 Layer v{{version}}",
+    "updateReady": "Layer v{{version}} 已就绪",
+    "updateFailed": "更新失败 — 请在设置中重试。",
+    "updateAvailable": "Layer v{{version}} 可供更新",
+    "published": "已发布到图库",
+    "widgetDeleted": "小组件已删除",
+    "allLocked": "所有小组件已锁定",
+    "allUnlocked": "所有小组件已解锁",
+    "spaceSwitched": "空间 · {{name}}",
+    "calIn10min": "10 分钟后 · {{title}}",
+    "calStartingNow": "即将开始 · {{title}}"
+  },
+  "notify": {
+    "publishTitle": "“{{name}}”已发布到图库 ✦",
+    "publishBody": "可在 layer-desktop.web.app/spaces 的“最新”中找到它。",
+    "battery20Title": "电量剩余 20%",
+    "battery20Body": "也许该插上电源了。",
+    "battery10Title": "电量剩余 10%",
+    "battery10Body": "该插上电源了。",
+    "batteryFullTitle": "电池已充满",
+    "batteryFullBody": "现在可以拔下电源了。",
+    "calToday": "今天：{{title}}",
+    "cal10min": "10 分钟后：{{title}}",
+    "calNow": "即将开始：{{title}}",
+    "upvoteOne": "有人为“{{name}}”点了赞 🎉",
+    "upvoteMany": "“{{name}}”获得了 {{count}} 个新点赞 🎉",
+    "milestoneTitle": "“{{name}}”获得了 {{count}} 个点赞 ✦",
+    "milestoneBody": "恭喜 — 这个空间正在找到喜欢它的人。",
+    "updatedTitle": "你现在使用的是 Layer v{{version}} ✦",
+    "updatedBody": "更新已成功安装。",
+    "availableTitle": "Layer v{{version}} 可供更新",
+    "availableBody": "点击此通知，或前往 设置 → 检查更新，以进行安装。"
+  },
+  "syncErrors": {
+    "format": "这个邮箱地址看起来不太对。",
+    "undeliverable": "该邮箱无法接收邮件 — 请检查地址。",
+    "rateLimited": "请求的验证码过多。请稍后再试。",
+    "cooldown": "请稍候片刻再请求新的验证码。",
+    "expired": "该验证码已过期。请重新请求一个。",
+    "tooManyAttempts": "尝试次数过多。请重新请求验证码。",
+    "invalid": "该验证码不正确。",
+    "sendFailed": "无法发送验证码。",
+    "network": "网络错误。请重试。",
+    "noEmail": "请先请求一个验证码。",
+    "verifyFailed": "无法验证。",
+    "signInFailed": "无法登录。请重试。",
+    "syncFailed": "同步失败。将重试。",
+    "restoreFailed": "无法从云端恢复。"
+  },
+  "dock": {
+    "label": "DOCK",
+    "notifications": "通知",
+    "editWidgets": "编辑小组件",
+    "unpinHint": "取消固定（允许自动隐藏）",
+    "pinHint": "固定显示"
+  },
+  "notch": {
+    "npUnknown": "未知",
+    "npIdle": "没有正在播放的内容",
+    "npHint": "开始播放后即可在此控制",
+    "sysReading": "读取中…",
+    "cpu": "CPU",
+    "memory": "内存",
+    "disk": "磁盘",
+    "searchApps": "搜索应用…",
+    "noApps": "未找到应用。",
+    "weatherUnavailable": "天气信息不可用。",
+    "locating": "定位中…",
+    "notifEmpty": "你已查看全部内容。",
+    "markRead": "标为已读",
+    "clipEmpty": "剪贴板历史为空。",
+    "copied": "✓ 已复制",
+    "pinnedHint": "已固定 · 右键取消固定",
+    "copyHint": "点击复制 · 右键固定",
+    "noEvents": "今天没有日程。",
+    "theme": "主题",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "系统",
+    "previewScreensaver": "预览屏幕保护程序",
+    "hotCorner": "触发角",
+    "on": "开",
+    "off": "关",
+    "enableHint": "在 设置 → 刘海 中启用一个模块。"
+  },
+  "widgetStyles": {
+    "clock": {
+      "analog": "指针",
+      "digital": "数字",
+      "display": "显示"
     }
   }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FC } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Music,
   Timer as TimerIcon,
@@ -86,6 +87,7 @@ const gb = (b: number) => (b / 1024 ** 3).toFixed(1)
 
 // ---------------- Now Playing ----------------
 const NowPlayingExpanded: FC = () => {
+  const { t } = useTranslation()
   const np = usePoll<NowPlaying>(getNowPlaying, 2500)
   const [vol, setVol] = useState(-1)
   useEffect(() => {
@@ -96,10 +98,10 @@ const NowPlayingExpanded: FC = () => {
     <div className="flex flex-col gap-3">
       <div className="min-w-0 text-center">
         <div className="truncate text-[14px] font-semibold">
-          {has ? np!.title || 'Unknown' : 'Nothing playing'}
+          {has ? np!.title || t('notch.npUnknown') : t('notch.npIdle')}
         </div>
         <div className="truncate text-[12px] text-[var(--text-tertiary)]">
-          {has ? np!.artist : 'Start something to control it here'}
+          {has ? np!.artist : t('notch.npHint')}
         </div>
       </div>
       <div className="flex items-center justify-center gap-3">
@@ -184,15 +186,16 @@ function Bar({ label, pct, tint }: { label: string; pct: number; tint: string })
   )
 }
 const SystemExpanded: FC = () => {
+  const { t } = useTranslation()
   const s = usePoll<SystemStats>(getSystemStats, 2500)
-  if (!s) return <div className="text-[12px] text-[var(--text-tertiary)]">Reading…</div>
+  if (!s) return <div className="text-[12px] text-[var(--text-tertiary)]">{t('notch.sysReading')}</div>
   const mem = s.memTotal ? (s.memUsed / s.memTotal) * 100 : 0
   const disk = s.diskTotal ? (s.diskUsed / s.diskTotal) * 100 : 0
   return (
     <div className="flex flex-col gap-2.5">
-      <Bar label="CPU" pct={s.cpu} tint="#3b82f6" />
-      <Bar label={`Memory · ${gb(s.memUsed)}/${gb(s.memTotal)} GB`} pct={mem} tint="#8b5cf6" />
-      <Bar label="Disk" pct={disk} tint="#10b981" />
+      <Bar label={t('notch.cpu')} pct={s.cpu} tint="#3b82f6" />
+      <Bar label={`${t('notch.memory')} · ${gb(s.memUsed)}/${gb(s.memTotal)} GB`} pct={mem} tint="#8b5cf6" />
+      <Bar label={t('notch.disk')} pct={disk} tint="#10b981" />
       {s.battery >= 0 && (
         <div className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
           Battery {s.battery}%{s.charging ? ' · charging' : ''}
@@ -228,6 +231,7 @@ function AppTile({ app, onLaunch, onRemove }: { app: PinnedApp; onLaunch: () => 
   )
 }
 const ShortcutsExpanded: FC = () => {
+  const { t } = useTranslation()
   const pinned = useNotchStore((s) => s.pinned)
   const setPinned = useNotchStore((s) => s.setPinned)
   const [picking, setPicking] = useState(false)
@@ -253,7 +257,7 @@ const ShortcutsExpanded: FC = () => {
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Search size={14} className="text-[var(--text-tertiary)]" />
-          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search apps…" className="w-full bg-transparent text-[13px] outline-none" />
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('notch.searchApps')} className="w-full bg-transparent text-[13px] outline-none" />
           <button type="button" onClick={() => setPicking(false)} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"><X size={15} /></button>
         </div>
         <div className="flex max-h-[160px] flex-col gap-0.5 overflow-y-auto">
@@ -262,7 +266,7 @@ const ShortcutsExpanded: FC = () => {
               {a.name}
             </button>
           ))}
-          {results.length === 0 && <div className="px-2 py-3 text-[12px] text-[var(--text-tertiary)]">No apps found.</div>}
+          {results.length === 0 && <div className="px-2 py-3 text-[12px] text-[var(--text-tertiary)]">{t('notch.noApps')}</div>}
         </div>
       </div>
     )
@@ -289,6 +293,7 @@ function weatherIcon(code: number): LucideIcon {
   return Cloud
 }
 const WeatherExpanded: FC = () => {
+  const { t } = useTranslation()
   const [data, setData] = useState<{ temp: number; code: number; city: string } | null>(null)
   const [err, setErr] = useState(false)
   useEffect(() => {
@@ -309,8 +314,8 @@ const WeatherExpanded: FC = () => {
     const id = window.setInterval(load, 15 * 60_000)
     return () => { alive = false; window.clearInterval(id) }
   }, [])
-  if (err) return <div className="text-[12px] text-[var(--text-tertiary)]">Weather unavailable.</div>
-  if (!data) return <div className="text-[12px] text-[var(--text-tertiary)]">Locating…</div>
+  if (err) return <div className="text-[12px] text-[var(--text-tertiary)]">{t('notch.weatherUnavailable')}</div>
+  if (!data) return <div className="text-[12px] text-[var(--text-tertiary)]">{t('notch.locating')}</div>
   const Icon = weatherIcon(data.code)
   return (
     <div className="flex items-center gap-3">
@@ -325,10 +330,11 @@ const WeatherExpanded: FC = () => {
 
 // ---------------- Notifications ----------------
 const NotificationsExpanded: FC = () => {
+  const { t } = useTranslation()
   const items = useNotificationStore((s) => s.items)
   const markAllRead = useNotificationStore((s) => s.markAllRead)
   const clearAll = useNotificationStore((s) => s.clearAll)
-  if (items.length === 0) return <div className="text-[12px] text-[var(--text-tertiary)]">You’re all caught up.</div>
+  if (items.length === 0) return <div className="text-[12px] text-[var(--text-tertiary)]">{t('notch.notifEmpty')}</div>
   return (
     <div className="flex flex-col gap-2">
       <div className="flex max-h-[160px] flex-col gap-1.5 overflow-y-auto">
@@ -343,7 +349,7 @@ const NotificationsExpanded: FC = () => {
         ))}
       </div>
       <div className="flex gap-2">
-        <button type="button" onClick={markAllRead} className="flex-1 rounded-[7px] bg-[var(--fill-2)] py-1.5 text-[12px] hover:bg-[var(--fill-3)]">Mark read</button>
+        <button type="button" onClick={markAllRead} className="flex-1 rounded-[7px] bg-[var(--fill-2)] py-1.5 text-[12px] hover:bg-[var(--fill-3)]">{t('notch.markRead')}</button>
         <button type="button" onClick={clearAll} className="rounded-[7px] px-3 py-1.5 text-[12px] text-[var(--text-tertiary)] hover:text-[var(--danger)]"><Trash2 size={14} /></button>
       </div>
     </div>
@@ -352,15 +358,16 @@ const NotificationsExpanded: FC = () => {
 
 // ---------------- Clipboard ----------------
 const ClipboardExpanded: FC = () => {
+  const { t } = useTranslation()
   const items = useClipboardStore((s) => s.items)
   const togglePin = useClipboardStore((s) => s.togglePin)
   const [copied, setCopied] = useState<string | null>(null)
-  if (items.length === 0) return <div className="text-[12px] text-[var(--text-tertiary)]">Clipboard history is empty.</div>
+  if (items.length === 0) return <div className="text-[12px] text-[var(--text-tertiary)]">{t('notch.clipEmpty')}</div>
   return (
     <div className="flex max-h-[180px] flex-col gap-1 overflow-y-auto">
       {items.slice(0, 25).map((c) => (
-        <button key={c.id} type="button" onClick={() => { writeText(c.text).catch(() => {}); setCopied(c.id); window.setTimeout(() => setCopied(null), 900) }} onContextMenu={(e) => { e.preventDefault(); togglePin(c.id) }} className="truncate rounded-[7px] px-2 py-1.5 text-left text-[12px] hover:bg-[var(--fill-2)]" title={c.pinned ? 'Pinned · right-click to unpin' : 'Click to copy · right-click to pin'}>
-          {copied === c.id ? '✓ Copied' : (c.pinned ? '📌 ' : '') + c.text}
+        <button key={c.id} type="button" onClick={() => { writeText(c.text).catch(() => {}); setCopied(c.id); window.setTimeout(() => setCopied(null), 900) }} onContextMenu={(e) => { e.preventDefault(); togglePin(c.id) }} className="truncate rounded-[7px] px-2 py-1.5 text-left text-[12px] hover:bg-[var(--fill-2)]" title={c.pinned ? t('notch.pinnedHint') : t('notch.copyHint')}>
+          {copied === c.id ? t('notch.copied') : (c.pinned ? '📌 ' : '') + c.text}
         </button>
       ))}
     </div>
@@ -369,6 +376,7 @@ const ClipboardExpanded: FC = () => {
 
 // ---------------- Calendar ----------------
 const CalendarExpanded: FC = () => {
+  const { t } = useTranslation()
   const events = useEventsStore((s) => s.events)
   const today = useMemo(() => eventsOnDay(events, new Date()), [events])
   return (
@@ -377,7 +385,7 @@ const CalendarExpanded: FC = () => {
         {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
       </div>
       {today.length === 0 ? (
-        <div className="text-[12px] text-[var(--text-tertiary)]">No events today.</div>
+        <div className="text-[12px] text-[var(--text-tertiary)]">{t('notch.noEvents')}</div>
       ) : (
         today.slice(0, 6).map((e) => (
           <div key={e.id} className="flex items-center gap-2 text-[12px]">
@@ -397,6 +405,7 @@ const CalendarExpanded: FC = () => {
 
 // ---------------- Quick toggles ----------------
 const TogglesExpanded: FC = () => {
+  const { t } = useTranslation()
   const theme = useSettingsStore((s) => s.theme)
   const setTheme = useSettingsStore((s) => s.setTheme)
   const hotCorner = useSettingsStore((s) => s.hotCorner)
@@ -404,19 +413,19 @@ const TogglesExpanded: FC = () => {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1.5">
-        <span className="text-[11px] text-[var(--text-tertiary)]">Theme</span>
+        <span className="text-[11px] text-[var(--text-tertiary)]">{t('notch.theme')}</span>
         <Segmented
           value={theme}
-          options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }, { value: 'system', label: 'System' }]}
+          options={[{ value: 'light', label: t('notch.light') }, { value: 'dark', label: t('notch.dark') }, { value: 'system', label: t('notch.system') }]}
           onChange={(v) => setTheme(v as 'light' | 'dark' | 'system')}
         />
       </div>
       <button type="button" onClick={() => previewScreensaver().catch(() => {})} className="flex items-center gap-2 rounded-[8px] bg-[var(--fill-2)] px-3 py-2 text-[13px] hover:bg-[var(--fill-3)]">
-        <MonitorPlay size={15} /> Preview screensaver
+        <MonitorPlay size={15} /> {t('notch.previewScreensaver')}
       </button>
       <button type="button" onClick={() => { const v = !hotCorner; setHotCorner(v); setHotcorner(v).catch(() => {}) }} className="flex items-center justify-between rounded-[8px] bg-[var(--fill-2)] px-3 py-2 text-[13px]">
-        <span>Hot corner</span>
-        <span className={hotCorner ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}>{hotCorner ? 'On' : 'Off'}</span>
+        <span>{t('notch.hotCorner')}</span>
+        <span className={hotCorner ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}>{hotCorner ? t('notch.on') : t('notch.off')}</span>
       </button>
     </div>
   )

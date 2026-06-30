@@ -178,6 +178,7 @@ function VolumeKnob({
   value: number
   onChange: (v: number) => void
 }) {
+  const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
   const angle = START + value * SWEEP
 
@@ -257,7 +258,7 @@ function VolumeKnob({
           fill="var(--text-tertiary)"
           style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.5px' }}
         >
-          MIN
+          {t('nowplaying.volume.min')}
         </text>
         <text
           x={KC}
@@ -275,7 +276,7 @@ function VolumeKnob({
           fill="var(--text-tertiary)"
           style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.5px' }}
         >
-          MAX
+          {t('nowplaying.volume.max')}
         </text>
       </svg>
     </div>
