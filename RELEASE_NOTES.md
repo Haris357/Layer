@@ -5,12 +5,10 @@
   subscriber email. REWRITE THIS BEFORE EACH TAG.
   This release intentionally skips the subscriber email: skip-email
 -->
-## 🌍 Fuller translations & localized dates
+## 🩹 Fix top-bar flicker
 
-Layer v1.7.1 rounds out the multi-language support from 1.7.0.
+Layer v1.7.2 is a small fix.
 
-- 🗓️ **Localized dates everywhere** — the Clock, World Clock and Calendar now show day and month names in your selected language.
-- 🖱️ **Translated right-click menu** — the widget context menu (Duplicate, Bring to front, Color, Theme…) is now fully translated.
-- 💬 **Everything else translated too** — toasts, notifications, the command palette, dialogs, cloud-sync messages and the screensaver now follow your language. If something was still showing in English, it shouldn't be anymore.
+- ✨ **No more flicker** — the top bar no longer strobes/blinks while the widget menu is expanded (it was most visible in dark mode). The open/close animation is unchanged.
 
 **Updates are automatic** — Layer will grab this in the background and let you relaunch when you're ready.

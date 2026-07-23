@@ -287,7 +287,6 @@ export function TopIsland() {
             style={{ borderRadius: '0 0 16px 16px' }}
           >
             <motion.button
-              layout
               type="button"
               onClick={toggleMode}
               onHoverStart={() => setNotchHov(true)}
@@ -342,7 +341,6 @@ export function TopIsland() {
               {open && (
                 <motion.div
                   key="tools"
-                  layout
                   initial="hidden"
                   animate="shown"
                   exit="hidden"
