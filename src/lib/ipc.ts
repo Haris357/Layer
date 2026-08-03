@@ -164,8 +164,18 @@ export const shelfRemove = (path: string) =>
 export const deleteAsset = (assetPath: string) =>
   invoke<void>('delete_asset', { assetPath })
 
-export const registerHotkey = (accelerator: string) =>
-  invoke<void>('register_hotkey', { accelerator })
+// A configurable global shortcut. `action` is one of
+// 'toggle' | 'capture' | 'screensaver' | 'cycle'.
+export interface ShortcutDef {
+  action: string
+  accelerator: string
+  enabled: boolean
+}
+
+// Replace the whole set of registered global shortcuts. Disabled ones are
+// simply not registered, freeing the key combo for other apps.
+export const setShortcuts = (shortcuts: ShortcutDef[]) =>
+  invoke<void>('set_shortcuts', { shortcuts })
 
 export const setScreensaverEnabled = (enabled: boolean) =>
   invoke<void>('set_screensaver_enabled', { enabled })

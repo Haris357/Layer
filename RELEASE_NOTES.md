@@ -5,10 +5,12 @@
   subscriber email. REWRITE THIS BEFORE EACH TAG.
   This release intentionally skips the subscriber email: skip-email
 -->
-## 🩹 Fix top-bar flicker
+## ⌨️ Remap or disable any keyboard shortcut
 
-Layer v1.7.2 is a small fix.
+Layer v1.8.0 puts you in control of the global shortcuts.
 
-- ✨ **No more flicker** — the top bar no longer strobes/blinks while the widget menu is expanded (it was most visible in dark mode). The open/close animation is unchanged.
+- ⌨️ **Rebind every shortcut** — the edit-mode toggle, Quick capture, Cycle spaces and Preview screensaver can all be set to whatever key combo you like, in **Settings → Shortcuts**.
+- 🚫 **Turn shortcuts off** — disable any of the secondary shortcuts so they no longer clash with other apps (e.g. Ctrl+Shift+S vs "Save As"). A disabled shortcut fully frees its keys system-wide.
+- 🧠 **Your bindings stick** — custom shortcuts now persist correctly across restarts.
 
 **Updates are automatic** — Layer will grab this in the background and let you relaunch when you're ready.

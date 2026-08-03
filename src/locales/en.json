@@ -131,7 +131,9 @@
       "cycleSpaces": "Cycle spaces",
       "peek": "Peek (hold)",
       "previewScreensaver": "Preview screensaver",
-      "hotCornerNote": "You can also flick the mouse to the top-left corner to switch spaces (enable “Hot corner” in General)."
+      "hotCornerNote": "You can also flick the mouse to the top-left corner to switch spaces (enable “Hot corner” in General).",
+      "disabled": "Off",
+      "remapHint": "Click a shortcut to rebind it, or turn it off to free the keys for other apps."
     },
     "about": {
       "tagline": "a quiet layer on your desktop",

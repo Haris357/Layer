@@ -1232,20 +1232,53 @@ pub async fn clear_all_notifications() {
     }
 }
 
-#[tauri::command]
-pub fn register_hotkey(app: AppHandle, accelerator: String) -> Result<(), String> {
-    use tauri_plugin_global_shortcut::GlobalShortcutExt;
-    let shortcut = app.global_shortcut();
-    let _ = shortcut.unregister_all();
-    shortcut
-        .register(accelerator.as_str())
-        .map_err(|e| e.to_string())?;
-    // Re-register the fixed shortcuts so a custom toggle hotkey doesn't take
-    // them down with unregister_all.
-    let _ = shortcut.register("CmdOrControl+Shift+N");
-    let _ = shortcut.register("CmdOrControl+Shift+S");
-    let _ = shortcut.register("CmdOrControl+Shift+E");
+// One configurable global shortcut, sent from the frontend.
+#[derive(serde::Deserialize)]
+pub struct ShortcutDef {
+    pub action: String,
+    pub accelerator: String,
+    pub enabled: bool,
+}
+
+// The built-in defaults (used at startup before the frontend applies the saved
+// config). Matches the frontend's default accelerators.
+pub fn default_shortcuts() -> Vec<ShortcutDef> {
+    vec![
+        ShortcutDef { action: "toggle".into(), accelerator: "CmdOrControl+Shift+Space".into(), enabled: true },
+        ShortcutDef { action: "capture".into(), accelerator: "CmdOrControl+Shift+N".into(), enabled: true },
+        ShortcutDef { action: "screensaver".into(), accelerator: "CmdOrControl+Shift+S".into(), enabled: true },
+        ShortcutDef { action: "cycle".into(), accelerator: "CmdOrControl+Shift+E".into(), enabled: true },
+    ]
+}
+
+// Unregister everything, then register only the enabled shortcuts and record
+// which action each maps to. A bad/unparseable accelerator is skipped rather
+// than failing the whole set.
+pub fn apply_shortcuts(app: &AppHandle, defs: &[ShortcutDef]) -> Result<(), String> {
+    use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
+    let gs = app.global_shortcut();
+    let _ = gs.unregister_all();
+    let state = app.state::<crate::SharedShortcuts>();
+    let mut map = state.lock().map_err(|e| e.to_string())?;
+    map.clear();
+    for d in defs {
+        if !d.enabled {
+            continue;
+        }
+        let sc: Shortcut = match d.accelerator.parse() {
+            Ok(s) => s,
+            Err(_) => continue,
+        };
+        if gs.register(sc.clone()).is_ok() {
+            map.push((sc, d.action.clone()));
+        }
+    }
     Ok(())
+}
+
+#[tauri::command]
+pub fn set_shortcuts(app: AppHandle, shortcuts: Vec<ShortcutDef>) -> Result<(), String> {
+    apply_shortcuts(&app, &shortcuts)
 }
 
 // ── DiskInfo widget ─────────────────────────────────────────────────────────

@@ -113,7 +113,9 @@
       "cycleSpaces": "Parcourir les espaces",
       "peek": "Aperçu (maintenir)",
       "previewScreensaver": "Prévisualiser l’écran de veille",
-      "hotCornerNote": "Vous pouvez aussi amener la souris dans le coin supérieur gauche pour changer d’espace (activez « Coin actif » dans Général)."
+      "hotCornerNote": "Vous pouvez aussi amener la souris dans le coin supérieur gauche pour changer d’espace (activez « Coin actif » dans Général).",
+      "disabled": "Désactivé",
+      "remapHint": "Cliquez sur un raccourci pour le réattribuer, ou désactivez-le pour libérer les touches pour d'autres applications."
     },
     "about": {
       "tagline": "une couche discrète sur votre bureau",

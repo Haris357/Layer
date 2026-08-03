@@ -113,7 +113,9 @@
       "cycleSpaces": "Cambiar de espacio",
       "peek": "Vistazo (mantener)",
       "previewScreensaver": "Previsualizar salvapantallas",
-      "hotCornerNote": "También puedes llevar el ratón a la esquina superior izquierda para cambiar de espacio (activa «Esquina activa» en General)."
+      "hotCornerNote": "También puedes llevar el ratón a la esquina superior izquierda para cambiar de espacio (activa «Esquina activa» en General).",
+      "disabled": "Desactivado",
+      "remapHint": "Haz clic en un atajo para reasignarlo, o desactívalo para liberar las teclas para otras apps."
     },
     "about": {
       "tagline": "una capa tranquila en tu escritorio",

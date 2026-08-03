@@ -4,11 +4,21 @@ import { persist } from 'zustand/middleware'
 type ThemePref = 'light' | 'dark' | 'system'
 export type ScreensaverTheme = 'ambient' | 'minimal' | 'quote'
 
+// The remappable/disable-able secondary global shortcuts. The main edit-mode
+// toggle stays in `hotkey`. Each of these can be rebound or turned off so it
+// doesn't clash with other apps (e.g. Ctrl+Shift+S vs "Save As").
+export type SecondaryShortcut = 'capture' | 'screensaver' | 'cycle'
+export interface ShortcutSetting {
+  accelerator: string
+  enabled: boolean
+}
+
 interface SettingsState {
   gridSize: number
   snapEnabled: boolean
   hotkey: string
   clockFormat24h: boolean
+  secondaryShortcuts: Record<SecondaryShortcut, ShortcutSetting>
   // UI language code (e.g. 'en', 'es'). i18n reads this from the persisted blob
   // on boot; the Settings picker drives changes via lib/i18n's changeLanguage.
   language: string
@@ -36,6 +46,10 @@ interface SettingsState {
   setSnapEnabled: (enabled: boolean) => void
   setHotkey: (hotkey: string) => void
   setClockFormat24h: (value: boolean) => void
+  setSecondaryShortcut: (
+    action: SecondaryShortcut,
+    patch: Partial<ShortcutSetting>,
+  ) => void
   setLanguage: (value: string) => void
   setTheme: (theme: ThemePref) => void
   setAutostartInit: (value: boolean) => void
@@ -62,6 +76,11 @@ export const useSettingsStore = create<SettingsState>()(
       snapEnabled: true,
       hotkey: 'Ctrl+Shift+Space',
       clockFormat24h: false,
+      secondaryShortcuts: {
+        capture: { accelerator: 'Ctrl+Shift+N', enabled: true },
+        screensaver: { accelerator: 'Ctrl+Shift+S', enabled: true },
+        cycle: { accelerator: 'Ctrl+Shift+E', enabled: true },
+      },
       language: 'en',
       theme: 'system',
       autostartInit: false,
@@ -83,6 +102,13 @@ export const useSettingsStore = create<SettingsState>()(
       setSnapEnabled: (snapEnabled) => set({ snapEnabled }),
       setHotkey: (hotkey) => set({ hotkey }),
       setClockFormat24h: (clockFormat24h) => set({ clockFormat24h }),
+      setSecondaryShortcut: (action, patch) =>
+        set((s) => ({
+          secondaryShortcuts: {
+            ...s.secondaryShortcuts,
+            [action]: { ...s.secondaryShortcuts[action], ...patch },
+          },
+        })),
       setLanguage: (language) => set({ language }),
       setTheme: (theme) => set({ theme }),
       setAutostartInit: (autostartInit) => set({ autostartInit }),

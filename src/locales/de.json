@@ -113,7 +113,9 @@
       "cycleSpaces": "Bereiche durchschalten",
       "peek": "Vorschau (halten)",
       "previewScreensaver": "Bildschirmschoner-Vorschau",
-      "hotCornerNote": "Du kannst die Maus auch in die obere linke Ecke bewegen, um Bereiche zu wechseln (aktiviere „Aktive Ecke“ unter Allgemein)."
+      "hotCornerNote": "Du kannst die Maus auch in die obere linke Ecke bewegen, um Bereiche zu wechseln (aktiviere „Aktive Ecke“ unter Allgemein).",
+      "disabled": "Aus",
+      "remapHint": "Klicke auf ein Kürzel, um es neu zu belegen, oder schalte es aus, um die Tasten für andere Apps freizugeben."
     },
     "about": {
       "tagline": "eine stille Schicht auf deinem Desktop",

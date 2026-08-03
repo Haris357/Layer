@@ -113,7 +113,9 @@
       "cycleSpaces": "循环切换空间",
       "peek": "速览（按住）",
       "previewScreensaver": "预览屏幕保护",
-      "hotCornerNote": "您也可以将鼠标快速甩到左上角来切换空间（在通用中启用“热角”）。"
+      "hotCornerNote": "您也可以将鼠标快速甩到左上角来切换空间（在通用中启用“热角”）。",
+      "disabled": "关闭",
+      "remapHint": "点击快捷键可重新绑定，或将其关闭以便其他应用使用这些按键。"
     },
     "about": {
       "tagline": "桌面上一层静谧的存在",

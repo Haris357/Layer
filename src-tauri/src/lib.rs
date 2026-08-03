@@ -8,7 +8,14 @@ mod window;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{Emitter, Manager};
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, ShortcutState};
+use tauri_plugin_global_shortcut::ShortcutState;
+
+// The currently-registered global shortcuts, mapping each to its action name
+// ("toggle" | "capture" | "screensaver" | "cycle"). Rebuilt whenever the user
+// remaps or disables a shortcut in Settings, so the handler can dispatch by
+// action instead of a fixed physical key.
+pub type SharedShortcuts =
+    std::sync::Arc<std::sync::Mutex<Vec<(tauri_plugin_global_shortcut::Shortcut, String)>>>;
 
 pub fn run() {
     // Decide up front whether Windows launched us as a screensaver (/s). /p and
@@ -46,23 +53,33 @@ pub fn run() {
                     if event.state != ShortcutState::Pressed {
                         return;
                     }
-                    // Ctrl+Shift+N → Quick capture. Bring the window forward
-                    // first so the modal is actually visible.
-                    if shortcut.key == Code::KeyN {
-                        if let Some(w) = app.get_webview_window("main") {
-                            let _ = w.unminimize();
-                            let _ = w.show();
-                            window::set_layer(&w, true);
+                    // Look up which action this shortcut is bound to. Users can
+                    // remap or disable any of these in Settings → Shortcuts.
+                    let action = {
+                        let state = app.state::<SharedShortcuts>();
+                        let map = state.lock().unwrap();
+                        map.iter()
+                            .find(|(sc, _)| sc == shortcut)
+                            .map(|(_, a)| a.clone())
+                    };
+                    match action.as_deref() {
+                        Some("capture") => {
+                            // Bring the window forward first so the modal shows.
+                            if let Some(w) = app.get_webview_window("main") {
+                                let _ = w.unminimize();
+                                let _ = w.show();
+                                window::set_layer(&w, true);
+                            }
+                            let _ = app.emit("quick-capture", ());
                         }
-                        let _ = app.emit("quick-capture", ());
-                    } else if shortcut.key == Code::KeyS {
-                        // Ctrl+Shift+S → preview the screensaver right now.
-                        screensaver::preview();
-                    } else if shortcut.key == Code::KeyE {
-                        // Ctrl+Shift+E → cycle to the next space.
-                        let _ = app.emit("cycle-space", ());
-                    } else {
-                        let _ = app.emit("toggle-mode", ());
+                        Some("screensaver") => screensaver::preview(),
+                        Some("cycle") => {
+                            let _ = app.emit("cycle-space", ());
+                        }
+                        Some("toggle") => {
+                            let _ = app.emit("toggle-mode", ());
+                        }
+                        _ => {}
                     }
                 })
                 .build(),
@@ -85,10 +102,13 @@ pub fn run() {
             let notch_hit: notch::SharedNotchHit =
                 std::sync::Arc::new(std::sync::Mutex::new([0i32; 4]));
             app.manage(notch_hit);
-            let _ = app.global_shortcut().register("CmdOrControl+Shift+Space");
-            let _ = app.global_shortcut().register("CmdOrControl+Shift+N");
-            let _ = app.global_shortcut().register("CmdOrControl+Shift+S");
-            let _ = app.global_shortcut().register("CmdOrControl+Shift+E");
+            // Global shortcuts: managed as an action map so each can be remapped
+            // or disabled from Settings. Register the defaults now; the frontend
+            // re-applies the user's saved config once it mounts.
+            let shortcuts: SharedShortcuts =
+                std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+            app.manage(shortcuts);
+            let _ = commands::apply_shortcuts(app.handle(), &commands::default_shortcuts());
 
             let toggle_item =
                 MenuItemBuilder::with_id("toggle", "Toggle edit mode").build(app)?;
@@ -207,7 +227,7 @@ pub fn run() {
             commands::clear_all_notifications,
             commands::get_volume,
             commands::set_volume,
-            commands::register_hotkey,
+            commands::set_shortcuts,
             commands::get_disks,
             commands::get_disk_io,
             commands::shelf_import,

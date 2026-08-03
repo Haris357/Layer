@@ -113,7 +113,9 @@
       "cycleSpaces": "Scorri gli spazi",
       "peek": "Sbircia (tieni premuto)",
       "previewScreensaver": "Anteprima salvaschermo",
-      "hotCornerNote": "Puoi anche portare il mouse nell'angolo in alto a sinistra per cambiare spazio (abilita “Angolo attivo” in Generale)."
+      "hotCornerNote": "Puoi anche portare il mouse nell'angolo in alto a sinistra per cambiare spazio (abilita “Angolo attivo” in Generale).",
+      "disabled": "Disattivato",
+      "remapHint": "Fai clic su una scorciatoia per riassegnarla, oppure disattivala per liberare i tasti per altre app."
     },
     "about": {
       "tagline": "uno strato silenzioso sul tuo desktop",

@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useSettingsStore } from '../store/settingsStore'
+import type { SecondaryShortcut } from '../store/settingsStore'
 import { useThemeStatus } from '../store/themeStatusStore'
 import {
   captureScreen,
@@ -23,7 +24,6 @@ import {
   openUrl,
   previewScreensaver,
   quitApp,
-  registerHotkey,
   showInFolder,
 } from '../lib/ipc'
 import { useCanvasStore } from '../store/canvasStore'
@@ -121,6 +121,8 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const gridSize = useSettingsStore((s) => s.gridSize)
   const snapEnabled = useSettingsStore((s) => s.snapEnabled)
   const hotkey = useSettingsStore((s) => s.hotkey)
+  const secondaryShortcuts = useSettingsStore((s) => s.secondaryShortcuts)
+  const setSecondaryShortcut = useSettingsStore((s) => s.setSecondaryShortcut)
   const theme = useSettingsStore((s) => s.theme)
   const screensaverEnabled = useSettingsStore((s) => s.screensaverEnabled)
   const screensaverTheme = useSettingsStore((s) => s.screensaverTheme)
@@ -154,7 +156,10 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
   const [tab, setTab] = useState<TabId>('general')
   const [confirmReset, setConfirmReset] = useState(false)
-  const [capturing, setCapturing] = useState(false)
+  // Which shortcut is currently being rebound (null = none).
+  const [capturing, setCapturing] = useState<'toggle' | SecondaryShortcut | null>(
+    null,
+  )
   const [autostart, setAutostart] = useState(false)
   const [version, setVersion] = useState('1.0.0')
   const [updateBusy, setUpdateBusy] = useState(false)
@@ -173,15 +178,24 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
     if (!capturing) return
     const handler = (e: KeyboardEvent) => {
       e.preventDefault()
+      // Esc cancels the rebind without changing anything.
+      if (e.key === 'Escape') {
+        setCapturing(null)
+        return
+      }
       const accel = buildAccelerator(e)
       if (!accel) return
-      setHotkey(accel)
-      registerHotkey(accel).catch(() => {})
-      setCapturing(false)
+      if (capturing === 'toggle') {
+        setHotkey(accel)
+      } else {
+        setSecondaryShortcut(capturing, { accelerator: accel, enabled: true })
+      }
+      setCapturing(null)
+      // useShortcuts() re-registers automatically when the store changes.
     }
     window.addEventListener('keydown', handler, true)
     return () => window.removeEventListener('keydown', handler, true)
-  }, [capturing, setHotkey])
+  }, [capturing, setHotkey, setSecondaryShortcut])
 
   const toggleAutostart = (value: boolean) => {
     setAutostart(value)
@@ -556,35 +570,78 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           {tab === 'shortcuts' && (
             <div className="flex flex-col gap-1">
               <SectionTitle>{t('settings.shortcuts.keyboard')}</SectionTitle>
+
+              {/* Main edit-mode toggle: rebindable (always on). */}
               <div className="mt-1 flex items-center justify-between border-b border-[var(--border)] py-2.5">
                 <span className="text-[13px] text-[var(--text-primary)]">
                   {t('settings.shortcuts.toggleEdit')}
                 </span>
                 <button
                   type="button"
-                  onClick={() => setCapturing(true)}
+                  onClick={() => setCapturing('toggle')}
                   className="rounded-[7px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--border-strong)]"
                 >
-                  {capturing ? t('settings.shortcuts.pressKeys') : hotkey}
+                  {capturing === 'toggle'
+                    ? t('settings.shortcuts.pressKeys')
+                    : hotkey}
                 </button>
               </div>
-              {[
-                { label: t('settings.shortcuts.quickCapture'), combo: 'Ctrl+Shift+N' },
-                { label: t('settings.shortcuts.cycleSpaces'), combo: 'Ctrl+Shift+E' },
-                { label: t('settings.shortcuts.peek'), combo: 'Ctrl+Shift+`' },
-                { label: t('settings.shortcuts.previewScreensaver'), combo: 'Ctrl+Shift+S' },
-              ].map((s) => (
-                <div
-                  key={s.combo}
-                  className="flex items-center justify-between border-b border-[var(--border)] py-2.5 last:border-0"
-                >
-                  <span className="text-[13px] text-[var(--text-primary)]">
-                    {s.label}
-                  </span>
-                  <Kbd combo={s.combo} />
-                </div>
-              ))}
-              <p className="mt-3 text-[11.5px] text-[var(--text-tertiary)]">
+
+              {/* Secondary shortcuts: rebindable AND disable-able (each frees
+                  its key combo for other apps when turned off). */}
+              {(
+                [
+                  ['capture', 'quickCapture'],
+                  ['cycle', 'cycleSpaces'],
+                  ['screensaver', 'previewScreensaver'],
+                ] as [SecondaryShortcut, string][]
+              ).map(([action, labelKey]) => {
+                const cfg = secondaryShortcuts[action]
+                return (
+                  <div
+                    key={action}
+                    className="flex items-center justify-between border-b border-[var(--border)] py-2.5"
+                  >
+                    <span className="text-[13px] text-[var(--text-primary)]">
+                      {t(`settings.shortcuts.${labelKey}`)}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={!cfg.enabled}
+                        onClick={() => setCapturing(action)}
+                        className="min-w-[92px] rounded-[7px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--border-strong)] disabled:opacity-40 disabled:hover:border-[var(--border)]"
+                      >
+                        {capturing === action
+                          ? t('settings.shortcuts.pressKeys')
+                          : cfg.enabled
+                            ? cfg.accelerator
+                            : t('settings.shortcuts.disabled')}
+                      </button>
+                      <Toggle
+                        checked={cfg.enabled}
+                        onChange={(v) =>
+                          setSecondaryShortcut(action, { enabled: v })
+                        }
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Peek is window-local (not a global shortcut), so it can't
+                  clash with other apps — shown for reference only. */}
+              <div className="flex items-center justify-between border-b border-[var(--border)] py-2.5 last:border-0">
+                <span className="text-[13px] text-[var(--text-primary)]">
+                  {t('settings.shortcuts.peek')}
+                </span>
+                <Kbd combo="Ctrl+Shift+`" />
+              </div>
+
+              <p className="mt-3 text-[11.5px] leading-relaxed text-[var(--text-tertiary)]">
+                {t('settings.shortcuts.remapHint')}
+              </p>
+              <p className="text-[11.5px] leading-relaxed text-[var(--text-tertiary)]">
                 {t('settings.shortcuts.hotCornerNote')}
               </p>
             </div>

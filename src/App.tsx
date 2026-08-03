@@ -5,6 +5,7 @@ import { Onboarding } from './components/Onboarding'
 import { Toast } from './components/Toast'
 import { QuickCaptureModal } from './components/QuickCaptureModal'
 import { useHotkey } from './hooks/useHotkey'
+import { useShortcuts } from './hooks/useShortcuts'
 import { usePersistence } from './hooks/usePersistence'
 import { useSync } from './hooks/useSync'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
@@ -30,6 +31,7 @@ import { useSettingsStore } from './store/settingsStore'
 
 export default function App() {
   useHotkey()
+  useShortcuts()
   usePersistence()
   useSync()
   useKeyboardShortcuts()
