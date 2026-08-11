@@ -115,7 +115,7 @@
       "previewScreensaver": "Prévisualiser l’écran de veille",
       "hotCornerNote": "Vous pouvez aussi amener la souris dans le coin supérieur gauche pour changer d’espace (activez « Coin actif » dans Général).",
       "disabled": "Désactivé",
-      "remapHint": "Cliquez sur un raccourci pour le réattribuer, ou désactivez-le pour libérer les touches pour d'autres applications."
+      "remapHint": "Cliquez sur un raccourci, puis appuyez sur la nouvelle combinaison (avec Ctrl, Shift ou Alt). Appuyez sur Échap pour annuler. Désactivez-en un pour libérer ses touches pour d’autres applications."
     },
     "about": {
       "tagline": "une couche discrète sur votre bureau",
@@ -353,7 +353,10 @@
       "removeCalendar": "Supprimer le calendrier",
       "namePlaceholder": "Nom (ex. Travail)",
       "urlPlaceholder": "https://…/basic.ics",
-      "add": "Ajouter"
+      "add": "Ajouter",
+      "weekStart": "La semaine commence le",
+      "sunday": "Dimanche",
+      "monday": "Lundi"
     }
   },
   "search": {

@@ -115,7 +115,7 @@
       "previewScreensaver": "スクリーンセーバーをプレビュー",
       "hotCornerNote": "マウスを左上の隅に弾くようにしてスペースを切り替えることもできます（一般設定で「ホットコーナー」を有効にしてください）。",
       "disabled": "オフ",
-      "remapHint": "ショートカットをクリックすると再割り当てできます。オフにすると、そのキーを他のアプリで使えるようになります。"
+      "remapHint": "ショートカットをクリックして、新しいキーの組み合わせ（Ctrl、Shift、Alt を含む）を押します。Esc でキャンセル。オフにすると、そのキーを他のアプリで使えます。"
     },
     "about": {
       "tagline": "デスクトップに静かに重なるレイヤー",
@@ -353,7 +353,10 @@
       "removeCalendar": "カレンダーを削除",
       "namePlaceholder": "名前（例：仕事）",
       "urlPlaceholder": "https://…/basic.ics",
-      "add": "追加"
+      "add": "追加",
+      "weekStart": "週の開始曜日",
+      "sunday": "日曜日",
+      "monday": "月曜日"
     }
   },
   "search": {

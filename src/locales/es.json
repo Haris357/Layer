@@ -115,7 +115,7 @@
       "previewScreensaver": "Previsualizar salvapantallas",
       "hotCornerNote": "También puedes llevar el ratón a la esquina superior izquierda para cambiar de espacio (activa «Esquina activa» en General).",
       "disabled": "Desactivado",
-      "remapHint": "Haz clic en un atajo para reasignarlo, o desactívalo para liberar las teclas para otras apps."
+      "remapHint": "Haz clic en un atajo y pulsa la nueva combinación (incluye Ctrl, Shift o Alt). Pulsa Esc para cancelar. Desactiva uno para liberar sus teclas para otras apps."
     },
     "about": {
       "tagline": "una capa tranquila en tu escritorio",
@@ -353,7 +353,10 @@
       "removeCalendar": "Quitar calendario",
       "namePlaceholder": "Nombre (p. ej. Trabajo)",
       "urlPlaceholder": "https://…/basic.ics",
-      "add": "Añadir"
+      "add": "Añadir",
+      "weekStart": "La semana empieza el",
+      "sunday": "Domingo",
+      "monday": "Lunes"
     }
   },
   "search": {

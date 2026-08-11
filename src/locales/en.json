@@ -133,7 +133,7 @@
       "previewScreensaver": "Preview screensaver",
       "hotCornerNote": "You can also flick the mouse to the top-left corner to switch spaces (enable “Hot corner” in General).",
       "disabled": "Off",
-      "remapHint": "Click a shortcut to rebind it, or turn it off to free the keys for other apps."
+      "remapHint": "Click a shortcut, then press the new combo (include Ctrl, Shift or Alt). Press Esc to cancel. Turn one off to free its keys for other apps."
     },
     "about": {
       "tagline": "a quiet layer on your desktop",
@@ -371,7 +371,10 @@
       "removeCalendar": "Remove calendar",
       "namePlaceholder": "Name (e.g. Work)",
       "urlPlaceholder": "https://…/basic.ics",
-      "add": "Add"
+      "add": "Add",
+      "weekStart": "Week starts on",
+      "sunday": "Sunday",
+      "monday": "Monday"
     }
   },
   "search": {

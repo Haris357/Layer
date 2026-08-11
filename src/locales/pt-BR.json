@@ -115,7 +115,7 @@
       "previewScreensaver": "Visualizar protetor de tela",
       "hotCornerNote": "Você também pode mover o mouse rapidamente para o canto superior esquerdo para alternar espaços (ative “Canto ativo” em Geral).",
       "disabled": "Desativado",
-      "remapHint": "Clique em um atalho para reatribuí-lo, ou desative-o para liberar as teclas para outros apps."
+      "remapHint": "Clique em um atalho e pressione a nova combinação (inclua Ctrl, Shift ou Alt). Pressione Esc para cancelar. Desative um para liberar suas teclas para outros apps."
     },
     "about": {
       "tagline": "uma camada silenciosa na sua área de trabalho",
@@ -353,7 +353,10 @@
       "removeCalendar": "Remover calendário",
       "namePlaceholder": "Nome (ex.: Trabalho)",
       "urlPlaceholder": "https://…/basic.ics",
-      "add": "Adicionar"
+      "add": "Adicionar",
+      "weekStart": "A semana começa em",
+      "sunday": "Domingo",
+      "monday": "Segunda"
     }
   },
   "search": {

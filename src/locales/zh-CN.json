@@ -115,7 +115,7 @@
       "previewScreensaver": "预览屏幕保护",
       "hotCornerNote": "您也可以将鼠标快速甩到左上角来切换空间（在通用中启用“热角”）。",
       "disabled": "关闭",
-      "remapHint": "点击快捷键可重新绑定，或将其关闭以便其他应用使用这些按键。"
+      "remapHint": "点击快捷键，然后按下新的组合键（需包含 Ctrl、Shift 或 Alt）。按 Esc 取消。关闭某项可将其按键留给其他应用。"
     },
     "about": {
       "tagline": "桌面上一层静谧的存在",
@@ -353,7 +353,10 @@
       "removeCalendar": "移除日历",
       "namePlaceholder": "名称（例如 工作）",
       "urlPlaceholder": "https://…/basic.ics",
-      "add": "添加"
+      "add": "添加",
+      "weekStart": "一周的起始日",
+      "sunday": "周日",
+      "monday": "周一"
     }
   },
   "search": {

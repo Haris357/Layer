@@ -115,7 +115,7 @@
       "previewScreensaver": "Anteprima salvaschermo",
       "hotCornerNote": "Puoi anche portare il mouse nell'angolo in alto a sinistra per cambiare spazio (abilita “Angolo attivo” in Generale).",
       "disabled": "Disattivato",
-      "remapHint": "Fai clic su una scorciatoia per riassegnarla, oppure disattivala per liberare i tasti per altre app."
+      "remapHint": "Fai clic su una scorciatoia e premi la nuova combinazione (con Ctrl, Shift o Alt). Premi Esc per annullare. Disattivane una per liberare i tasti per altre app."
     },
     "about": {
       "tagline": "uno strato silenzioso sul tuo desktop",
@@ -353,7 +353,10 @@
       "removeCalendar": "Rimuovi calendario",
       "namePlaceholder": "Nome (es. Lavoro)",
       "urlPlaceholder": "https://…/basic.ics",
-      "add": "Aggiungi"
+      "add": "Aggiungi",
+      "weekStart": "La settimana inizia di",
+      "sunday": "Domenica",
+      "monday": "Lunedì"
     }
   },
   "search": {

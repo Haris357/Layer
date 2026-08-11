@@ -115,7 +115,7 @@
       "previewScreensaver": "Bildschirmschoner-Vorschau",
       "hotCornerNote": "Du kannst die Maus auch in die obere linke Ecke bewegen, um Bereiche zu wechseln (aktiviere „Aktive Ecke“ unter Allgemein).",
       "disabled": "Aus",
-      "remapHint": "Klicke auf ein Kürzel, um es neu zu belegen, oder schalte es aus, um die Tasten für andere Apps freizugeben."
+      "remapHint": "Klicke auf ein Kürzel und drücke die neue Kombination (mit Ctrl, Shift oder Alt). Drücke Esc zum Abbrechen. Schalte eines aus, um seine Tasten für andere Apps freizugeben."
     },
     "about": {
       "tagline": "eine stille Schicht auf deinem Desktop",
@@ -353,7 +353,10 @@
       "removeCalendar": "Kalender entfernen",
       "namePlaceholder": "Name (z. B. Arbeit)",
       "urlPlaceholder": "https://…/basic.ics",
-      "add": "Hinzufügen"
+      "add": "Hinzufügen",
+      "weekStart": "Woche beginnt am",
+      "sunday": "Sonntag",
+      "monday": "Montag"
     }
   },
   "search": {

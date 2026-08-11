@@ -29,9 +29,11 @@ import {
 import { months, weekdays, dateLocale } from '../../lib/locale'
 import { cn } from '../../lib/utils'
 import { Menu } from '../Menu'
+import { Segmented } from '../ui'
 import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 import { useCalendarSourcesStore } from '../../store/calendarSourcesStore'
+import { useSettingsStore } from '../../store/settingsStore'
 
 // Local events + read-only subscription events, merged for display.
 function useAllEvents(): CalendarEvent[] {
@@ -58,19 +60,26 @@ function MonthView({
   events: CalendarEvent[]
   onSelectDay: (d: Date) => void
 }) {
+  const weekStart = useSettingsStore((s) => s.weekStart)
   const y = cursor.getFullYear()
   const m = cursor.getMonth()
   const firstDay = new Date(y, m, 1).getDay()
   const daysInMonth = new Date(y, m + 1, 0).getDate()
+  // Leading blanks depend on which weekday the grid starts on.
+  const lead = (firstDay - weekStart + 7) % 7
   const cells: (Date | null)[] = []
-  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let i = 0; i < lead; i++) cells.push(null)
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(y, m, d))
   while (cells.length % 7 !== 0) cells.push(null)
+
+  // Weekday header rotated so the chosen start day comes first.
+  const wd = weekdays('narrow')
+  const header = [...wd.slice(weekStart), ...wd.slice(0, weekStart)]
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="grid grid-cols-7 gap-0.5">
-        {weekdays('narrow').map((w, i) => (
+        {header.map((w, i) => (
           <span
             key={i}
             className="text-center text-[var(--text-tertiary)]"
@@ -139,9 +148,10 @@ function WeekView({
   onSelectDay: (d: Date) => void
 }) {
   const { t } = useTranslation()
-  // 7 days starting from the Sunday of the cursor week, as horizontal rows.
-  const sunday = addDays(cursor, -cursor.getDay())
-  const days = Array.from({ length: 7 }, (_, i) => addDays(sunday, i))
+  const weekStart = useSettingsStore((s) => s.weekStart)
+  // 7 days starting from the configured first day of the cursor's week.
+  const start = addDays(cursor, -((cursor.getDay() - weekStart + 7) % 7))
+  const days = Array.from({ length: 7 }, (_, i) => addDays(start, i))
   return (
     <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto">
       {days.map((d) => {
@@ -700,6 +710,7 @@ function CalendarRenderer() {
   const { t } = useTranslation()
   const events = useAllEvents()
   const today = useMemo(() => startOfDay(new Date()), [])
+  const weekStart = useSettingsStore((s) => s.weekStart)
   const [view, setView] = useState<ViewKind>('month')
   const [cursor, setCursor] = useState<Date>(today)
   const [openDay, setOpenDay] = useState<Date | null>(null)
@@ -710,17 +721,17 @@ function CalendarRenderer() {
   const headerTitle = useMemo(() => {
     if (view === 'month') return `${months('long')[cursor.getMonth()]} ${cursor.getFullYear()}`
     if (view === 'week') {
-      const sunday = addDays(cursor, -cursor.getDay())
-      const sat = addDays(sunday, 6)
-      const sameMonth = sunday.getMonth() === sat.getMonth()
-      const a = months('long')[sunday.getMonth()] ?? ''
-      const b = months('long')[sat.getMonth()] ?? ''
+      const first = addDays(cursor, -((cursor.getDay() - weekStart + 7) % 7))
+      const last = addDays(first, 6)
+      const sameMonth = first.getMonth() === last.getMonth()
+      const a = months('long')[first.getMonth()] ?? ''
+      const b = months('long')[last.getMonth()] ?? ''
       return sameMonth
-        ? `${a.slice(0, 3)} ${sunday.getDate()}–${sat.getDate()}`
-        : `${a.slice(0, 3)} ${sunday.getDate()} – ${b.slice(0, 3)} ${sat.getDate()}`
+        ? `${a.slice(0, 3)} ${first.getDate()}–${last.getDate()}`
+        : `${a.slice(0, 3)} ${first.getDate()} – ${b.slice(0, 3)} ${last.getDate()}`
     }
     return `${months('long')[cursor.getMonth()]} ${cursor.getDate()}`
-  }, [view, cursor])
+  }, [view, cursor, weekStart])
 
   const shift = (dir: -1 | 1) => {
     if (view === 'month') {
@@ -857,6 +868,8 @@ function CalendarRenderer() {
 // settings popover. Sources are global (shared across calendar widgets).
 function CalendarSettings() {
   const { t } = useTranslation()
+  const weekStart = useSettingsStore((s) => s.weekStart)
+  const setWeekStart = useSettingsStore((s) => s.setWeekStart)
   const sources = useCalendarSourcesStore((s) => s.sources)
   const addSource = useCalendarSourcesStore((s) => s.addSource)
   const updateSource = useCalendarSourcesStore((s) => s.updateSource)
@@ -884,6 +897,20 @@ function CalendarSettings() {
 
   return (
     <div className="flex w-[284px] flex-col gap-3">
+      <div className="flex flex-col gap-1.5">
+        <div className="text-[12px] font-semibold text-[var(--text-secondary)]">
+          {t('calendar.settings.weekStart')}
+        </div>
+        <Segmented
+          value={String(weekStart)}
+          options={[
+            { value: '0', label: t('calendar.settings.sunday') },
+            { value: '1', label: t('calendar.settings.monday') },
+          ]}
+          onChange={(v) => setWeekStart(Number(v) as 0 | 1)}
+        />
+      </div>
+      <div className="h-px bg-[var(--border)]" />
       <div className="text-[12px] font-semibold text-[var(--text-secondary)]">
         {t('calendar.settings.title')}
       </div>

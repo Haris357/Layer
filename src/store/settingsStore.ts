@@ -18,6 +18,8 @@ interface SettingsState {
   snapEnabled: boolean
   hotkey: string
   clockFormat24h: boolean
+  // First day of the week in the Calendar widget: 0 = Sunday, 1 = Monday.
+  weekStart: 0 | 1
   secondaryShortcuts: Record<SecondaryShortcut, ShortcutSetting>
   // UI language code (e.g. 'en', 'es'). i18n reads this from the persisted blob
   // on boot; the Settings picker drives changes via lib/i18n's changeLanguage.
@@ -46,6 +48,7 @@ interface SettingsState {
   setSnapEnabled: (enabled: boolean) => void
   setHotkey: (hotkey: string) => void
   setClockFormat24h: (value: boolean) => void
+  setWeekStart: (value: 0 | 1) => void
   setSecondaryShortcut: (
     action: SecondaryShortcut,
     patch: Partial<ShortcutSetting>,
@@ -76,6 +79,7 @@ export const useSettingsStore = create<SettingsState>()(
       snapEnabled: true,
       hotkey: 'Ctrl+Shift+Space',
       clockFormat24h: false,
+      weekStart: 0,
       secondaryShortcuts: {
         capture: { accelerator: 'Ctrl+Shift+N', enabled: true },
         screensaver: { accelerator: 'Ctrl+Shift+S', enabled: true },
@@ -102,6 +106,7 @@ export const useSettingsStore = create<SettingsState>()(
       setSnapEnabled: (snapEnabled) => set({ snapEnabled }),
       setHotkey: (hotkey) => set({ hotkey }),
       setClockFormat24h: (clockFormat24h) => set({ clockFormat24h }),
+      setWeekStart: (weekStart) => set({ weekStart }),
       setSecondaryShortcut: (action, patch) =>
         set((s) => ({
           secondaryShortcuts: {

@@ -185,10 +185,23 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
   const canTheme = widget.type !== 'note' && widget.type !== 'sticky'
 
   return (
-    <motion.div
-      ref={menuRef}
-      data-hit
-      initial={{ opacity: 0, scale: 0.96 }}
+    <>
+      {/* Full-screen hit backdrop: makes the whole screen interactive while the
+          menu is open, so a click on empty canvas (which is otherwise
+          click-through and never reaches the webview) still closes it. */}
+      <div
+        data-hit
+        className="fixed inset-0 z-[9998]"
+        onMouseDown={onClose}
+        onContextMenu={(e) => {
+          e.preventDefault()
+          onClose()
+        }}
+      />
+      <motion.div
+        ref={menuRef}
+        data-hit
+        initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.12, ease: 'easeOut' }}
       className="glass fixed z-[9999] min-w-[170px] rounded-[10px] border border-[var(--border)] p-1"
@@ -320,6 +333,7 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
           </div>
         </>
       )}
-    </motion.div>
+      </motion.div>
+    </>
   )
 }

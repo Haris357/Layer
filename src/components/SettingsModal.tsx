@@ -24,8 +24,10 @@ import {
   openUrl,
   previewScreensaver,
   quitApp,
+  setShortcuts,
   showInFolder,
 } from '../lib/ipc'
+import { buildShortcuts } from '../hooks/useShortcuts'
 import { useCanvasStore } from '../store/canvasStore'
 import { useMonitorStore, useAnchorMonitor } from '../store/monitorStore'
 import { useToastStore } from '../store/toastStore'
@@ -196,6 +198,28 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
     window.addEventListener('keydown', handler, true)
     return () => window.removeEventListener('keydown', handler, true)
   }, [capturing, setHotkey, setSecondaryShortcut])
+
+  // While rebinding, unregister every global shortcut so Windows stops
+  // swallowing the combos (otherwise pressing e.g. Ctrl+Shift+S just fires the
+  // action and never reaches the capture box). Re-apply the saved config the
+  // moment rebinding ends — whether the user set a new key or pressed Esc.
+  useEffect(() => {
+    if (capturing) {
+      setShortcuts([]).catch(() => {})
+      return
+    }
+    const s = useSettingsStore.getState()
+    setShortcuts(buildShortcuts(s.hotkey, s.secondaryShortcuts)).catch(() => {})
+  }, [capturing])
+
+  // Safety: if Settings is closed while still mid-rebind, make sure the saved
+  // shortcuts get re-registered.
+  useEffect(() => {
+    return () => {
+      const s = useSettingsStore.getState()
+      setShortcuts(buildShortcuts(s.hotkey, s.secondaryShortcuts)).catch(() => {})
+    }
+  }, [])
 
   const toggleAutostart = (value: boolean) => {
     setAutostart(value)
