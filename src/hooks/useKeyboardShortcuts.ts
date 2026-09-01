@@ -35,11 +35,12 @@ export function useKeyboardShortcuts(): void {
         state.redo()
         return
       }
-      if (ctrl && k === 'v') {
-        e.preventDefault()
-        state.pasteWidget()
-        return
-      }
+
+      // Ctrl+C / Ctrl+V are deliberately NOT bound to widget copy/paste here.
+      // A widget stays "selected" on the canvas even after focus moves away to
+      // select text elsewhere (a tooltip, a bookmark title, page text) — so a
+      // global Ctrl+C/V binding would hijack ordinary text copy/paste. Cloning
+      // a widget is still available via Ctrl+D or the right-click menu.
 
       const id = state.selectedId
       if (!id) return
@@ -47,9 +48,6 @@ export function useKeyboardShortcuts(): void {
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault()
         state.deleteWidget(id)
-      } else if (ctrl && k === 'c') {
-        e.preventDefault()
-        state.copyWidget(id)
       } else if (ctrl && k === 'd') {
         e.preventDefault()
         state.duplicateWidget(id)

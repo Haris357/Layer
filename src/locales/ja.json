@@ -113,6 +113,7 @@
       "cycleSpaces": "スペースを順に切り替え",
       "peek": "のぞき見（長押し）",
       "previewScreensaver": "スクリーンセーバーをプレビュー",
+      "hideEverything": "すべて非表示",
       "hotCornerNote": "マウスを左上の隅に弾くようにしてスペースを切り替えることもできます（一般設定で「ホットコーナー」を有効にしてください）。",
       "disabled": "オフ",
       "remapHint": "ショートカットをクリックして、新しいキーの組み合わせ（Ctrl、Shift、Alt を含む）を押します。Esc でキャンセル。オフにすると、そのキーを他のアプリで使えます。"
@@ -654,6 +655,10 @@
     "delete": "削除",
     "background": "背景",
     "opacity": "不透明度 · {{pct}}%",
+    "size": "サイズ",
+    "sizeSmall": "S",
+    "sizeMedium": "M",
+    "sizeLarge": "L",
     "color": "カラー",
     "reset": "リセット",
     "theme": "テーマ",

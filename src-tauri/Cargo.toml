@@ -1,6 +1,6 @@
 [package]
 name = "layer"
-version = "1.9.0"
+version = "1.10.0"
 description = "A quiet layer on your desktop"
 authors = ["Layer"]
 edition = "2021"

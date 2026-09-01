@@ -20,7 +20,6 @@ interface CanvasState {
   activeId: string
   past: Widget[][]
   future: Widget[][]
-  clipboard: Widget | null
   guides: { v: number[]; h: number[] }
   setGuides: (guides: { v: number[]; h: number[] }) => void
   addWidget: (widget: NewWidget) => string
@@ -30,8 +29,6 @@ interface CanvasState {
   liveUpdateWidget: (id: string, patch: Partial<Widget>) => void
   deleteWidget: (id: string) => void
   duplicateWidget: (id: string) => void
-  copyWidget: (id: string) => void
-  pasteWidget: () => void
   toggleLock: (id: string) => void
   bringToFront: (id: string) => void
   sendToBack: (id: string) => void
@@ -114,6 +111,15 @@ const KNOWN_TYPES: ReadonlySet<string> = new Set([
   'shelf',
   'audio',
   'board',
+  // Browser-extension-only widgets. The desktop has no renderer for these, so
+  // WidgetWrapper draws nothing (its `if (!def) return null` guard) — but they
+  // are listed here so a space synced from the Chrome extension keeps them in
+  // the data instead of pruning them away. Tolerated-but-not-rendered, the
+  // exact mirror of how the extension hides the desktop's native widgets.
+  'bookmarks',
+  'topsites',
+  'recentlyclosed',
+  'focusblocklist',
 ])
 function pruneUnknown(widgets: Widget[]): Widget[] {
   return healZ(widgets.filter((w) => KNOWN_TYPES.has(w.type)))
@@ -142,7 +148,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     activeId: '',
     past: [],
     future: [],
-    clipboard: null,
     guides: { v: [], h: [] },
 
     setGuides: (guides) => set({ guides }),
@@ -234,31 +239,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
             id: newId,
             x: original.x + 24,
             y: original.y + 24,
-            zIndex: nextZIndex(state.widgets),
-          } as Widget,
-        ],
-        selectedId: newId,
-      }))
-    },
-
-    copyWidget: (id) => {
-      const w = get().widgets.find((x) => x.id === id)
-      if (w) set({ clipboard: { ...w } })
-    },
-
-    pasteWidget: () => {
-      const clip = get().clipboard
-      if (!clip) return
-      pushHistory()
-      const newId = uid()
-      set((state) => ({
-        widgets: [
-          ...state.widgets,
-          {
-            ...clip,
-            id: newId,
-            x: clip.x + 28,
-            y: clip.y + 28,
             zIndex: nextZIndex(state.widgets),
           } as Widget,
         ],

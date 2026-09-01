@@ -113,6 +113,7 @@
       "cycleSpaces": "Cambiar de espacio",
       "peek": "Vistazo (mantener)",
       "previewScreensaver": "Previsualizar salvapantallas",
+      "hideEverything": "Ocultar todo",
       "hotCornerNote": "También puedes llevar el ratón a la esquina superior izquierda para cambiar de espacio (activa «Esquina activa» en General).",
       "disabled": "Desactivado",
       "remapHint": "Haz clic en un atajo y pulsa la nueva combinación (incluye Ctrl, Shift o Alt). Pulsa Esc para cancelar. Desactiva uno para liberar sus teclas para otras apps."
@@ -654,6 +655,10 @@
     "delete": "Eliminar",
     "background": "Fondo",
     "opacity": "Opacidad · {{pct}}%",
+    "size": "Tamaño",
+    "sizeSmall": "S",
+    "sizeMedium": "M",
+    "sizeLarge": "L",
     "color": "Color",
     "reset": "restablecer",
     "theme": "Tema",

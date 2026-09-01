@@ -5,6 +5,7 @@ import { listen } from '@tauri-apps/api/event'
 import { Inbox } from 'lucide-react'
 import { useInboxStore } from '../store/inboxStore'
 import { useToastStore } from '../store/toastStore'
+import { setFront } from '../lib/ipc'
 import { MonitorLayer } from './MonitorLayer'
 
 // Listens for the Ctrl+Shift+N global hotkey (emitted from Rust as
@@ -34,9 +35,17 @@ export function QuickCaptureModal() {
     return () => window.clearTimeout(id)
   }, [open])
 
+  // Rust grabbed real OS focus so this popup is visible/typeable over
+  // whatever app was active (see focus_capture_window in window.rs). Restore
+  // normal pinned-to-bottom, click-through desktop-layer mode on close —
+  // setFront's value is ignored by set_layer, it always re-pins to the
+  // bottom; the call itself is what triggers the restore.
+  const restoreLayer = () => setFront(false).catch(() => {})
+
   const cancel = () => {
     setOpen(false)
     setText('')
+    restoreLayer()
   }
 
   const save = () => {
@@ -51,6 +60,7 @@ export function QuickCaptureModal() {
     }
     setOpen(false)
     setText('')
+    restoreLayer()
   }
 
   return (

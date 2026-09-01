@@ -113,6 +113,7 @@
       "cycleSpaces": "Parcourir les espaces",
       "peek": "Aperçu (maintenir)",
       "previewScreensaver": "Prévisualiser l’écran de veille",
+      "hideEverything": "Tout masquer",
       "hotCornerNote": "Vous pouvez aussi amener la souris dans le coin supérieur gauche pour changer d’espace (activez « Coin actif » dans Général).",
       "disabled": "Désactivé",
       "remapHint": "Cliquez sur un raccourci, puis appuyez sur la nouvelle combinaison (avec Ctrl, Shift ou Alt). Appuyez sur Échap pour annuler. Désactivez-en un pour libérer ses touches pour d’autres applications."
@@ -654,6 +655,10 @@
     "delete": "Supprimer",
     "background": "Arrière-plan",
     "opacity": "Opacité · {{pct}} %",
+    "size": "Taille",
+    "sizeSmall": "S",
+    "sizeMedium": "M",
+    "sizeLarge": "L",
     "color": "Couleur",
     "reset": "réinitialiser",
     "theme": "Thème",

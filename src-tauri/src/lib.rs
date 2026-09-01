@@ -64,13 +64,19 @@ pub fn run() {
                     };
                     match action.as_deref() {
                         Some("capture") => {
-                            // Bring the window forward first so the modal shows.
+                            // Grab REAL foreground focus so the popup is visible
+                            // and typeable over whatever app is currently active —
+                            // set_layer (used everywhere else) pins to the bottom
+                            // of the z-order instead, which would leave this
+                            // invisible behind other windows. The frontend calls
+                            // setFront() to restore normal pinned mode on close.
                             if let Some(w) = app.get_webview_window("main") {
-                                let _ = w.unminimize();
-                                let _ = w.show();
-                                window::set_layer(&w, true);
+                                window::focus_capture_window(&w);
                             }
                             let _ = app.emit("quick-capture", ());
+                        }
+                        Some("hideAll") => {
+                            let _ = app.emit("hide-all", ());
                         }
                         Some("screensaver") => screensaver::preview(),
                         Some("cycle") => {

@@ -23,7 +23,13 @@ export function SettingsPopover({ widget }: { widget: Widget }) {
       initial={{ opacity: 0, y: openBelow ? -6 : 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: openBelow ? -6 : 6 }}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
+      // Selecting a widget (including right when it's added) opens this AND
+      // the widget's own entrance animation on the same frame — two new
+      // backdrop-filter glass surfaces starting to blur at once is a known
+      // compositor flash trigger over Layer's transparent window. A small
+      // delay lets the widget's blur surface settle first so they don't both
+      // materialize on the same paint.
+      transition={{ duration: 0.15, ease: 'easeOut', delay: 0.18 }}
       className={cn(
         'glass absolute z-[50] rounded-[10px] border border-[var(--border)] p-2',
         openBelow ? 'top-full mt-3' : 'bottom-full mb-3',

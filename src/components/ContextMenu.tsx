@@ -13,7 +13,27 @@ import {
 import { useCanvasStore } from '../store/canvasStore'
 import { useMonitorStore } from '../store/monitorStore'
 import { hexToRgba } from '../lib/utils'
+import { widgetRegistry } from '../lib/widgetRegistry'
 import { Segmented, Slider, Toggle } from './ui'
+
+// Quick Small/Medium/Large sizing — interpolated between a widget type's own
+// min/max size (so "Large" on a sticky note and "Large" on a gallery each
+// land somewhere sensible for THAT widget, not a fixed pixel size for all).
+// Types without a declared maxSize get a generic 2.5x-of-min ceiling instead
+// of ballooning to something absurd.
+type Size = { width: number; height: number }
+function sizePresets(min: Size, max: Size | undefined, lockAspect: boolean) {
+  const ceiling = max ?? { width: min.width * 2.5, height: min.height * 2.5 }
+  const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t)
+  const at = (t: number): Size => {
+    if (lockAspect) {
+      const s = lerp(Math.min(min.width, min.height), Math.min(ceiling.width, ceiling.height), t)
+      return { width: s, height: s }
+    }
+    return { width: lerp(min.width, ceiling.width, t), height: lerp(min.height, ceiling.height, t) }
+  }
+  return { small: at(0.15), medium: at(0.5), large: at(0.9) }
+}
 
 // Quick-pick accent swatches; users can still pick any colour via the picker.
 const PRESET_ACCENTS = [
@@ -151,6 +171,17 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
     onClose()
   }
 
+  const def = widgetRegistry[widget.type]
+  const lockAspect = widget.type === 'clock' && widget.variant === 'analog'
+  const presets = def
+    ? sizePresets(def.minSize ?? { width: 120, height: 80 }, def.maxSize, lockAspect)
+    : null
+  const activePreset = presets
+    ? (Object.entries(presets).find(
+        ([, s]) => s.width === widget.width && s.height === widget.height,
+      )?.[0] as 'small' | 'medium' | 'large' | undefined)
+    : undefined
+
   const items: MenuItem[] = [
     {
       label: t('contextMenu.duplicate'),
@@ -253,6 +284,30 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
           onChange={(v) => updateWidget(widgetId, { opacity: v })}
         />
       </div>
+
+      {presets && !widget.locked && (
+        <div className="flex flex-col gap-1.5 px-2.5 py-1.5">
+          <span
+            className="text-[var(--text-secondary)]"
+            style={{ fontSize: 11, fontWeight: 600 }}
+          >
+            {t('contextMenu.size')}
+          </span>
+          <Segmented<'small' | 'medium' | 'large' | ''>
+            value={activePreset ?? ''}
+            options={[
+              { value: 'small', label: t('contextMenu.sizeSmall') },
+              { value: 'medium', label: t('contextMenu.sizeMedium') },
+              { value: 'large', label: t('contextMenu.sizeLarge') },
+            ]}
+            onChange={(v) => {
+              if (!v) return
+              const s = presets[v]
+              updateWidget(widgetId, { width: s.width, height: s.height })
+            }}
+          />
+        </div>
+      )}
 
       {/* Notes and sticky notes carry their own theming, so skip them. */}
       {canTheme && (

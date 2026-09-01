@@ -151,6 +151,33 @@ pub fn set_layer(window: &WebviewWindow, _front: bool) {
 #[cfg(not(target_os = "windows"))]
 pub fn set_layer(_window: &WebviewWindow, _front: bool) {}
 
+// Quick Capture needs the exact opposite of `set_layer`: real, temporary OS
+// focus so the popup is actually visible and typeable OVER whatever app the
+// user is currently in — not pinned at the bottom of the z-order like normal
+// desktop-layer mode. NOACTIVATE has to come off first (a NOACTIVATE window
+// cannot be made the OS foreground window at all), then we bring it forward
+// the same proven way the screensaver already does. Call `set_layer` again
+// when the capture popup closes to restore normal pinned-to-bottom behaviour.
+#[cfg(target_os = "windows")]
+pub fn focus_capture_window(window: &WebviewWindow) {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{SetForegroundWindow, ShowWindow, SW_SHOW};
+    let _ = window.unminimize();
+    set_noactivate(window, false);
+    let hwnd: HWND = match window.hwnd() {
+        Ok(h) => h.0 as HWND,
+        Err(_) => return,
+    };
+    unsafe {
+        ShowWindow(hwnd, SW_SHOW);
+        SetForegroundWindow(hwnd);
+    }
+    let _ = window.set_focus();
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn focus_capture_window(_window: &WebviewWindow) {}
+
 #[cfg(target_os = "windows")]
 fn cursor_pos() -> (i32, i32) {
     use windows_sys::Win32::Foundation::POINT;

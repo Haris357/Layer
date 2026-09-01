@@ -7,7 +7,7 @@ export type ScreensaverTheme = 'ambient' | 'minimal' | 'quote'
 // The remappable/disable-able secondary global shortcuts. The main edit-mode
 // toggle stays in `hotkey`. Each of these can be rebound or turned off so it
 // doesn't clash with other apps (e.g. Ctrl+Shift+S vs "Save As").
-export type SecondaryShortcut = 'capture' | 'screensaver' | 'cycle'
+export type SecondaryShortcut = 'capture' | 'screensaver' | 'cycle' | 'hideAll'
 export interface ShortcutSetting {
   accelerator: string
   enabled: boolean
@@ -21,6 +21,11 @@ interface SettingsState {
   // First day of the week in the Calendar widget: 0 = Sunday, 1 = Monday.
   weekStart: 0 | 1
   secondaryShortcuts: Record<SecondaryShortcut, ShortcutSetting>
+  // Remembers which Space was last active for a given monitor setup (keyed by
+  // a signature of connected monitor resolutions — see useMonitorProfiles).
+  // Written passively as you use the app; read on launch/monitor-change to
+  // auto-switch back to it, e.g. office multi-monitor vs. laptop-only.
+  monitorSpaceMap: Record<string, string>
   // UI language code (e.g. 'en', 'es'). i18n reads this from the persisted blob
   // on boot; the Settings picker drives changes via lib/i18n's changeLanguage.
   language: string
@@ -33,14 +38,6 @@ interface SettingsState {
   // Which monitor the pill + modals anchor to. -1 = auto (primary monitor).
   uiMonitor: number
   onboarded: boolean
-  // Cloud sync. `cloudSyncConsented` gates the whole feature behind explicit
-  // permission; `cloudSyncEnabled` reflects a signed-in, syncing session.
-  cloudSyncConsented: boolean
-  cloudSyncEnabled: boolean
-  autoSync: boolean
-  syncEmail: string | null
-  deviceId: string
-  lastSyncedAt: string | null
   // Layer Notch (separate top-center window).
   notchEnabled: boolean
   notchMonitor: number
@@ -53,6 +50,7 @@ interface SettingsState {
     action: SecondaryShortcut,
     patch: Partial<ShortcutSetting>,
   ) => void
+  setMonitorSpace: (signature: string, spaceId: string) => void
   setLanguage: (value: string) => void
   setTheme: (theme: ThemePref) => void
   setAutostartInit: (value: boolean) => void
@@ -62,12 +60,6 @@ interface SettingsState {
   setHotCorner: (value: boolean) => void
   setUiMonitor: (value: number) => void
   setOnboarded: (value: boolean) => void
-  setCloudSyncConsented: (value: boolean) => void
-  setCloudSyncEnabled: (value: boolean) => void
-  setAutoSync: (value: boolean) => void
-  setSyncEmail: (value: string | null) => void
-  setDeviceId: (value: string) => void
-  setLastSyncedAt: (value: string | null) => void
   setNotchEnabled: (value: boolean) => void
   setNotchMonitor: (value: number) => void
 }
@@ -84,7 +76,9 @@ export const useSettingsStore = create<SettingsState>()(
         capture: { accelerator: 'Ctrl+Shift+N', enabled: true },
         screensaver: { accelerator: 'Ctrl+Shift+S', enabled: true },
         cycle: { accelerator: 'Ctrl+Shift+E', enabled: true },
+        hideAll: { accelerator: 'Ctrl+Shift+H', enabled: true },
       },
+      monitorSpaceMap: {},
       language: 'en',
       theme: 'system',
       autostartInit: false,
@@ -94,12 +88,6 @@ export const useSettingsStore = create<SettingsState>()(
       hotCorner: false,
       uiMonitor: -1,
       onboarded: false,
-      cloudSyncConsented: false,
-      cloudSyncEnabled: false,
-      autoSync: true,
-      syncEmail: null,
-      deviceId: '',
-      lastSyncedAt: null,
       notchEnabled: false,
       notchMonitor: -1,
       setGridSize: (gridSize) => set({ gridSize }),
@@ -114,6 +102,10 @@ export const useSettingsStore = create<SettingsState>()(
             [action]: { ...s.secondaryShortcuts[action], ...patch },
           },
         })),
+      setMonitorSpace: (signature, spaceId) =>
+        set((s) => ({
+          monitorSpaceMap: { ...s.monitorSpaceMap, [signature]: spaceId },
+        })),
       setLanguage: (language) => set({ language }),
       setTheme: (theme) => set({ theme }),
       setAutostartInit: (autostartInit) => set({ autostartInit }),
@@ -124,16 +116,28 @@ export const useSettingsStore = create<SettingsState>()(
       setHotCorner: (hotCorner) => set({ hotCorner }),
       setUiMonitor: (uiMonitor) => set({ uiMonitor }),
       setOnboarded: (onboarded) => set({ onboarded }),
-      setCloudSyncConsented: (cloudSyncConsented) =>
-        set({ cloudSyncConsented }),
-      setCloudSyncEnabled: (cloudSyncEnabled) => set({ cloudSyncEnabled }),
-      setAutoSync: (autoSync) => set({ autoSync }),
-      setSyncEmail: (syncEmail) => set({ syncEmail }),
-      setDeviceId: (deviceId) => set({ deviceId }),
-      setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),
       setNotchEnabled: (notchEnabled) => set({ notchEnabled }),
       setNotchMonitor: (notchMonitor) => set({ notchMonitor }),
     }),
-    { name: 'layer-settings' },
+    {
+      name: 'layer-settings',
+      // zustand's default merge is shallow, so a saved `secondaryShortcuts`
+      // blob from before a new shortcut existed (e.g. hideAll) would wholesale
+      // replace the defaults object and drop the new key — undefined, and the
+      // Settings → Shortcuts tab crashes reading `.enabled` off it. Deep-merge
+      // just that one nested object so old installs pick up new shortcuts with
+      // their defaults while keeping every rebind/disable the user already made.
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<SettingsState>
+        return {
+          ...current,
+          ...p,
+          secondaryShortcuts: {
+            ...current.secondaryShortcuts,
+            ...(p.secondaryShortcuts ?? {}),
+          },
+        }
+      },
+    },
   ),
 )

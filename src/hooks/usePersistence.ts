@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
 import { useCanvasStore } from '../store/canvasStore'
 import { useJournalStore } from '../store/journalStore'
-import { useSettingsStore } from '../store/settingsStore'
-import { useSyncStore } from '../store/syncStore'
 import {
   isTauri,
   loadJournal,
@@ -101,19 +99,6 @@ export function usePersistence(): void {
       }
       saveSpaces(JSON.stringify(file, null, 2)).catch(() => {})
     }, 500)
-    return () => clearTimeout(timer)
-  }, [widgets, spaces, activeId, hydrated])
-
-  // Auto cloud-sync: when signed in with sync + auto-sync on, push changes on a
-  // longer debounce than the local save (Firestore free-tier write quota).
-  useEffect(() => {
-    if (!hydrated || !isTauri()) return
-    const { signedIn } = useSyncStore.getState()
-    const { cloudSyncEnabled, autoSync } = useSettingsStore.getState()
-    if (!signedIn || !cloudSyncEnabled || !autoSync) return
-    const timer = setTimeout(() => {
-      void useSyncStore.getState().syncNow()
-    }, 4000)
     return () => clearTimeout(timer)
   }, [widgets, spaces, activeId, hydrated])
 

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, useDragControls } from 'framer-motion'
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart'
-import { save } from '@tauri-apps/plugin-dialog'
 import {
   Loader2,
   X,
@@ -12,29 +11,24 @@ import {
   MonitorPlay,
   Keyboard,
   Info,
-  Cloud,
   type LucideIcon,
 } from 'lucide-react'
 import { useSettingsStore } from '../store/settingsStore'
 import type { SecondaryShortcut } from '../store/settingsStore'
 import { useThemeStatus } from '../store/themeStatusStore'
 import {
-  captureScreen,
   getAppVersion,
   openUrl,
   previewScreensaver,
   quitApp,
   setShortcuts,
-  showInFolder,
 } from '../lib/ipc'
 import { buildShortcuts } from '../hooks/useShortcuts'
 import { useCanvasStore } from '../store/canvasStore'
 import { useMonitorStore, useAnchorMonitor } from '../store/monitorStore'
-import { useToastStore } from '../store/toastStore'
 import { getUpdate } from '../lib/updater'
 import { runUpdate } from '../lib/updateFlow'
 import { Toggle, Slider, FieldRow, Segmented, Select } from './ui'
-import { SyncTab } from './SyncTab'
 import { useNotchStore, type NotchModuleId } from '../notch/notchStore'
 import { IS_STORE } from '../lib/dist'
 import { LANGUAGES, changeLanguage, type LanguageCode } from '../lib/i18n'
@@ -63,7 +57,6 @@ type TabId =
   | 'appearance'
   | 'screensaver'
   | 'notch'
-  | 'sync'
   | 'shortcuts'
   | 'about'
 
@@ -75,7 +68,6 @@ const TABS: { id: TabId; icon: LucideIcon }[] = [
   // Notch/Dock is parked — its tab is hidden from release builds while the
   // feature is finished. The panel code below stays so re-enabling is one line.
   // { id: 'notch', icon: PanelTop },
-  { id: 'sync', icon: Cloud },
   { id: 'shortcuts', icon: Keyboard },
   { id: 'about', icon: Info },
 ]
@@ -247,37 +239,6 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
     }
   }
 
-  const exportImage = async () => {
-    const path = await save({
-      title: t('settings.toasts.exportDialogTitle'),
-      defaultPath: 'layer-canvas.png',
-      filters: [{ name: 'PNG image', extensions: ['png'] }],
-    })
-    if (!path) return
-    onClose()
-    setTimeout(() => {
-      captureScreen(path)
-        .then(() =>
-          useToastStore.getState().showToast({
-            message: t('settings.toasts.canvasExported'),
-            icon: 'success',
-            duration: 7000,
-            actions: [
-              {
-                label: t('settings.toasts.openFolder'),
-                onClick: () => showInFolder(path).catch(() => {}),
-              },
-            ],
-          }),
-        )
-        .catch(() =>
-          useToastStore
-            .getState()
-            .showToast({ message: t('settings.toasts.exportFailed'), icon: 'error' }),
-        )
-    }, 250)
-  }
-
   const handleReset = () => {
     resetSpace(activeId)
     setConfirmReset(false)
@@ -422,13 +383,6 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
               <div className="flex flex-col gap-2">
                 <SectionTitle>{t('settings.general.canvas')}</SectionTitle>
-                <button
-                  type="button"
-                  onClick={() => exportImage().catch(() => {})}
-                  className={ghostBtn}
-                >
-                  {t('settings.general.exportImage')}
-                </button>
                 <button
                   type="button"
                   onClick={() =>
@@ -618,6 +572,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   ['capture', 'quickCapture'],
                   ['cycle', 'cycleSpaces'],
                   ['screensaver', 'previewScreensaver'],
+                  ['hideAll', 'hideEverything'],
                 ] as [SecondaryShortcut, string][]
               ).map(([action, labelKey]) => {
                 const cfg = secondaryShortcuts[action]
@@ -799,8 +754,6 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
           )}
-
-          {tab === 'sync' && <SyncTab />}
           </div>
         </div>
         </motion.div>

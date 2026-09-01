@@ -1248,6 +1248,7 @@ pub fn default_shortcuts() -> Vec<ShortcutDef> {
         ShortcutDef { action: "capture".into(), accelerator: "CmdOrControl+Shift+N".into(), enabled: true },
         ShortcutDef { action: "screensaver".into(), accelerator: "CmdOrControl+Shift+S".into(), enabled: true },
         ShortcutDef { action: "cycle".into(), accelerator: "CmdOrControl+Shift+E".into(), enabled: true },
+        ShortcutDef { action: "hideAll".into(), accelerator: "CmdOrControl+Shift+H".into(), enabled: true },
     ]
 }
 

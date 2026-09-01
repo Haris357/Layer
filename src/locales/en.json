@@ -13,6 +13,10 @@
     "delete": "Delete",
     "background": "Background",
     "opacity": "Opacity · {{pct}}%",
+    "size": "Size",
+    "sizeSmall": "S",
+    "sizeMedium": "M",
+    "sizeLarge": "L",
     "color": "Color",
     "reset": "reset",
     "theme": "Theme",
@@ -131,6 +135,7 @@
       "cycleSpaces": "Cycle spaces",
       "peek": "Peek (hold)",
       "previewScreensaver": "Preview screensaver",
+      "hideEverything": "Hide everything",
       "hotCornerNote": "You can also flick the mouse to the top-left corner to switch spaces (enable “Hot corner” in General).",
       "disabled": "Off",
       "remapHint": "Click a shortcut, then press the new combo (include Ctrl, Shift or Alt). Press Esc to cancel. Turn one off to free its keys for other apps."

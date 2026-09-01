@@ -113,6 +113,7 @@
       "cycleSpaces": "循环切换空间",
       "peek": "速览（按住）",
       "previewScreensaver": "预览屏幕保护",
+      "hideEverything": "隐藏全部",
       "hotCornerNote": "您也可以将鼠标快速甩到左上角来切换空间（在通用中启用“热角”）。",
       "disabled": "关闭",
       "remapHint": "点击快捷键，然后按下新的组合键（需包含 Ctrl、Shift 或 Alt）。按 Esc 取消。关闭某项可将其按键留给其他应用。"
@@ -654,6 +655,10 @@
     "delete": "删除",
     "background": "背景",
     "opacity": "不透明度 · {{pct}}%",
+    "size": "大小",
+    "sizeSmall": "S",
+    "sizeMedium": "M",
+    "sizeLarge": "L",
     "color": "颜色",
     "reset": "重置",
     "theme": "主题",

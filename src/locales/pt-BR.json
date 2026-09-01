@@ -113,6 +113,7 @@
       "cycleSpaces": "Alternar entre espaços",
       "peek": "Espiar (segurar)",
       "previewScreensaver": "Visualizar protetor de tela",
+      "hideEverything": "Ocultar tudo",
       "hotCornerNote": "Você também pode mover o mouse rapidamente para o canto superior esquerdo para alternar espaços (ative “Canto ativo” em Geral).",
       "disabled": "Desativado",
       "remapHint": "Clique em um atalho e pressione a nova combinação (inclua Ctrl, Shift ou Alt). Pressione Esc para cancelar. Desative um para liberar suas teclas para outros apps."
@@ -654,6 +655,10 @@
     "delete": "Excluir",
     "background": "Plano de fundo",
     "opacity": "Opacidade · {{pct}}%",
+    "size": "Tamanho",
+    "sizeSmall": "S",
+    "sizeMedium": "M",
+    "sizeLarge": "L",
     "color": "Cor",
     "reset": "redefinir",
     "theme": "Tema",
