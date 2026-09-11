@@ -189,6 +189,8 @@ jobs:
       # hiccup here doesn't fail it.
       - name: Update CHANGELOG.md
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
@@ -198,7 +200,15 @@ jobs:
           $bullets = ($lines | Where-Object { $_ -match '^\s*-\s+' }) -join "`n"
           $entry = "### $tag — $title`n$bullets`n"
 
-          $path = "CHANGELOG.md"
+          # The checkout at the top of this job is a detached HEAD at the
+          # pushed tag, which may be stale relative to main's current tip by
+          # the time this step runs. Rather than reason about this shallow
+          # checkout's exact refspec/detached state, clone fresh into a
+          # subdirectory — the same proven-safe pattern this workflow already
+          # used for years to push Layer-releases' changelog — so the push is
+          # always a clean fast-forward off main's true current tip.
+          git clone "https://x-access-token:$env:GH_TOKEN@github.com/Haris357/Layer.git" changelog-repo
+          $path = "changelog-repo/CHANGELOG.md"
           $doc = if (Test-Path $path) { Get-Content $path -Raw } else { "# Changelog`n" }
           if ($doc -match [regex]::Escape("### $tag ")) {
             Write-Host "CHANGELOG.md already has $tag — skipping."
@@ -210,11 +220,13 @@ jobs:
               "$anchor`n`n$entry`n$doc"
             }
             Set-Content -Path $path -Value $doc -Encoding utf8 -NoNewline
+            Push-Location changelog-repo
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add CHANGELOG.md
             git commit -m "Changelog: $tag"
-            git push origin HEAD:main
+            git push
+            Pop-Location
             Write-Host "CHANGELOG.md updated for $tag."
           }
 
