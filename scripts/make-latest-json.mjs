@@ -1,18 +1,28 @@
 // Builds the Tauri updater manifest (latest.json) from finished build(s).
-//   node scripts/make-latest-json.mjs v1.2.0 [arm64BundleDir]
+//   node scripts/make-latest-json.mjs v1.2.0 [arm64BundleDir] [outFile] [repo]
 // The optional second arg points at a directory holding the ARM64 NSIS
 // installer (+ .sig) — when present, a `windows-aarch64` platform is added so
 // native ARM64 installs auto-update to ARM64 builds. x64 is always required.
+//
+// Layer now publishes releases to BOTH Haris357/Layer (primary, since the
+// source repo is public now) and Haris357/Layer-releases (kept forever —
+// every already-installed copy of Layer has that URL baked into its updater
+// endpoint at compile time and can never be pointed elsewhere remotely). Each
+// repo needs its own manifest, since the asset download URLs differ — hence
+// the optional outFile/repo args, so this script can run twice.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const RELEASES_REPO = 'Haris357/Layer-releases'
 const X64_BUNDLE_DIR = 'src-tauri/target/release/bundle/nsis'
 
 const version = (process.argv[2] || '').replace(/^v/, '')
 const arm64Dir = process.argv[3] || ''
+const outFile = process.argv[4] || 'latest.json'
+const RELEASES_REPO = process.argv[5] || 'Haris357/Layer-releases'
 if (!version) {
-  console.error('usage: node scripts/make-latest-json.mjs <version> [arm64Dir]')
+  console.error(
+    'usage: node scripts/make-latest-json.mjs <version> [arm64Dir] [outFile] [repo]',
+  )
   process.exit(1)
 }
 
@@ -60,7 +70,7 @@ const manifest = {
   platforms,
 }
 
-writeFileSync('latest.json', JSON.stringify(manifest, null, 2))
+writeFileSync(outFile, JSON.stringify(manifest, null, 2))
 console.log(
-  `latest.json written for v${version} (${Object.keys(platforms).join(', ')})`,
+  `${outFile} written for v${version} → ${RELEASES_REPO} (${Object.keys(platforms).join(', ')})`,
 )
