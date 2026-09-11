@@ -79,10 +79,16 @@ Produces `.msi` and NSIS `.exe` installers under
 
 ## Notes
 
-- v1 uses a **full click-through toggle**: the whole window is interactive in
-  edit mode and fully click-through in view mode. Because of this, clicking a
-  Link widget only works while in edit mode — per-region click-through (and a
-  floating "edit" pill for view mode) is on the post-v1 roadmap.
 - The frontend (`npm run build`) compiles and type-checks cleanly. The Rust
   shell needs the Rust toolchain installed before `tauri dev` / `tauri build`
   will run.
+
+## Contributing
+
+PRs and issues welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Found a
+security issue? See [SECURITY.md](SECURITY.md) instead of opening a public
+issue.
+
+## License
+
+[MIT](LICENSE)
