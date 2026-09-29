@@ -26,6 +26,11 @@ export type WidgetType =
   | 'shelf'
   | 'audio'
   | 'board'
+  | 'camera'
+  | 'keepawake'
+  | 'mixer'
+  | 'quick'
+  | 'winget'
 
 export type Mode = 'edit' | 'view'
 
@@ -130,8 +135,13 @@ export interface WeatherWidget extends BaseWidget {
   unit?: 'c' | 'f'
 }
 
+export type StatsMetric = 'cpu' | 'memory' | 'disk' | 'battery' | 'network'
+
 export interface StatsWidget extends BaseWidget {
   type: 'stats'
+  // Which rows to show. Missing = the pre-toggle defaults (everything except
+  // network), so widgets placed before network existed don't suddenly grow.
+  metrics?: Partial<Record<StatsMetric, boolean>>
 }
 
 export interface TodoItem {
@@ -288,6 +298,48 @@ export interface AudioWidget extends BaseWidget {
   background: boolean
 }
 
+export interface CameraWidget extends BaseWidget {
+  type: 'camera'
+  // Picked from navigator.mediaDevices.enumerateDevices(); unset = OS default.
+  deviceId?: string
+  // Flip horizontally for a natural "mirror" feel. Default true (unset).
+  mirrored?: boolean
+}
+
+export interface KeepAwakeWidget extends BaseWidget {
+  type: 'keepawake'
+  enabled: boolean
+  // Also keep the display on, not just prevent sleep/lock.
+  keepDisplayOn: boolean
+  // Selected duration in minutes; null = indefinite (until toggled off).
+  timerMinutes: number | null
+  // Epoch ms the timer should end at; null = no active timer. Computed from
+  // timerMinutes at the moment it's turned on, not re-derived on the fly, so
+  // a countdown resumes correctly across an app restart.
+  endsAt: number | null
+}
+
+export interface MixerWidget extends BaseWidget {
+  type: 'mixer'
+  // Pin a master (device-level) slider above the per-app ones.
+  showMaster: boolean
+  background: boolean
+}
+
+export type QuickTile = 'dark' | 'icons' | 'nightlight' | 'recycle' | 'lock'
+
+export interface QuickWidget extends BaseWidget {
+  type: 'quick'
+  // Which tiles to show. Missing = all of them.
+  tiles?: Partial<Record<QuickTile, boolean>>
+}
+
+export interface WingetWidget extends BaseWidget {
+  type: 'winget'
+  // Package ids the user chose to hide from the list.
+  ignored?: string[]
+}
+
 export interface BoardCard {
   id: string
   x: number
@@ -340,6 +392,11 @@ export type Widget =
   | ShelfWidget
   | AudioWidget
   | BoardWidget
+  | CameraWidget
+  | KeepAwakeWidget
+  | MixerWidget
+  | QuickWidget
+  | WingetWidget
 
 export type NewWidget = Omit<Widget, 'id' | 'zIndex'>
 

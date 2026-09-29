@@ -1,9 +1,11 @@
 mod audio;
 mod commands;
 mod notch;
+mod quick;
 mod screensaver;
 mod storage;
 mod window;
+mod winget;
 
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -36,7 +38,25 @@ pub fn run() {
         }
     }
 
-    tauri::Builder::default()
+    let mut builder = tauri::Builder::default();
+    // Single-instance guard — must be registered before any other plugin
+    // (the plugin's own requirement) and ONLY for a normal launch. The
+    // screensaver is a deliberate second process running alongside an
+    // already-running Layer (own WebView2 profile, see above); if it were
+    // caught by this guard it would just get forwarded to the main
+    // instance and never actually show as a screensaver.
+    if !is_screensaver {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            // Someone tried to launch Layer again while it's already
+            // running. skipTaskbar + always-behind-other-windows means
+            // there's normally no visual sign it's running at all, so
+            // surface the toolbar instead of silently doing nothing —
+            // same action as a tray-icon left-click.
+            let _ = app.emit("toggle-mode", ());
+        }));
+    }
+
+    builder
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
@@ -215,6 +235,8 @@ pub fn run() {
             commands::get_launch_mode,
             commands::exit_screensaver,
             commands::set_screensaver_enabled,
+            commands::set_keep_awake,
+            commands::get_virtual_screen_size,
             commands::preview_screensaver,
             commands::set_screensaver_theme,
             commands::get_screensaver_theme,
@@ -250,6 +272,17 @@ pub fn run() {
             commands::is_desktop_foreground,
             commands::list_audio_devices,
             commands::set_audio_device,
+            commands::list_audio_sessions,
+            commands::set_session_volume,
+            commands::set_session_mute,
+            commands::get_quick_state,
+            commands::set_dark_mode,
+            commands::set_desktop_icons_hidden,
+            commands::set_night_light,
+            commands::empty_recycle_bin,
+            commands::lock_screen,
+            commands::list_winget_upgrades,
+            commands::winget_upgrade,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Layer");

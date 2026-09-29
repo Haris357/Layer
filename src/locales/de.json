@@ -19,7 +19,9 @@
     "settings": "Einstellungen",
     "styles": "{{name}} · Stile",
     "styleHeader": "{{name}}-Stil",
-    "spaceReset": "Bereich zurückgesetzt"
+    "spaceReset": "Bereich zurückgesetzt",
+    "scrollLeft": "Nach links scrollen",
+    "scrollRight": "Nach rechts scrollen"
   },
   "updates": {
     "available": "Layer v{{version}} ist verfügbar",
@@ -54,6 +56,11 @@
     "greeting": "Begrüßung",
     "shelf": "Ablage",
     "audio": "Audiogeräte",
+    "mixer": "Lautstärkemixer",
+    "camera": "Kamera",
+    "keepawake": "Wach halten",
+    "quick": "Schnellschalter",
+    "winget": "App-Updates",
     "board": "Board"
   },
   "settings": {
@@ -128,6 +135,7 @@
       "rateStore": "Layer im Store bewerten",
       "store": "Microsoft Store",
       "github": "GitHub",
+      "feedback": "Feedback geben",
       "support": "☕ Layer unterstützen"
     },
     "toasts": {
@@ -449,6 +457,87 @@
       "background": "Hintergrund"
     }
   },
+  "camera": {
+    "title": "Kamera",
+    "requesting": "Kamerazugriff wird angefordert…",
+    "denied": "Kamerazugriff verweigert. Erlaube ihn in den Windows-Einstellungen und versuche es erneut.",
+    "retry": "Erneut versuchen",
+    "noCamera": "Keine Kamera gefunden",
+    "error": "Kamera nicht verfügbar",
+    "device": "Gerät",
+    "mirror": "Bild spiegeln"
+  },
+  "keepawake": {
+    "title": "Wach halten",
+    "on": "Bleibt wach",
+    "off": "Aus",
+    "remaining": "noch {{time}}",
+    "duration": "Dauer",
+    "d30": "30 Min.",
+    "d60": "1 Std.",
+    "d120": "2 Std.",
+    "dInf": "Bis manuell aus",
+    "keepDisplayOn": "Bildschirm eingeschaltet lassen"
+  },
+  "mixer": {
+    "title": "Lautstärkemixer",
+    "master": "Gesamt",
+    "systemSounds": "Systemklänge",
+    "empty": "Keine Apps spielen Audio ab",
+    "mute": "Stumm",
+    "unmute": "Ton an",
+    "showMaster": "Gesamtlautstärke zeigen",
+    "background": "Hintergrund"
+  },
+  "quick": {
+    "dark": "Dunkelmodus",
+    "icons": "Symbole ausblenden",
+    "nightLight": "Nachtmodus",
+    "recycle": "Papierkorb leeren",
+    "lock": "Sperren",
+    "lockSub": "PC sperren",
+    "openSettings": "Einstellungen öffnen",
+    "confirmEmpty": "Zum Bestätigen klicken",
+    "binEmpty": "Bereits leer",
+    "binInfo_one": "{{count}} Element · {{size}}",
+    "binInfo_other": "{{count}} Elemente · {{size}}",
+    "failed": "Einstellung konnte nicht geändert werden",
+    "empty": "Keine Kacheln. Aktiviere welche in den Einstellungen.",
+    "show": "Anzeigen",
+    "tips": {
+      "darkOn": "Windows auf Dunkelmodus umstellen",
+      "darkOff": "Windows auf hellen Modus umstellen",
+      "iconsHide": "Desktopsymbole ausblenden",
+      "iconsShow": "Desktopsymbole anzeigen",
+      "nightOn": "Nachtmodus einschalten",
+      "nightOff": "Nachtmodus ausschalten",
+      "nightSettings": "Nachtmodus-Einstellungen öffnen",
+      "recycle": "Alles im Papierkorb endgültig löschen",
+      "recycleConfirm": "Erneut klicken, um den Papierkorb zu leeren",
+      "lock": "Bildschirm jetzt sperren"
+    }
+  },
+  "winget": {
+    "title": "App-Updates",
+    "count_one": "{{count}} Update",
+    "count_other": "{{count}} Updates",
+    "checked": "Geprüft {{when}}",
+    "checking": "Suche nach Updates…",
+    "missing": "winget ist auf diesem PC nicht verfügbar. Installiere den App-Installer aus dem Microsoft Store.",
+    "checkFailed": "Updates konnten nicht geprüft werden. Versuche es erneut.",
+    "upToDate": "Alles ist aktuell",
+    "updateAll": "Alle aktualisieren",
+    "updateAllTip": "Alle Apps der Liste nacheinander aktualisieren",
+    "refresh": "Erneut prüfen",
+    "hide": "Diese App ausblenden",
+    "queued": "Wartet auf Update",
+    "updating": "Wird aktualisiert…",
+    "update": "Aktualisieren",
+    "failedTip": "Update fehlgeschlagen. Zum Wiederholen klicken.",
+    "hiddenCount_one": "{{count}} App ausgeblendet",
+    "hiddenCount_other": "{{count}} Apps ausgeblendet",
+    "unhideAll": "Ausgeblendete Apps anzeigen"
+  },
   "converter": {
     "swap": "Einheiten tauschen",
     "categories": {
@@ -533,7 +622,11 @@
     "memory": "Arbeitsspeicher",
     "storage": "Speicher",
     "battery": "Akku",
-    "chargingSuffix": " · lädt"
+    "chargingSuffix": " · lädt",
+    "network": "Netzwerk",
+    "session": "Diese Sitzung",
+    "show": "Anzeigen",
+    "empty": "Nichts anzuzeigen. Aktiviere einen Wert in den Einstellungen."
   },
   "diskinfo": {
     "title": "Laufwerke",

@@ -111,6 +111,11 @@ const KNOWN_TYPES: ReadonlySet<string> = new Set([
   'shelf',
   'audio',
   'board',
+  'camera',
+  'keepawake',
+  'mixer',
+  'quick',
+  'winget',
   // Browser-extension-only widgets. The desktop has no renderer for these, so
   // WidgetWrapper draws nothing (its `if (!def) return null` guard) — but they
   // are listed here so a space synced from the Chrome extension keeps them in

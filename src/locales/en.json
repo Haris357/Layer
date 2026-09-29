@@ -41,7 +41,9 @@
     "settings": "Settings",
     "styles": "{{name}} · styles",
     "styleHeader": "{{name}} style",
-    "spaceReset": "Space reset"
+    "spaceReset": "Space reset",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right"
   },
   "updates": {
     "available": "Layer v{{version}} is available",
@@ -76,6 +78,11 @@
     "greeting": "Greeting",
     "shelf": "Shelf",
     "audio": "Audio Devices",
+    "mixer": "Volume Mixer",
+    "camera": "Camera",
+    "keepawake": "Keep Awake",
+    "quick": "Quick Toggles",
+    "winget": "App Updates",
     "board": "Board"
   },
   "settings": {
@@ -150,6 +157,7 @@
       "rateStore": "Rate Layer on the Store",
       "store": "Microsoft Store",
       "github": "GitHub",
+      "feedback": "Give Feedback",
       "support": "☕ Support Layer"
     },
     "toasts": {
@@ -471,6 +479,87 @@
       "background": "Background"
     }
   },
+  "camera": {
+    "title": "Camera",
+    "requesting": "Asking for camera access…",
+    "denied": "Camera access denied. Allow it in Windows Settings, then try again.",
+    "retry": "Try again",
+    "noCamera": "No camera found",
+    "error": "Camera unavailable",
+    "device": "Device",
+    "mirror": "Mirror image"
+  },
+  "keepawake": {
+    "title": "Keep Awake",
+    "on": "Staying awake",
+    "off": "Off",
+    "remaining": "{{time}} left",
+    "duration": "Duration",
+    "d30": "30m",
+    "d60": "1h",
+    "d120": "2h",
+    "dInf": "Until off",
+    "keepDisplayOn": "Keep display on"
+  },
+  "mixer": {
+    "title": "Volume Mixer",
+    "master": "Master",
+    "systemSounds": "System Sounds",
+    "empty": "No apps are playing audio",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "showMaster": "Show master volume",
+    "background": "Background"
+  },
+  "quick": {
+    "dark": "Dark mode",
+    "icons": "Hide icons",
+    "nightLight": "Night light",
+    "recycle": "Empty bin",
+    "lock": "Lock",
+    "lockSub": "Lock this PC",
+    "openSettings": "Open settings",
+    "confirmEmpty": "Click to confirm",
+    "binEmpty": "Already empty",
+    "binInfo_one": "{{count}} item · {{size}}",
+    "binInfo_other": "{{count}} items · {{size}}",
+    "failed": "Couldn't change that setting",
+    "empty": "No tiles. Turn some on in settings.",
+    "show": "Show",
+    "tips": {
+      "darkOn": "Switch Windows to dark mode",
+      "darkOff": "Switch Windows to light mode",
+      "iconsHide": "Hide desktop icons",
+      "iconsShow": "Show desktop icons",
+      "nightOn": "Turn Night light on",
+      "nightOff": "Turn Night light off",
+      "nightSettings": "Open Night light settings",
+      "recycle": "Permanently delete everything in the Recycle Bin",
+      "recycleConfirm": "Click again to empty the Recycle Bin",
+      "lock": "Lock the screen now"
+    }
+  },
+  "winget": {
+    "title": "App updates",
+    "count_one": "{{count}} update",
+    "count_other": "{{count}} updates",
+    "checked": "Checked {{when}}",
+    "checking": "Checking for updates…",
+    "missing": "winget isn't available on this PC. Install App Installer from the Microsoft Store.",
+    "checkFailed": "Couldn't check for updates. Try refreshing.",
+    "upToDate": "Everything is up to date",
+    "updateAll": "Update all",
+    "updateAllTip": "Update every app in the list, one at a time",
+    "refresh": "Check again",
+    "hide": "Hide this app",
+    "queued": "Waiting to update",
+    "updating": "Updating…",
+    "update": "Update",
+    "failedTip": "Update failed. Click to try again.",
+    "hiddenCount_one": "{{count}} app hidden",
+    "hiddenCount_other": "{{count}} apps hidden",
+    "unhideAll": "Show hidden apps"
+  },
   "converter": {
     "swap": "Swap units",
     "categories": {
@@ -555,7 +644,11 @@
     "memory": "Memory",
     "storage": "Storage",
     "battery": "Battery",
-    "chargingSuffix": " · charging"
+    "chargingSuffix": " · charging",
+    "network": "Network",
+    "session": "This session",
+    "show": "Show",
+    "empty": "Nothing to show. Turn a stat on in settings."
   },
   "diskinfo": {
     "title": "Disks",

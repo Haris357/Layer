@@ -13,6 +13,19 @@ pub struct AudioDevice {
     pub is_default: bool,
 }
 
+#[derive(serde::Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AudioSession {
+    /// Stable per-session-instance id (not the pid — a process can own more
+    /// than one session, e.g. one per browser tab), used to target a single
+    /// slider on the next set_session_volume/mute call.
+    pub id: String,
+    pub pid: u32,
+    pub name: String,
+    pub volume: f32,
+    pub muted: bool,
+}
+
 #[cfg(target_os = "windows")]
 mod imp {
     use super::AudioDevice;
@@ -100,6 +113,205 @@ mod imp {
         out
     }
 
+    // ---- Per-app session volumes (IAudioSessionManager2) ------------------
+    use super::AudioSession;
+    use windows::Win32::Media::Audio::{
+        IAudioSessionControl2, IAudioSessionManager2, ISimpleAudioVolume, AudioSessionStateExpired,
+    };
+
+    unsafe fn session_manager() -> windows::core::Result<IAudioSessionManager2> {
+        let enumr: IMMDeviceEnumerator =
+            CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_ALL)?;
+        let device = enumr.GetDefaultAudioEndpoint(eRender, eConsole)?;
+        device.Activate::<IAudioSessionManager2>(CLSCTX_ALL, None)
+    }
+
+    // Display name for a pid: the exe's FileDescription (what Windows' own
+    // mixer shows, e.g. "Google Chrome"), falling back to the process name.
+    // Cached per exe path — the widget polls every 1.5s and version resources
+    // never change for a given file.
+    fn process_name(pid: u32) -> Option<String> {
+        use std::collections::HashMap;
+        use std::path::PathBuf;
+        use std::sync::{Mutex, OnceLock};
+        use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
+
+        static CACHE: OnceLock<Mutex<HashMap<PathBuf, String>>> = OnceLock::new();
+
+        let pid = Pid::from_u32(pid);
+        let mut sys = System::new();
+        sys.refresh_processes_specifics(
+            ProcessesToUpdate::Some(&[pid]),
+            true,
+            ProcessRefreshKind::nothing().with_exe(UpdateKind::OnlyIfNotSet),
+        );
+        let proc_ = sys.process(pid)?;
+        let raw = proc_.name().to_string_lossy().to_string();
+        let fallback = raw.strip_suffix(".exe").unwrap_or(&raw).to_string();
+        let Some(exe) = proc_.exe().map(|p| p.to_path_buf()) else {
+            return Some(fallback);
+        };
+
+        let cache = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+        if let Some(hit) = cache.lock().ok().and_then(|c| c.get(&exe).cloned()) {
+            return Some(hit);
+        }
+        let name = unsafe { file_description(&exe) }.unwrap_or(fallback);
+        if let Ok(mut c) = cache.lock() {
+            c.insert(exe, name.clone());
+        }
+        Some(name)
+    }
+
+    unsafe fn file_description(path: &std::path::Path) -> Option<String> {
+        use std::os::windows::ffi::OsStrExt;
+        use windows::Win32::Storage::FileSystem::{
+            GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW,
+        };
+
+        let wide: Vec<u16> = path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+        let file = PCWSTR(wide.as_ptr());
+        let size = GetFileVersionInfoSizeW(file, None);
+        if size == 0 {
+            return None;
+        }
+        let mut data = vec![0u8; size as usize];
+        GetFileVersionInfoW(file, None, size, data.as_mut_ptr() as *mut _).ok()?;
+
+        let query = |sub: &str| -> Option<(*const u8, u32)> {
+            let sub_w: Vec<u16> = sub.encode_utf16().chain(std::iter::once(0)).collect();
+            let mut ptr: *mut core::ffi::c_void = core::ptr::null_mut();
+            let mut len: u32 = 0;
+            let ok = VerQueryValueW(
+                data.as_ptr() as *const _,
+                PCWSTR(sub_w.as_ptr()),
+                &mut ptr,
+                &mut len,
+            );
+            (ok.as_bool() && !ptr.is_null() && len > 0).then_some((ptr as *const u8, len))
+        };
+
+        // Prefer the file's own declared language/codepage, then US English.
+        let mut langs: Vec<String> = Vec::new();
+        if let Some((p, len)) = query("\\VarFileInfo\\Translation") {
+            let pairs = std::slice::from_raw_parts(p as *const u16, (len / 2) as usize);
+            for pair in pairs.chunks_exact(2) {
+                langs.push(format!("{:04x}{:04x}", pair[0], pair[1]));
+            }
+        }
+        langs.extend(["040904b0".into(), "040904e4".into()]);
+
+        for lang in langs {
+            if let Some((p, len)) = query(&format!("\\StringFileInfo\\{lang}\\FileDescription")) {
+                // len is in characters, including the trailing NUL.
+                let chars = std::slice::from_raw_parts(p as *const u16, len as usize);
+                let s = String::from_utf16_lossy(chars);
+                let s = s.trim_end_matches('\0').trim();
+                if !s.is_empty() {
+                    return Some(s.to_string());
+                }
+            }
+        }
+        None
+    }
+
+    unsafe fn each_session(
+        mut f: impl FnMut(&IAudioSessionControl2, &ISimpleAudioVolume, u32) -> bool,
+    ) -> bool {
+        com_init();
+        let Ok(mgr) = session_manager() else { return false };
+        let Ok(sessions) = mgr.GetSessionEnumerator() else { return false };
+        let count = sessions.GetCount().unwrap_or(0);
+        for i in 0..count {
+            let Ok(ctrl) = sessions.GetSession(i) else { continue };
+            let Ok(ctrl2) = ctrl.cast::<IAudioSessionControl2>() else { continue };
+            if matches!(ctrl2.GetState(), Ok(s) if s == AudioSessionStateExpired) {
+                continue;
+            }
+            let Ok(vol) = ctrl2.cast::<ISimpleAudioVolume>() else { continue };
+            let pid = ctrl2.GetProcessId().unwrap_or(0);
+            if f(&ctrl2, &vol, pid) {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn list_sessions() -> Vec<AudioSession> {
+        let mut out: Vec<AudioSession> = Vec::new();
+        unsafe {
+            each_session(|ctrl2, vol, pid| {
+                let is_system = pid == 0;
+                let id = ctrl2
+                    .GetSessionInstanceIdentifier()
+                    .ok()
+                    .and_then(|p| {
+                        let s = p.to_string().ok();
+                        CoTaskMemFree(Some(p.0 as *const _));
+                        s
+                    })
+                    .unwrap_or_else(|| format!("pid-{pid}"));
+                let name = if is_system {
+                    "System Sounds".to_string()
+                } else {
+                    process_name(pid).unwrap_or_else(|| format!("PID {pid}"))
+                };
+                let volume = vol.GetMasterVolume().unwrap_or(-1.0);
+                if volume < 0.0 {
+                    return false;
+                }
+                let muted = vol.GetMute().map(|b| b.as_bool()).unwrap_or(false);
+                out.push(AudioSession {
+                    id,
+                    pid,
+                    name,
+                    volume,
+                    muted,
+                });
+                false
+            });
+        }
+        out
+    }
+
+    pub fn set_session_volume(id: &str, level: f32) -> bool {
+        let level = level.clamp(0.0, 1.0);
+        unsafe {
+            each_session(|ctrl2, vol, pid| {
+                if session_matches(ctrl2, id, pid) {
+                    let _ = vol.SetMasterVolume(level, std::ptr::null());
+                    return true;
+                }
+                false
+            })
+        }
+    }
+
+    pub fn set_session_mute(id: &str, muted: bool) -> bool {
+        unsafe {
+            each_session(|ctrl2, vol, pid| {
+                if session_matches(ctrl2, id, pid) {
+                    let _ = vol.SetMute(muted, std::ptr::null());
+                    return true;
+                }
+                false
+            })
+        }
+    }
+
+    unsafe fn session_matches(ctrl2: &IAudioSessionControl2, id: &str, pid: u32) -> bool {
+        let this_id = ctrl2
+            .GetSessionInstanceIdentifier()
+            .ok()
+            .and_then(|p| {
+                let s = p.to_string().ok();
+                CoTaskMemFree(Some(p.0 as *const _));
+                s
+            })
+            .unwrap_or_else(|| format!("pid-{pid}"));
+        this_id == id
+    }
+
     // ---- IPolicyConfig (undocumented) -------------------------------------
     const CLSID_POLICY_CONFIG_CLIENT: GUID =
         GUID::from_u128(0x870af99c_171d_4f9e_af0d_e63df40c2bc9);
@@ -174,6 +386,19 @@ pub fn set_default_device(id: &str) -> bool {
     imp::set_default(id)
 }
 
+#[cfg(target_os = "windows")]
+pub fn list_sessions() -> Vec<AudioSession> {
+    imp::list_sessions()
+}
+#[cfg(target_os = "windows")]
+pub fn set_session_volume(id: &str, level: f32) -> bool {
+    imp::set_session_volume(id, level)
+}
+#[cfg(target_os = "windows")]
+pub fn set_session_mute(id: &str, muted: bool) -> bool {
+    imp::set_session_mute(id, muted)
+}
+
 #[cfg(not(target_os = "windows"))]
 pub fn list_devices() -> Vec<AudioDevice> {
     Vec::new()
@@ -182,3 +407,16 @@ pub fn list_devices() -> Vec<AudioDevice> {
 pub fn set_default_device(_id: &str) -> bool {
     false
 }
+#[cfg(not(target_os = "windows"))]
+pub fn list_sessions() -> Vec<AudioSession> {
+    Vec::new()
+}
+#[cfg(not(target_os = "windows"))]
+pub fn set_session_volume(_id: &str, _level: f32) -> bool {
+    false
+}
+#[cfg(not(target_os = "windows"))]
+pub fn set_session_mute(_id: &str, _muted: bool) -> bool {
+    false
+}
+

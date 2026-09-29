@@ -47,6 +47,8 @@ export interface SystemStats {
   diskTotal: number
   battery: number
   charging: boolean
+  netRx: number
+  netTx: number
 }
 
 export const getSystemStats = () =>
@@ -124,6 +126,56 @@ export const listAudioDevices = () =>
 export const setAudioDevice = (id: string) =>
   invoke<boolean>('set_audio_device', { id })
 
+// ── App updates (winget) ──
+export interface WingetUpgrade {
+  name: string
+  id: string
+  version: string
+  available: string
+  source: string
+}
+
+// Both reject with an error code: 'winget-missing' | 'timeout' | 'failed'.
+export const listWingetUpgrades = () =>
+  invoke<WingetUpgrade[]>('list_winget_upgrades')
+export const wingetUpgrade = (id: string) => invoke<void>('winget_upgrade', { id })
+
+// ── Quick toggles ──
+export interface QuickState {
+  dark: boolean
+  iconsHidden: boolean
+  // null = Night Light state couldn't be read safely; open Settings instead.
+  nightLight: boolean | null
+  recycleItems: number
+  recycleBytes: number
+}
+
+export const getQuickState = () => invoke<QuickState>('get_quick_state')
+export const setDarkMode = (dark: boolean) => invoke<boolean>('set_dark_mode', { dark })
+export const setDesktopIconsHidden = (hidden: boolean) =>
+  invoke<boolean>('set_desktop_icons_hidden', { hidden })
+export const setNightLight = (on: boolean) => invoke<boolean>('set_night_light', { on })
+export const emptyRecycleBin = () => invoke<boolean>('empty_recycle_bin')
+export const lockScreen = () => invoke<boolean>('lock_screen')
+
+// ── Per-app volume (mixer) ──
+export interface AudioSession {
+  id: string
+  pid: number
+  name: string
+  volume: number
+  muted: boolean
+}
+
+export const listAudioSessions = () =>
+  invoke<AudioSession[]>('list_audio_sessions')
+
+export const setSessionVolume = (id: string, level: number) =>
+  invoke<boolean>('set_session_volume', { id, level })
+
+export const setSessionMute = (id: string, muted: boolean) =>
+  invoke<boolean>('set_session_mute', { id, muted })
+
 export const openUrl = (url: string) => invoke<void>('open_url', { url })
 
 export const importAsset = (sourcePath: string) =>
@@ -179,6 +231,12 @@ export const setShortcuts = (shortcuts: ShortcutDef[]) =>
 
 export const setScreensaverEnabled = (enabled: boolean) =>
   invoke<void>('set_screensaver_enabled', { enabled })
+
+export const setKeepAwake = (enabled: boolean, keepDisplayOn: boolean) =>
+  invoke<void>('set_keep_awake', { enabled, keepDisplayOn })
+
+export const getVirtualScreenSize = () =>
+  invoke<[number, number]>('get_virtual_screen_size')
 
 export const previewScreensaver = () =>
   invoke<void>('preview_screensaver')

@@ -19,7 +19,9 @@
     "settings": "设置",
     "styles": "{{name}} · 样式",
     "styleHeader": "{{name}} 样式",
-    "spaceReset": "空间已重置"
+    "spaceReset": "空间已重置",
+    "scrollLeft": "向左滚动",
+    "scrollRight": "向右滚动"
   },
   "updates": {
     "available": "Layer v{{version}} 已可用",
@@ -54,6 +56,11 @@
     "greeting": "问候语",
     "shelf": "搁架",
     "audio": "音频设备",
+    "mixer": "音量合成器",
+    "camera": "摄像头",
+    "keepawake": "保持唤醒",
+    "quick": "快捷开关",
+    "winget": "应用更新",
     "board": "看板"
   },
   "settings": {
@@ -128,6 +135,7 @@
       "rateStore": "在商店为 Layer 评分",
       "store": "Microsoft Store",
       "github": "GitHub",
+      "feedback": "发送反馈",
       "support": "☕ 支持 Layer"
     },
     "toasts": {
@@ -449,6 +457,84 @@
       "background": "背景"
     }
   },
+  "camera": {
+    "title": "摄像头",
+    "requesting": "正在请求摄像头权限…",
+    "denied": "摄像头访问被拒绝。请在 Windows 设置中允许访问，然后重试。",
+    "retry": "重试",
+    "noCamera": "未找到摄像头",
+    "error": "摄像头不可用",
+    "device": "设备",
+    "mirror": "镜像翻转"
+  },
+  "keepawake": {
+    "title": "保持唤醒",
+    "on": "保持唤醒中",
+    "off": "关闭",
+    "remaining": "剩余 {{time}}",
+    "duration": "时长",
+    "d30": "30分钟",
+    "d60": "1小时",
+    "d120": "2小时",
+    "dInf": "直到手动关闭",
+    "keepDisplayOn": "保持屏幕开启"
+  },
+  "mixer": {
+    "title": "音量合成器",
+    "master": "主音量",
+    "systemSounds": "系统声音",
+    "empty": "没有应用在播放音频",
+    "mute": "静音",
+    "unmute": "取消静音",
+    "showMaster": "显示主音量",
+    "background": "背景"
+  },
+  "quick": {
+    "dark": "深色模式",
+    "icons": "隐藏图标",
+    "nightLight": "夜间模式",
+    "recycle": "清空回收站",
+    "lock": "锁定",
+    "lockSub": "锁定此电脑",
+    "openSettings": "打开设置",
+    "confirmEmpty": "点击确认",
+    "binEmpty": "已是空的",
+    "binInfo_other": "{{count}} 个项目 · {{size}}",
+    "failed": "无法更改该设置",
+    "empty": "没有磁贴。请在设置中开启。",
+    "show": "显示",
+    "tips": {
+      "darkOn": "将 Windows 切换为深色模式",
+      "darkOff": "将 Windows 切换为浅色模式",
+      "iconsHide": "隐藏桌面图标",
+      "iconsShow": "显示桌面图标",
+      "nightOn": "开启夜间模式",
+      "nightOff": "关闭夜间模式",
+      "nightSettings": "打开夜间模式设置",
+      "recycle": "永久删除回收站中的所有内容",
+      "recycleConfirm": "再次点击以清空回收站",
+      "lock": "立即锁定屏幕"
+    }
+  },
+  "winget": {
+    "title": "应用更新",
+    "count_other": "{{count}} 个更新",
+    "checked": "{{when}}检查过",
+    "checking": "正在检查更新…",
+    "missing": "此电脑上没有 winget。请从 Microsoft Store 安装“应用安装程序”。",
+    "checkFailed": "无法检查更新，请重试。",
+    "upToDate": "全部为最新",
+    "updateAll": "全部更新",
+    "updateAllTip": "逐个更新列表中的所有应用",
+    "refresh": "重新检查",
+    "hide": "隐藏此应用",
+    "queued": "等待更新",
+    "updating": "正在更新…",
+    "update": "更新",
+    "failedTip": "更新失败，点击重试。",
+    "hiddenCount_other": "已隐藏 {{count}} 个应用",
+    "unhideAll": "显示隐藏的应用"
+  },
   "converter": {
     "swap": "交换单位",
     "categories": {
@@ -533,7 +619,11 @@
     "memory": "内存",
     "storage": "存储",
     "battery": "电池",
-    "chargingSuffix": " · 充电中"
+    "chargingSuffix": " · 充电中",
+    "network": "网络",
+    "session": "本次会话",
+    "show": "显示",
+    "empty": "没有可显示的内容。请在设置中开启一项统计。"
   },
   "diskinfo": {
     "title": "磁盘",

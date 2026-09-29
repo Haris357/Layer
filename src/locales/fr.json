@@ -19,7 +19,9 @@
     "settings": "Paramètres",
     "styles": "{{name}} · styles",
     "styleHeader": "Style {{name}}",
-    "spaceReset": "Espace réinitialisé"
+    "spaceReset": "Espace réinitialisé",
+    "scrollLeft": "Défiler à gauche",
+    "scrollRight": "Défiler à droite"
   },
   "updates": {
     "available": "Layer v{{version}} est disponible",
@@ -54,6 +56,11 @@
     "greeting": "Salutation",
     "shelf": "Étagère",
     "audio": "Périphériques audio",
+    "mixer": "Mélangeur de volume",
+    "camera": "Caméra",
+    "keepawake": "Empêcher la veille",
+    "quick": "Raccourcis rapides",
+    "winget": "Mises à jour des apps",
     "board": "Tableau"
   },
   "settings": {
@@ -128,6 +135,7 @@
       "rateStore": "Noter Layer sur le Store",
       "store": "Microsoft Store",
       "github": "GitHub",
+      "feedback": "Envoyer un avis",
       "support": "☕ Soutenir Layer"
     },
     "toasts": {
@@ -449,6 +457,87 @@
       "background": "Arrière-plan"
     }
   },
+  "camera": {
+    "title": "Caméra",
+    "requesting": "Demande d'accès à la caméra…",
+    "denied": "Accès à la caméra refusé. Autorisez-le dans les paramètres Windows, puis réessayez.",
+    "retry": "Réessayer",
+    "noCamera": "Aucune caméra trouvée",
+    "error": "Caméra indisponible",
+    "device": "Appareil",
+    "mirror": "Image en miroir"
+  },
+  "keepawake": {
+    "title": "Empêcher la veille",
+    "on": "Éveil maintenu",
+    "off": "Désactivé",
+    "remaining": "{{time}} restant",
+    "duration": "Durée",
+    "d30": "30 min",
+    "d60": "1 h",
+    "d120": "2 h",
+    "dInf": "Jusqu'à l'arrêt",
+    "keepDisplayOn": "Garder l'écran allumé"
+  },
+  "mixer": {
+    "title": "Mélangeur de volume",
+    "master": "Général",
+    "systemSounds": "Sons système",
+    "empty": "Aucune app ne lit de son",
+    "mute": "Couper le son",
+    "unmute": "Réactiver le son",
+    "showMaster": "Afficher le volume général",
+    "background": "Arrière-plan"
+  },
+  "quick": {
+    "dark": "Mode sombre",
+    "icons": "Masquer les icônes",
+    "nightLight": "Éclairage nocturne",
+    "recycle": "Vider la corbeille",
+    "lock": "Verrouiller",
+    "lockSub": "Verrouiller ce PC",
+    "openSettings": "Ouvrir les paramètres",
+    "confirmEmpty": "Cliquez pour confirmer",
+    "binEmpty": "Déjà vide",
+    "binInfo_one": "{{count}} élément · {{size}}",
+    "binInfo_other": "{{count}} éléments · {{size}}",
+    "failed": "Impossible de modifier ce réglage",
+    "empty": "Aucune tuile. Activez-en dans les réglages.",
+    "show": "Afficher",
+    "tips": {
+      "darkOn": "Passer Windows en mode sombre",
+      "darkOff": "Passer Windows en mode clair",
+      "iconsHide": "Masquer les icônes du bureau",
+      "iconsShow": "Afficher les icônes du bureau",
+      "nightOn": "Activer l'éclairage nocturne",
+      "nightOff": "Désactiver l'éclairage nocturne",
+      "nightSettings": "Ouvrir les paramètres d'éclairage nocturne",
+      "recycle": "Supprimer définitivement tout le contenu de la corbeille",
+      "recycleConfirm": "Cliquez à nouveau pour vider la corbeille",
+      "lock": "Verrouiller l'écran maintenant"
+    }
+  },
+  "winget": {
+    "title": "Mises à jour des apps",
+    "count_one": "{{count}} mise à jour",
+    "count_other": "{{count}} mises à jour",
+    "checked": "Vérifié {{when}}",
+    "checking": "Recherche de mises à jour…",
+    "missing": "winget n'est pas disponible sur ce PC. Installez Programme d'installation d'application depuis le Microsoft Store.",
+    "checkFailed": "Impossible de vérifier les mises à jour. Réessayez.",
+    "upToDate": "Tout est à jour",
+    "updateAll": "Tout mettre à jour",
+    "updateAllTip": "Mettre à jour toutes les apps de la liste, une par une",
+    "refresh": "Vérifier à nouveau",
+    "hide": "Masquer cette app",
+    "queued": "En attente de mise à jour",
+    "updating": "Mise à jour…",
+    "update": "Mettre à jour",
+    "failedTip": "Échec de la mise à jour. Cliquez pour réessayer.",
+    "hiddenCount_one": "{{count}} app masquée",
+    "hiddenCount_other": "{{count}} apps masquées",
+    "unhideAll": "Afficher les apps masquées"
+  },
   "converter": {
     "swap": "Inverser les unités",
     "categories": {
@@ -533,7 +622,11 @@
     "memory": "Mémoire",
     "storage": "Stockage",
     "battery": "Batterie",
-    "chargingSuffix": " · en charge"
+    "chargingSuffix": " · en charge",
+    "network": "Réseau",
+    "session": "Cette session",
+    "show": "Afficher",
+    "empty": "Rien à afficher. Activez une statistique dans les réglages."
   },
   "diskinfo": {
     "title": "Disques",

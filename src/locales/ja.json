@@ -19,7 +19,9 @@
     "settings": "設定",
     "styles": "{{name}} · スタイル",
     "styleHeader": "{{name}} スタイル",
-    "spaceReset": "スペースをリセットしました"
+    "spaceReset": "スペースをリセットしました",
+    "scrollLeft": "左へスクロール",
+    "scrollRight": "右へスクロール"
   },
   "updates": {
     "available": "Layer v{{version}} が利用可能です",
@@ -54,6 +56,11 @@
     "greeting": "あいさつ",
     "shelf": "シェルフ",
     "audio": "オーディオデバイス",
+    "mixer": "音量ミキサー",
+    "camera": "カメラ",
+    "keepawake": "スリープ防止",
+    "quick": "クイック切替",
+    "winget": "アプリの更新",
     "board": "ボード"
   },
   "settings": {
@@ -128,6 +135,7 @@
       "rateStore": "ストアで Layer を評価",
       "store": "Microsoft Store",
       "github": "GitHub",
+      "feedback": "フィードバックを送る",
       "support": "☕ Layer を支援する"
     },
     "toasts": {
@@ -449,6 +457,84 @@
       "background": "背景"
     }
   },
+  "camera": {
+    "title": "カメラ",
+    "requesting": "カメラへのアクセスを要求しています…",
+    "denied": "カメラへのアクセスが拒否されました。Windows の設定で許可してから、もう一度お試しください。",
+    "retry": "再試行",
+    "noCamera": "カメラが見つかりません",
+    "error": "カメラを利用できません",
+    "device": "デバイス",
+    "mirror": "画像を反転"
+  },
+  "keepawake": {
+    "title": "スリープ防止",
+    "on": "スリープを防止中",
+    "off": "オフ",
+    "remaining": "残り {{time}}",
+    "duration": "時間",
+    "d30": "30分",
+    "d60": "1時間",
+    "d120": "2時間",
+    "dInf": "オフにするまで",
+    "keepDisplayOn": "画面をオンのままにする"
+  },
+  "mixer": {
+    "title": "音量ミキサー",
+    "master": "マスター",
+    "systemSounds": "システム音",
+    "empty": "音声を再生中のアプリはありません",
+    "mute": "ミュート",
+    "unmute": "ミュート解除",
+    "showMaster": "マスター音量を表示",
+    "background": "背景"
+  },
+  "quick": {
+    "dark": "ダークモード",
+    "icons": "アイコンを隠す",
+    "nightLight": "夜間モード",
+    "recycle": "ごみ箱を空に",
+    "lock": "ロック",
+    "lockSub": "このPCをロック",
+    "openSettings": "設定を開く",
+    "confirmEmpty": "クリックして確定",
+    "binEmpty": "空です",
+    "binInfo_other": "{{count}} 項目 · {{size}}",
+    "failed": "設定を変更できませんでした",
+    "empty": "タイルがありません。設定でオンにしてください。",
+    "show": "表示",
+    "tips": {
+      "darkOn": "Windows をダークモードに切り替え",
+      "darkOff": "Windows をライトモードに切り替え",
+      "iconsHide": "デスクトップアイコンを隠す",
+      "iconsShow": "デスクトップアイコンを表示",
+      "nightOn": "夜間モードをオン",
+      "nightOff": "夜間モードをオフ",
+      "nightSettings": "夜間モードの設定を開く",
+      "recycle": "ごみ箱の中身を完全に削除",
+      "recycleConfirm": "もう一度クリックでごみ箱を空にします",
+      "lock": "今すぐ画面をロック"
+    }
+  },
+  "winget": {
+    "title": "アプリの更新",
+    "count_other": "{{count}} 件の更新",
+    "checked": "{{when}}に確認",
+    "checking": "更新を確認中…",
+    "missing": "この PC では winget を利用できません。Microsoft Store からアプリ インストーラーをインストールしてください。",
+    "checkFailed": "更新を確認できませんでした。もう一度お試しください。",
+    "upToDate": "すべて最新です",
+    "updateAll": "すべて更新",
+    "updateAllTip": "リスト内のアプリを 1 つずつ更新",
+    "refresh": "再確認",
+    "hide": "このアプリを非表示",
+    "queued": "更新待ち",
+    "updating": "更新中…",
+    "update": "更新",
+    "failedTip": "更新に失敗しました。クリックして再試行。",
+    "hiddenCount_other": "{{count}} 個のアプリを非表示中",
+    "unhideAll": "非表示のアプリを表示"
+  },
   "converter": {
     "swap": "単位を入れ替え",
     "categories": {
@@ -533,7 +619,11 @@
     "memory": "メモリ",
     "storage": "ストレージ",
     "battery": "バッテリー",
-    "chargingSuffix": " · 充電中"
+    "chargingSuffix": " · 充電中",
+    "network": "ネットワーク",
+    "session": "このセッション",
+    "show": "表示",
+    "empty": "表示する項目がありません。設定で項目をオンにしてください。"
   },
   "diskinfo": {
     "title": "ディスク",

@@ -76,7 +76,7 @@ fn set_noactivate(_window: &WebviewWindow, _enabled: bool) {}
 // of every connected monitor). On a single-monitor machine this collapses
 // to the primary screen.
 #[cfg(target_os = "windows")]
-fn virtual_screen_rect() -> (i32, i32, i32, i32) {
+pub fn virtual_screen_rect() -> (i32, i32, i32, i32) {
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         GetSystemMetrics, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN,
         SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN,
@@ -92,7 +92,7 @@ fn virtual_screen_rect() -> (i32, i32, i32, i32) {
 }
 
 #[cfg(not(target_os = "windows"))]
-fn virtual_screen_rect() -> (i32, i32, i32, i32) {
+pub fn virtual_screen_rect() -> (i32, i32, i32, i32) {
     (0, 0, 1920, 1080)
 }
 

@@ -19,7 +19,9 @@
     "settings": "Configurações",
     "styles": "{{name}} · estilos",
     "styleHeader": "Estilo {{name}}",
-    "spaceReset": "Espaço redefinido"
+    "spaceReset": "Espaço redefinido",
+    "scrollLeft": "Rolar para a esquerda",
+    "scrollRight": "Rolar para a direita"
   },
   "updates": {
     "available": "O Layer v{{version}} está disponível",
@@ -54,6 +56,11 @@
     "greeting": "Saudação",
     "shelf": "Prateleira",
     "audio": "Dispositivos de áudio",
+    "mixer": "Mixer de volume",
+    "camera": "Câmera",
+    "keepawake": "Manter ativo",
+    "quick": "Atalhos rápidos",
+    "winget": "Atualizações de apps",
     "board": "Quadro"
   },
   "settings": {
@@ -128,6 +135,7 @@
       "rateStore": "Avalie o Layer na Store",
       "store": "Microsoft Store",
       "github": "GitHub",
+      "feedback": "Enviar feedback",
       "support": "☕ Apoie o Layer"
     },
     "toasts": {
@@ -449,6 +457,87 @@
       "background": "Plano de fundo"
     }
   },
+  "camera": {
+    "title": "Câmera",
+    "requesting": "Solicitando acesso à câmera…",
+    "denied": "Acesso à câmera negado. Permita nas Configurações do Windows e tente novamente.",
+    "retry": "Tentar novamente",
+    "noCamera": "Nenhuma câmera encontrada",
+    "error": "Câmera indisponível",
+    "device": "Dispositivo",
+    "mirror": "Espelhar imagem"
+  },
+  "keepawake": {
+    "title": "Manter ativo",
+    "on": "Mantendo ativo",
+    "off": "Desativado",
+    "remaining": "{{time}} restantes",
+    "duration": "Duração",
+    "d30": "30 min",
+    "d60": "1 h",
+    "d120": "2 h",
+    "dInf": "Até desativar",
+    "keepDisplayOn": "Manter a tela ligada"
+  },
+  "mixer": {
+    "title": "Mixer de volume",
+    "master": "Geral",
+    "systemSounds": "Sons do sistema",
+    "empty": "Nenhum app está reproduzindo áudio",
+    "mute": "Silenciar",
+    "unmute": "Ativar som",
+    "showMaster": "Mostrar volume geral",
+    "background": "Fundo"
+  },
+  "quick": {
+    "dark": "Modo escuro",
+    "icons": "Ocultar ícones",
+    "nightLight": "Luz noturna",
+    "recycle": "Esvaziar lixeira",
+    "lock": "Bloquear",
+    "lockSub": "Bloquear este PC",
+    "openSettings": "Abrir configurações",
+    "confirmEmpty": "Clique para confirmar",
+    "binEmpty": "Já está vazia",
+    "binInfo_one": "{{count}} item · {{size}}",
+    "binInfo_other": "{{count}} itens · {{size}}",
+    "failed": "Não foi possível alterar essa configuração",
+    "empty": "Nenhum bloco. Ative alguns nas configurações.",
+    "show": "Mostrar",
+    "tips": {
+      "darkOn": "Mudar o Windows para o modo escuro",
+      "darkOff": "Mudar o Windows para o modo claro",
+      "iconsHide": "Ocultar ícones da área de trabalho",
+      "iconsShow": "Mostrar ícones da área de trabalho",
+      "nightOn": "Ligar a luz noturna",
+      "nightOff": "Desligar a luz noturna",
+      "nightSettings": "Abrir configurações da luz noturna",
+      "recycle": "Excluir permanentemente tudo da lixeira",
+      "recycleConfirm": "Clique de novo para esvaziar a lixeira",
+      "lock": "Bloquear a tela agora"
+    }
+  },
+  "winget": {
+    "title": "Atualizações de apps",
+    "count_one": "{{count}} atualização",
+    "count_other": "{{count}} atualizações",
+    "checked": "Verificado {{when}}",
+    "checking": "Procurando atualizações…",
+    "missing": "O winget não está disponível neste PC. Instale o Instalador de Aplicativo pela Microsoft Store.",
+    "checkFailed": "Não foi possível procurar atualizações. Tente novamente.",
+    "upToDate": "Tudo está atualizado",
+    "updateAll": "Atualizar tudo",
+    "updateAllTip": "Atualizar todos os apps da lista, um de cada vez",
+    "refresh": "Verificar de novo",
+    "hide": "Ocultar este app",
+    "queued": "Aguardando atualização",
+    "updating": "Atualizando…",
+    "update": "Atualizar",
+    "failedTip": "A atualização falhou. Clique para tentar de novo.",
+    "hiddenCount_one": "{{count}} app oculto",
+    "hiddenCount_other": "{{count}} apps ocultos",
+    "unhideAll": "Mostrar apps ocultos"
+  },
   "converter": {
     "swap": "Trocar unidades",
     "categories": {
@@ -533,7 +622,11 @@
     "memory": "Memória",
     "storage": "Armazenamento",
     "battery": "Bateria",
-    "chargingSuffix": " · carregando"
+    "chargingSuffix": " · carregando",
+    "network": "Rede",
+    "session": "Esta sessão",
+    "show": "Mostrar",
+    "empty": "Nada para mostrar. Ative uma estatística nas configurações."
   },
   "diskinfo": {
     "title": "Discos",

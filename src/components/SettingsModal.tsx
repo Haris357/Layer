@@ -665,7 +665,13 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   type="button"
                   onClick={() =>
                     openUrl(
-                      'https://apps.microsoft.com/detail/9NL577X16L1N',
+                      // Store builds jump straight into the "write a review"
+                      // flow instead of just the listing page — this is the
+                      // one button whose label actually says "Rate", so it
+                      // should actually do that in one click, not two.
+                      IS_STORE
+                        ? 'ms-windows-store://review/?ProductId=9NL577X16L1N'
+                        : 'https://apps.microsoft.com/detail/9NL577X16L1N',
                     ).catch(() => {})
                   }
                   className="inline-flex items-center gap-2 rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
@@ -690,6 +696,17 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
                 >
                   {t('settings.about.github')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openUrl(
+                      'mailto:harisimran7857@gmail.com?subject=Layer%20feedback',
+                    ).catch(() => {})
+                  }
+                  className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
+                >
+                  {t('settings.about.feedback')}
                 </button>
                 {!IS_STORE && SUPPORT_ENABLED && (
                   <button

@@ -28,6 +28,11 @@ import { greetingDefinition } from '../components/widgets/GreetingWidget'
 import { shelfDefinition } from '../components/widgets/ShelfWidget'
 import { audioDefinition } from '../components/widgets/AudioWidget'
 import { boardDefinition } from '../components/widgets/BoardWidget'
+import { cameraDefinition } from '../components/widgets/CameraWidget'
+import { keepAwakeDefinition } from '../components/widgets/KeepAwakeWidget'
+import { mixerDefinition } from '../components/widgets/MixerWidget'
+import { quickDefinition } from '../components/widgets/QuickTogglesWidget'
+import { wingetDefinition } from '../components/widgets/WingetWidget'
 
 export interface WidgetSize {
   width: number
@@ -94,6 +99,11 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   shelf: shelfDefinition as WidgetDefinition,
   audio: audioDefinition as WidgetDefinition,
   board: boardDefinition as WidgetDefinition,
+  camera: cameraDefinition as WidgetDefinition,
+  keepawake: keepAwakeDefinition as WidgetDefinition,
+  mixer: mixerDefinition as WidgetDefinition,
+  quick: quickDefinition as WidgetDefinition,
+  winget: wingetDefinition as WidgetDefinition,
 }
 
 export const widgetOrder: WidgetType[] = [
@@ -116,6 +126,11 @@ export const widgetOrder: WidgetType[] = [
   'nowplaying',
   'notifications',
   'audio',
+  'mixer',
+  'camera',
+  'keepawake',
+  'quick',
+  'winget',
   'converter',
   'link',
   'image',

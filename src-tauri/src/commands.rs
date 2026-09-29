@@ -192,6 +192,58 @@ pub fn set_screensaver_enabled(enabled: bool) {
     crate::screensaver::set_enabled(enabled);
 }
 
+// Keep the machine (and optionally the display) awake for the Keep Awake
+// widget. A single SetThreadExecutionState call with ES_CONTINUOUS is a
+// process-wide, persistent state in Windows — it stays in effect until
+// another call changes it or the process exits, so there's no need to keep
+// re-calling this on a timer, and no thread needs to stay alive for it to
+// hold. Calling with just ES_CONTINUOUS (no SYSTEM_REQUIRED/DISPLAY_REQUIRED)
+// clears it and restores normal power management. Cheap, synchronous Win32
+// call — not the kind of blocking work that needs spawn_blocking.
+#[tauri::command]
+pub fn set_keep_awake(enabled: bool, keep_display_on: bool) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use windows_sys::Win32::System::Power::{
+            SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED,
+        };
+        let flags = if enabled {
+            let mut f = ES_CONTINUOUS | ES_SYSTEM_REQUIRED;
+            if keep_display_on {
+                f |= ES_DISPLAY_REQUIRED;
+            }
+            f
+        } else {
+            ES_CONTINUOUS
+        };
+        let result = unsafe { SetThreadExecutionState(flags) };
+        if result == 0 {
+            return Err("SetThreadExecutionState failed".into());
+        }
+        Ok(())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = (enabled, keep_display_on);
+        Err("Unsupported platform".to_string())
+    }
+}
+
+// Ground truth for the frontend's viewport-clamp logic (useResponsive.ts).
+// window.innerWidth/innerHeight is what it used to clamp against, but a
+// desktop refresh (F5 / right-click > Refresh) reliably makes WebView2
+// misreport its own viewport for a beat while Explorer recalculates the
+// desktop's work area/icon layout — long enough that even a debounce on
+// *when* to act didn't help, because the value being acted on was itself
+// wrong. GetSystemMetrics is a direct OS query, not subject to whatever
+// WebView2 does internally during that recalculation, so the frontend now
+// clamps against this instead of trusting its own viewport measurement.
+#[tauri::command]
+pub fn get_virtual_screen_size() -> (i32, i32) {
+    let (_, _, w, h) = crate::window::virtual_screen_rect();
+    (w, h)
+}
+
 // Settings "Preview" button: show the screensaver right now.
 #[tauri::command]
 pub fn preview_screensaver() {
@@ -258,6 +310,10 @@ pub struct SystemStats {
     disk_total: u64,
     battery: i32,
     charging: bool,
+    // Cumulative bytes across all real network adapters. The frontend diffs
+    // two polls to get a rate, so this command stays stateless.
+    net_rx: u64,
+    net_tx: u64,
 }
 
 #[cfg(target_os = "windows")]
@@ -305,6 +361,12 @@ pub async fn get_system_stats() -> SystemStats {
 
         let (battery, charging) = battery_status();
 
+        let (mut net_rx, mut net_tx) = (0u64, 0u64);
+        for (_, data) in &sysinfo::Networks::new_with_refreshed_list() {
+            net_rx += data.total_received();
+            net_tx += data.total_transmitted();
+        }
+
         SystemStats {
             cpu: sys.global_cpu_usage(),
             mem_used: sys.used_memory(),
@@ -313,6 +375,8 @@ pub async fn get_system_stats() -> SystemStats {
             disk_total,
             battery,
             charging,
+            net_rx,
+            net_tx,
         }
     })
     .await
@@ -572,13 +636,19 @@ fn capture_screen_png() -> Option<Vec<u8>> {
     }
 }
 
+// A fullscreen BitBlt + PNG encode takes long enough to visibly hitch the UI,
+// so both capture commands run on a blocking thread rather than the main one.
 #[tauri::command]
-pub fn capture_screen(path: String) -> Result<(), String> {
+pub async fn capture_screen(path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
-        let png = capture_screen_png().ok_or("Screen capture failed")?;
-        std::fs::write(&path, png).map_err(|e| e.to_string())?;
-        Ok(())
+        tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
+            let png = capture_screen_png().ok_or("Screen capture failed")?;
+            std::fs::write(&path, png).map_err(|e| e.to_string())?;
+            Ok(())
+        })
+        .await
+        .map_err(|e| e.to_string())?
     }
     #[cfg(not(target_os = "windows"))]
     {
@@ -588,12 +658,16 @@ pub fn capture_screen(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn capture_screen_base64() -> Result<String, String> {
+pub async fn capture_screen_base64() -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
-        use base64::Engine;
-        let png = capture_screen_png().ok_or("Screen capture failed")?;
-        Ok(base64::engine::general_purpose::STANDARD.encode(&png))
+        tauri::async_runtime::spawn_blocking(|| -> Result<String, String> {
+            use base64::Engine;
+            let png = capture_screen_png().ok_or("Screen capture failed")?;
+            Ok(base64::engine::general_purpose::STANDARD.encode(&png))
+        })
+        .await
+        .map_err(|e| e.to_string())?
     }
     #[cfg(not(target_os = "windows"))]
     {
@@ -1213,6 +1287,83 @@ pub async fn list_audio_devices() -> Vec<crate::audio::AudioDevice> {
 #[tauri::command]
 pub async fn set_audio_device(id: String) -> bool {
     tauri::async_runtime::spawn_blocking(move || crate::audio::set_default_device(&id))
+        .await
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+pub async fn list_winget_upgrades() -> Result<Vec<crate::winget::WingetUpgrade>, String> {
+    tauri::async_runtime::spawn_blocking(crate::winget::list)
+        .await
+        .map_err(|_| crate::winget::ERR_FAILED.to_string())?
+}
+
+#[tauri::command]
+pub async fn winget_upgrade(id: String) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || crate::winget::upgrade(&id))
+        .await
+        .map_err(|_| crate::winget::ERR_FAILED.to_string())?
+}
+
+#[tauri::command]
+pub async fn get_quick_state() -> crate::quick::QuickState {
+    tauri::async_runtime::spawn_blocking(crate::quick::state)
+        .await
+        .unwrap_or_default()
+}
+
+#[tauri::command]
+pub async fn set_dark_mode(dark: bool) -> bool {
+    tauri::async_runtime::spawn_blocking(move || crate::quick::set_dark(dark))
+        .await
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+pub async fn set_desktop_icons_hidden(hidden: bool) -> bool {
+    tauri::async_runtime::spawn_blocking(move || crate::quick::set_icons_hidden(hidden))
+        .await
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+pub async fn set_night_light(on: bool) -> bool {
+    tauri::async_runtime::spawn_blocking(move || crate::quick::set_night_light(on))
+        .await
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+pub async fn empty_recycle_bin() -> bool {
+    tauri::async_runtime::spawn_blocking(crate::quick::empty_recycle_bin)
+        .await
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+pub async fn lock_screen() -> bool {
+    tauri::async_runtime::spawn_blocking(crate::quick::lock)
+        .await
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+pub async fn list_audio_sessions() -> Vec<crate::audio::AudioSession> {
+    tauri::async_runtime::spawn_blocking(crate::audio::list_sessions)
+        .await
+        .unwrap_or_default()
+}
+
+#[tauri::command]
+pub async fn set_session_volume(id: String, level: f32) -> bool {
+    tauri::async_runtime::spawn_blocking(move || crate::audio::set_session_volume(&id, level))
+        .await
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+pub async fn set_session_mute(id: String, muted: bool) -> bool {
+    tauri::async_runtime::spawn_blocking(move || crate::audio::set_session_mute(&id, muted))
         .await
         .unwrap_or(false)
 }
