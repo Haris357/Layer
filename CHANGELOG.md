@@ -1,5 +1,13 @@
 # Changelog
 
+### v1.11.1 — 🩹 Fixes from your feedback: virtual desktops, flicker, shortcuts and YouTube
+- 🖥️ **Works with multiple virtual desktops** — Layer now shows on every desktop instead of opening on one you weren't looking at (which made it seem like nothing happened).
+- ✨ **No more flickering** — fixed the screen blinking some people saw, especially alongside wallpaper apps like Lively or Wallpaper Engine.
+- ⌨️ **Shortcuts no longer take over other apps** — Layer's shortcuts now only work while you're on the desktop, so your other apps get their key combos back. Want them everywhere? Turn on **Settings → Shortcuts → Work in every app**.
+- ▶️ **YouTube works in the Web embed widget again** — fixed "Error 153", and Shorts and live links work too.
+- 🌙 **The screensaver is now opt-in** — it's off by default on new installs, and uninstalling Layer now properly removes it from Windows.
+
+
 ### v1.11.0 — 🎛️ Five new widgets, network stats and a top bar that fits any screen
 - 🎚️ **New: Volume Mixer** — a live slider and mute button for every app that's playing sound, plus your master volume. No more digging through Windows Settings.
 - ⚡ **New: Quick Toggles** — dark mode, hide desktop icons, Night light, empty the Recycle Bin and lock your PC, one click each.
