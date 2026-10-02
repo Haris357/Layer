@@ -229,6 +229,9 @@ export interface ShortcutDef {
 export const setShortcuts = (shortcuts: ShortcutDef[]) =>
   invoke<void>('set_shortcuts', { shortcuts })
 
+export const setShortcutsEverywhere = (everywhere: boolean) =>
+  invoke<void>('set_shortcuts_everywhere', { everywhere })
+
 export const setScreensaverEnabled = (enabled: boolean) =>
   invoke<void>('set_screensaver_enabled', { enabled })
 

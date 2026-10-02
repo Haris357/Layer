@@ -123,7 +123,9 @@
       "hideEverything": "Ocultar todo",
       "hotCornerNote": "También puedes llevar el ratón a la esquina superior izquierda para cambiar de espacio (activa «Esquina activa» en General).",
       "disabled": "Desactivado",
-      "remapHint": "Haz clic en un atajo y pulsa la nueva combinación (incluye Ctrl, Shift o Alt). Pulsa Esc para cancelar. Desactiva uno para liberar sus teclas para otras apps."
+      "remapHint": "Haz clic en un atajo y pulsa la nueva combinación (incluye Ctrl, Shift o Alt). Pulsa Esc para cancelar. Desactiva uno para liberar sus teclas para otras apps.",
+      "everywhere": "En todas las apps",
+      "everywhereHint": "Desactivado: los atajos solo funcionan en el escritorio y nunca quitan combinaciones a otras apps. Activado: funcionan en todas partes (p. ej., Captura rápida sobre cualquier app)."
     },
     "about": {
       "tagline": "una capa tranquila en tu escritorio",

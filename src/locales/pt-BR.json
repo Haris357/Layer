@@ -123,7 +123,9 @@
       "hideEverything": "Ocultar tudo",
       "hotCornerNote": "Você também pode mover o mouse rapidamente para o canto superior esquerdo para alternar espaços (ative “Canto ativo” em Geral).",
       "disabled": "Desativado",
-      "remapHint": "Clique em um atalho e pressione a nova combinação (inclua Ctrl, Shift ou Alt). Pressione Esc para cancelar. Desative um para liberar suas teclas para outros apps."
+      "remapHint": "Clique em um atalho e pressione a nova combinação (inclua Ctrl, Shift ou Alt). Pressione Esc para cancelar. Desative um para liberar suas teclas para outros apps.",
+      "everywhere": "Em todos os apps",
+      "everywhereHint": "Desligado: os atalhos só funcionam na área de trabalho e nunca roubam combinações de outros apps. Ligado: funcionam em qualquer lugar (ex.: Captura rápida sobre qualquer app)."
     },
     "about": {
       "tagline": "uma camada silenciosa na sua área de trabalho",

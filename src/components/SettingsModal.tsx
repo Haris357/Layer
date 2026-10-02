@@ -117,6 +117,8 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const hotkey = useSettingsStore((s) => s.hotkey)
   const secondaryShortcuts = useSettingsStore((s) => s.secondaryShortcuts)
   const setSecondaryShortcut = useSettingsStore((s) => s.setSecondaryShortcut)
+  const shortcutsEverywhere = useSettingsStore((s) => s.shortcutsEverywhere)
+  const setShortcutsEverywhere = useSettingsStore((s) => s.setShortcutsEverywhere)
   const theme = useSettingsStore((s) => s.theme)
   const screensaverEnabled = useSettingsStore((s) => s.screensaverEnabled)
   const screensaverTheme = useSettingsStore((s) => s.screensaverTheme)
@@ -615,6 +617,18 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   {t('settings.shortcuts.peek')}
                 </span>
                 <Kbd combo="Ctrl+Shift+`" />
+              </div>
+
+              <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] py-2.5">
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-[13px] text-[var(--text-primary)]">
+                    {t('settings.shortcuts.everywhere')}
+                  </span>
+                  <span className="text-[11.5px] leading-snug text-[var(--text-tertiary)]">
+                    {t('settings.shortcuts.everywhereHint')}
+                  </span>
+                </div>
+                <Toggle checked={shortcutsEverywhere} onChange={setShortcutsEverywhere} />
               </div>
 
               <p className="mt-3 text-[11.5px] leading-relaxed text-[var(--text-tertiary)]">

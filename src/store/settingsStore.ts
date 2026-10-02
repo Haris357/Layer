@@ -21,6 +21,9 @@ interface SettingsState {
   // First day of the week in the Calendar widget: 0 = Sunday, 1 = Monday.
   weekStart: 0 | 1
   secondaryShortcuts: Record<SecondaryShortcut, ShortcutSetting>
+  // false (default): shortcuts only work while the desktop or Layer is in
+  // front, so they never steal key combos from other apps.
+  shortcutsEverywhere: boolean
   // Remembers which Space was last active for a given monitor setup (keyed by
   // a signature of connected monitor resolutions — see useMonitorProfiles).
   // Written passively as you use the app; read on launch/monitor-change to
@@ -50,6 +53,7 @@ interface SettingsState {
     action: SecondaryShortcut,
     patch: Partial<ShortcutSetting>,
   ) => void
+  setShortcutsEverywhere: (value: boolean) => void
   setMonitorSpace: (signature: string, spaceId: string) => void
   setLanguage: (value: string) => void
   setTheme: (theme: ThemePref) => void
@@ -78,11 +82,12 @@ export const useSettingsStore = create<SettingsState>()(
         cycle: { accelerator: 'Ctrl+Shift+E', enabled: true },
         hideAll: { accelerator: 'Ctrl+Shift+H', enabled: true },
       },
+      shortcutsEverywhere: false,
       monitorSpaceMap: {},
       language: 'en',
       theme: 'system',
       autostartInit: false,
-      screensaverEnabled: true,
+      screensaverEnabled: false,
       screensaverTheme: 'ambient',
       wallpaperAccent: false,
       hotCorner: false,
@@ -102,6 +107,7 @@ export const useSettingsStore = create<SettingsState>()(
             [action]: { ...s.secondaryShortcuts[action], ...patch },
           },
         })),
+      setShortcutsEverywhere: (shortcutsEverywhere) => set({ shortcutsEverywhere }),
       setMonitorSpace: (signature, spaceId) =>
         set((s) => ({
           monitorSpaceMap: { ...s.monitorSpaceMap, [signature]: spaceId },

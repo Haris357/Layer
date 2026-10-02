@@ -123,7 +123,9 @@
       "hideEverything": "隐藏全部",
       "hotCornerNote": "您也可以将鼠标快速甩到左上角来切换空间（在通用中启用“热角”）。",
       "disabled": "关闭",
-      "remapHint": "点击快捷键，然后按下新的组合键（需包含 Ctrl、Shift 或 Alt）。按 Esc 取消。关闭某项可将其按键留给其他应用。"
+      "remapHint": "点击快捷键，然后按下新的组合键（需包含 Ctrl、Shift 或 Alt）。按 Esc 取消。关闭某项可将其按键留给其他应用。",
+      "everywhere": "在所有应用中生效",
+      "everywhereHint": "关闭：快捷键仅在桌面上生效，不会抢占其他应用的按键组合。开启：在任何地方都生效（例如在任意应用上使用快速记录）。"
     },
     "about": {
       "tagline": "桌面上一层静谧的存在",

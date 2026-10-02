@@ -381,3 +381,31 @@ pub fn is_desktop_foreground() -> bool {
 pub fn is_desktop_foreground() -> bool {
     false
 }
+
+// The desktop, the taskbar (e.g. right after using the tray icon), or one of
+// Layer's own windows (canvas, notch, Quick Capture) is in front.
+#[cfg(target_os = "windows")]
+pub fn is_desktop_or_layer_foreground() -> bool {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GetClassNameW, GetForegroundWindow, GetWindowThreadProcessId,
+    };
+    if is_desktop_foreground() {
+        return true;
+    }
+    unsafe {
+        let hwnd = GetForegroundWindow();
+        let mut pid: u32 = 0;
+        GetWindowThreadProcessId(hwnd, &mut pid);
+        if pid == std::process::id() {
+            return true;
+        }
+        let mut buf = [0u16; 64];
+        let len = GetClassNameW(hwnd, buf.as_mut_ptr(), buf.len() as i32);
+        let class = String::from_utf16_lossy(&buf[..len.max(0) as usize]);
+        class == "Shell_TrayWnd" || class == "Shell_SecondaryTrayWnd"
+    }
+}
+#[cfg(not(target_os = "windows"))]
+pub fn is_desktop_or_layer_foreground() -> bool {
+    true
+}

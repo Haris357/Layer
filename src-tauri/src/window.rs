@@ -38,6 +38,7 @@ pub fn setup_window(app: &App) -> Result<(), Box<dyn std::error::Error>> {
         let _ = window.set_skip_taskbar(true);
         let _ = window.set_ignore_cursor_events(true);
         resize_to_virtual_desktop(&window);
+        show_on_all_desktops(&window);
         set_noactivate(&window, true);
         set_layer(&window, false);
         start_hit_poll(window, hits);
@@ -71,6 +72,34 @@ fn set_noactivate(window: &WebviewWindow, enabled: bool) {
 
 #[cfg(not(target_os = "windows"))]
 fn set_noactivate(_window: &WebviewWindow, _enabled: bool) {}
+
+// Windows assigns ordinary windows to one virtual desktop, so Layer could
+// open on a desktop the user wasn't looking at. Tool windows belong to no
+// desktop and show on all of them. The shell decides this when the window is
+// shown, so hide it, change the style, and let set_layer show it again.
+#[cfg(target_os = "windows")]
+fn show_on_all_desktops(window: &WebviewWindow) {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GetWindowLongPtrW, SetWindowLongPtrW, ShowWindow, GWL_EXSTYLE, SW_HIDE,
+        WS_EX_APPWINDOW, WS_EX_TOOLWINDOW,
+    };
+    let hwnd: HWND = match window.hwnd() {
+        Ok(handle) => handle.0 as HWND,
+        Err(_) => return,
+    };
+    unsafe {
+        let cur = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        let next = (cur | WS_EX_TOOLWINDOW as isize) & !(WS_EX_APPWINDOW as isize);
+        if next != cur {
+            ShowWindow(hwnd, SW_HIDE);
+            SetWindowLongPtrW(hwnd, GWL_EXSTYLE, next);
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn show_on_all_desktops(_window: &WebviewWindow) {}
 
 // Returns (x, y, width, height) of the entire virtual desktop (the union
 // of every connected monitor). On a single-monitor machine this collapses
@@ -444,6 +473,52 @@ fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
     });
 }
 
+// True if a real app window sits below Layer in the z-order — the only case
+// that needs fixing. Calling SetWindowPos(HWND_BOTTOM) unconditionally every
+// tick fought Explorer and wallpaper engines (which also keep their windows at
+// the bottom) and made the whole screen flicker.
+#[cfg(target_os = "windows")]
+unsafe fn app_window_below(hwnd: windows_sys::Win32::Foundation::HWND) -> bool {
+    use windows_sys::Win32::Graphics::Dwm::{DwmGetWindowAttribute, DWMWA_CLOAKED};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GetClassNameW, GetWindow, GetWindowLongPtrW, IsIconic, IsWindowVisible, GWL_EXSTYLE,
+        GW_HWNDNEXT, WS_EX_TOOLWINDOW,
+    };
+    let mut next = GetWindow(hwnd, GW_HWNDNEXT);
+    let mut checked = 0;
+    while !next.is_null() && checked < 256 {
+        checked += 1;
+        let candidate = next;
+        next = GetWindow(candidate, GW_HWNDNEXT);
+        if IsWindowVisible(candidate) == 0 || IsIconic(candidate) != 0 {
+            continue;
+        }
+        // Tool windows (other desktop widgets, overlays) aren't apps.
+        if GetWindowLongPtrW(candidate, GWL_EXSTYLE) & WS_EX_TOOLWINDOW as isize != 0 {
+            continue;
+        }
+        // Cloaked = on another virtual desktop, or a suspended UWP frame.
+        let mut cloaked: u32 = 0;
+        let hr = DwmGetWindowAttribute(
+            candidate,
+            DWMWA_CLOAKED as u32,
+            &mut cloaked as *mut u32 as *mut _,
+            4,
+        );
+        if hr >= 0 && cloaked != 0 {
+            continue;
+        }
+        let mut buf = [0u16; 64];
+        let len = GetClassNameW(candidate, buf.as_mut_ptr(), buf.len() as i32);
+        let class = String::from_utf16_lossy(&buf[..len.max(0) as usize]);
+        if class == "Progman" || class == "WorkerW" {
+            continue;
+        }
+        return true;
+    }
+    false
+}
+
 #[cfg(target_os = "windows")]
 fn pin_to_bottom(window: &WebviewWindow) {
     use windows_sys::Win32::Foundation::HWND;
@@ -456,6 +531,9 @@ fn pin_to_bottom(window: &WebviewWindow) {
         Err(_) => return,
     };
     unsafe {
+        if !app_window_below(hwnd) {
+            return;
+        }
         SetWindowPos(
             hwnd,
             HWND_BOTTOM,

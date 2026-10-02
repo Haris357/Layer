@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useSettingsStore } from '../store/settingsStore'
 import type { SecondaryShortcut, ShortcutSetting } from '../store/settingsStore'
-import { setShortcuts, type ShortcutDef } from '../lib/ipc'
+import { setShortcuts, setShortcutsEverywhere, type ShortcutDef } from '../lib/ipc'
 
 // Build the full shortcut list from the current settings. Shared by the mount
 // hook and the Settings rebind flow so they stay in sync.
@@ -26,7 +26,13 @@ export function useShortcuts() {
   const hotkey = useSettingsStore((s) => s.hotkey)
   const secondary = useSettingsStore((s) => s.secondaryShortcuts)
 
+  const everywhere = useSettingsStore((s) => s.shortcutsEverywhere)
+
   useEffect(() => {
     setShortcuts(buildShortcuts(hotkey, secondary)).catch(() => {})
   }, [hotkey, secondary])
+
+  useEffect(() => {
+    setShortcutsEverywhere(everywhere).catch(() => {})
+  }, [everywhere])
 }

@@ -1384,7 +1384,7 @@ pub async fn clear_all_notifications() {
 }
 
 // One configurable global shortcut, sent from the frontend.
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Clone)]
 pub struct ShortcutDef {
     pub action: String,
     pub accelerator: String,
@@ -1403,15 +1403,27 @@ pub fn default_shortcuts() -> Vec<ShortcutDef> {
     ]
 }
 
-// Unregister everything, then register only the enabled shortcuts and record
-// which action each maps to. A bad/unparseable accelerator is skipped rather
-// than failing the whole set.
-pub fn apply_shortcuts(app: &AppHandle, defs: &[ShortcutDef]) -> Result<(), String> {
+// Global hotkeys swallow their key combo system-wide, so by default they're
+// only registered while the desktop (or Layer itself) is in front — in any
+// other app the combo goes to that app. `everywhere` restores the old
+// always-on behaviour for people who want Quick Capture etc. over apps.
+#[derive(Default)]
+pub struct ShortcutGate {
+    defs: Vec<ShortcutDef>,
+    everywhere: bool,
+    // Whether `defs` are currently registered with the OS.
+    active: bool,
+}
+pub type SharedShortcutGate = std::sync::Arc<std::sync::Mutex<ShortcutGate>>;
+
+// Must run on the main thread: RegisterHotKey only works from the thread that
+// owns the plugin's hidden window.
+fn register_defs(app: &AppHandle, defs: &[ShortcutDef]) {
     use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
     let gs = app.global_shortcut();
     let _ = gs.unregister_all();
     let state = app.state::<crate::SharedShortcuts>();
-    let mut map = state.lock().map_err(|e| e.to_string())?;
+    let Ok(mut map) = state.lock() else { return };
     map.clear();
     for d in defs {
         if !d.enabled {
@@ -1425,12 +1437,60 @@ pub fn apply_shortcuts(app: &AppHandle, defs: &[ShortcutDef]) -> Result<(), Stri
             map.push((sc, d.action.clone()));
         }
     }
+}
+
+// Register or unregister to match where the user is right now. Main thread.
+fn sync_shortcuts(app: &AppHandle) {
+    let gate = app.state::<SharedShortcutGate>();
+    let Ok(mut g) = gate.lock() else { return };
+    let want = g.everywhere || crate::notch::is_desktop_or_layer_foreground();
+    if want {
+        register_defs(app, &g.defs);
+    } else {
+        register_defs(app, &[]);
+    }
+    g.active = want;
+}
+
+pub fn apply_shortcuts(app: &AppHandle, defs: &[ShortcutDef]) -> Result<(), String> {
+    {
+        let gate = app.state::<SharedShortcutGate>();
+        let mut g = gate.lock().map_err(|e| e.to_string())?;
+        g.defs = defs.to_vec();
+    }
+    sync_shortcuts(app);
     Ok(())
+}
+
+// Watches the foreground window and flips registration when the user moves
+// between the desktop and other apps. Cheap: one GetForegroundWindow per tick.
+pub fn start_shortcut_gate(app: AppHandle) {
+    std::thread::spawn(move || loop {
+        std::thread::sleep(std::time::Duration::from_millis(120));
+        let needs_change = {
+            let gate = app.state::<SharedShortcutGate>();
+            let Ok(g) = gate.lock() else { continue };
+            let want = g.everywhere || crate::notch::is_desktop_or_layer_foreground();
+            want != g.active
+        };
+        if needs_change {
+            let handle = app.clone();
+            let _ = app.run_on_main_thread(move || sync_shortcuts(&handle));
+        }
+    });
 }
 
 #[tauri::command]
 pub fn set_shortcuts(app: AppHandle, shortcuts: Vec<ShortcutDef>) -> Result<(), String> {
     apply_shortcuts(&app, &shortcuts)
+}
+
+#[tauri::command]
+pub fn set_shortcuts_everywhere(app: AppHandle, everywhere: bool) {
+    if let Ok(mut g) = app.state::<SharedShortcutGate>().lock() {
+        g.everywhere = everywhere;
+    }
+    sync_shortcuts(&app);
 }
 
 // ── DiskInfo widget ─────────────────────────────────────────────────────────

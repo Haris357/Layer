@@ -134,7 +134,10 @@ pub fn run() {
             let shortcuts: SharedShortcuts =
                 std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
             app.manage(shortcuts);
+            let gate: commands::SharedShortcutGate = Default::default();
+            app.manage(gate);
             let _ = commands::apply_shortcuts(app.handle(), &commands::default_shortcuts());
+            commands::start_shortcut_gate(app.handle().clone());
 
             let toggle_item =
                 MenuItemBuilder::with_id("toggle", "Toggle edit mode").build(app)?;
@@ -270,6 +273,7 @@ pub fn run() {
             commands::set_notch_size,
             commands::set_notch_hitbox,
             commands::is_desktop_foreground,
+            commands::set_shortcuts_everywhere,
             commands::list_audio_devices,
             commands::set_audio_device,
             commands::list_audio_sessions,

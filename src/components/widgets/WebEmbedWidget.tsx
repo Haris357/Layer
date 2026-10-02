@@ -19,10 +19,22 @@ function normalizeUrl(raw: string): string {
 }
 
 // Rewrite links that refuse normal embedding into an embeddable form.
+const YT_ID =
+  /(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([\w-]{11})/
+
 function toEmbeddable(url: string): string {
-  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/)
+  const yt = url.match(YT_ID)
   if (yt) return `https://www.youtube.com/embed/${yt[1]}`
   return url
+}
+
+// YouTube's player refuses to run without a Referer (Error 153), so for it we
+// send just Layer's origin — never the full URL. Every other site still gets
+// no referrer at all.
+function referrerFor(url: string): React.HTMLAttributeReferrerPolicy {
+  return /^https:\/\/www\.youtube\.com\/embed\//.test(url)
+    ? 'strict-origin-when-cross-origin'
+    : 'no-referrer'
 }
 
 function hostOf(url: string): string {
@@ -148,7 +160,7 @@ function WebEmbedRenderer({ widget }: { widget: WebEmbedWidgetType }) {
         // No allow-top-navigation: an embedded page can never hijack Layer.
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation allow-popups-to-escape-sandbox"
         allow="autoplay; encrypted-media; clipboard-read; clipboard-write; fullscreen; picture-in-picture"
-        referrerPolicy="no-referrer"
+        referrerPolicy={referrerFor(url)}
       />
     </div>
   )
