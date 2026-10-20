@@ -126,8 +126,8 @@ export function fillName(template: string, name: string): string {
   if (name) return template.replace(/\{name\}/g, name)
   return (
     template
-      .replace(/,?\s*\{name\}/g, '')
-      .replace(/\s+([?!.])/g, '$1')
+      .replace(/,? ?\{name\}/g, '')
+      .replace(/ ([?!.])/g, '$1')
       .trim() || 'Welcome back'
   )
 }

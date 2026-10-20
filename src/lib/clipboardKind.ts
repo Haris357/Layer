@@ -32,10 +32,15 @@ export interface ClipMeta {
   preview: string
 }
 
+// Every pattern here runs on arbitrary clipboard text, so each must be
+// linear-time (no nested or overlapping quantifiers) — `npm run check:regex`
+// enforces it. The old WIN_PATH_RE, /(?:[^…]*\\?)*/, backtracked
+// exponentially on paths like "C:\src\file.ts:142" and froze the app.
 const URL_RE = /^(https?:\/\/|www\.)\S+$/i
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const EMAIL_RE = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/
 const HEX_RE = /^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
-const WIN_PATH_RE = /^[a-zA-Z]:\\(?:[^<>:"|?*\r\n]*\\?)*$/
+// Also accepts an editor-style ":line" or ":line:col" suffix.
+const WIN_PATH_RE = /^[a-zA-Z]:\\[^<>:"|?*\r\n]*(?::\d+){0,2}$/
 const UNC_RE = /^\\\\[^\\]+\\\S+/
 const UNIX_PATH_RE = /^(?:\/|~\/|\.\.?\/)[^\s]+$/
 const NUM_RE = /^-?\d{1,3}(?:[, ]\d{3})+(?:\.\d+)?$|^-?\d+(?:\.\d+)?$/
@@ -61,13 +66,13 @@ function looksLikeSql(t: string): boolean {
 
 function looksLikeCode(t: string): boolean {
   if (
-    /=>|;\s*$|^\s*(function|const|let|var|import|export|class|def|public|private|return|if|for|while|#include|package|func)\b/m.test(
+    /=>|;[ \t]*$|^[ \t]*(function|const|let|var|import|export|class|def|public|private|return|if|for|while|#include|package|func)\b/m.test(
       t,
     )
   )
     return true
   // HTML / XML / JSX tag
-  if (/<\/?[a-z][^>]*>/i.test(t)) return true
+  if (/<\/?[a-z][^<>]*>/i.test(t)) return true
   // Braces/calls spanning multiple lines
   if (/[{}();]/.test(t) && /\n/.test(t)) return true
   return false

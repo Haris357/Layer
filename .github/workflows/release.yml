@@ -80,6 +80,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Never ship a regex that can freeze the app on user text (see
+      # scripts/check-regex.mjs).
+      - name: Regex safety (ReDoS)
+        run: npm run check:regex
+
       # Strip the instructional HTML comment from RELEASE_NOTES.md and reuse
       # the cleaned text everywhere: GitHub release body, in-app updater notes,
       # and the announcement email.

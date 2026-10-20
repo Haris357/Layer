@@ -2,14 +2,15 @@
   "name": "layer",
   "private": true,
   "license": "MIT",
-  "version": "1.11.1",
+  "version": "1.11.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "gen-icons": "node scripts/gen-icons.mjs"
+    "gen-icons": "node scripts/gen-icons.mjs",
+    "check:regex": "node scripts/check-regex.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -42,6 +43,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
+    "recheck": "^4.5.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.6.3",

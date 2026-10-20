@@ -19,13 +19,28 @@ function normalizeUrl(raw: string): string {
 }
 
 // Rewrite links that refuse normal embedding into an embeddable form.
-const YT_ID =
-  /(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([\w-]{11})/
+// Parsed with URL rather than one big regex: a "?…&v=" pattern backtracks
+// quadratically on long query strings.
+function youtubeId(url: string): string | null {
+  let u: URL
+  try {
+    u = new URL(url)
+  } catch {
+    return null
+  }
+  const host = u.hostname.replace(/^(www\.|m\.|music\.)/, '')
+  const valid = (id: string | null | undefined) =>
+    id && /^[\w-]{11}$/.test(id) ? id : null
+  if (host === 'youtu.be') return valid(u.pathname.split('/')[1])
+  if (host !== 'youtube.com') return null
+  if (u.pathname === '/watch') return valid(u.searchParams.get('v'))
+  const [, kind, id] = u.pathname.split('/')
+  return kind === 'shorts' || kind === 'live' || kind === 'embed' ? valid(id) : null
+}
 
 function toEmbeddable(url: string): string {
-  const yt = url.match(YT_ID)
-  if (yt) return `https://www.youtube.com/embed/${yt[1]}`
-  return url
+  const id = youtubeId(url)
+  return id ? `https://www.youtube.com/embed/${id}` : url
 }
 
 // YouTube's player refuses to run without a Referer (Error 153), so for it we

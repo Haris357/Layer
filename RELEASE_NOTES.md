@@ -5,14 +5,14 @@
   subscriber email. REWRITE THIS BEFORE EACH TAG.
   This release intentionally skips the subscriber email: skip-email
 -->
-## 🩹 Fixes from your feedback: virtual desktops, flicker, shortcuts and YouTube
+## 🩹 Fix: Layer freezing after copying certain file paths
 
-Layer v1.11.1.
+Layer v1.11.2.
 
-- 🖥️ **Works with multiple virtual desktops** — Layer now shows on every desktop instead of opening on one you weren't looking at (which made it seem like nothing happened).
-- ✨ **No more flickering** — fixed the screen blinking some people saw, especially alongside wallpaper apps like Lively or Wallpaper Engine.
-- ⌨️ **Shortcuts no longer take over other apps** — Layer's shortcuts now only work while you're on the desktop, so your other apps get their key combos back. Want them everywhere? Turn on **Settings → Shortcuts → Work in every app**.
-- ▶️ **YouTube works in the Web embed widget again** — fixed "Error 153", and Shorts and live links work too.
-- 🌙 **The screensaver is now opt-in** — it's off by default on new installs, and uninstalling Layer now properly removes it from Windows.
+- 🐛 **No more freezes from the clipboard** — copying a Windows file path that ends in a line number (like `C:\project\app.ts:142`) could freeze Layer completely, and the freeze came back every time Layer restarted. Fixed — and if you were stuck, this update unfreezes Layer on its own; you don't need to clear anything.
+- 📋 **File paths with line numbers are recognized** — the Clipboard widget now shows paths like `app.ts:142` as paths.
+- 🛡️ **Hardened everywhere** — we checked every pattern Layer uses on text you copy or type and fixed six more that could slow it down on very long or unusual text. A new automatic check now stops this kind of bug from ever shipping again.
+
+Thanks to the community member who tracked this down and reported it.
 
 **Updates are automatic** — Layer will grab this in the background and let you relaunch when you're ready.
