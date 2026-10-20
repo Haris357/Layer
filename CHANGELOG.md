@@ -1,5 +1,11 @@
 # Changelog
 
+### v1.11.2 — 🩹 Fix: Layer freezing after copying certain file paths
+- 🐛 **No more freezes from the clipboard** — copying a Windows file path that ends in a line number (like `C:\project\app.ts:142`) could freeze Layer completely, and the freeze came back every time Layer restarted. Fixed — and if you were stuck, this update unfreezes Layer on its own; you don't need to clear anything.
+- 📋 **File paths with line numbers are recognized** — the Clipboard widget now shows paths like `app.ts:142` as paths.
+- 🛡️ **Hardened everywhere** — we checked every pattern Layer uses on text you copy or type and fixed six more that could slow it down on very long or unusual text. A new automatic check now stops this kind of bug from ever shipping again.
+
+
 ### v1.11.1 — 🩹 Fixes from your feedback: virtual desktops, flicker, shortcuts and YouTube
 - 🖥️ **Works with multiple virtual desktops** — Layer now shows on every desktop instead of opening on one you weren't looking at (which made it seem like nothing happened).
 - ✨ **No more flickering** — fixed the screen blinking some people saw, especially alongside wallpaper apps like Lively or Wallpaper Engine.
