@@ -80,7 +80,7 @@ In Partner Center → your app → **Packages**, upload `Layer.msix`, then compl
 
 - **Listing**: description, 1–4 screenshots, category (Personalization /
   Productivity).
-- **Privacy policy URL**: `https://layer-desktop.web.app/privacy`
+- **Privacy policy URL**: `https://layer-desktop.vercel.app/privacy`
 - **Age ratings** questionnaire.
 - Submit for certification (a few hours to a couple of days).
 

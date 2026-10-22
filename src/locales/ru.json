@@ -835,7 +835,7 @@
   },
   "notify": {
     "publishTitle": "«{{name}}» опубликовано в галерее ✦",
-    "publishBody": "Ищите в разделе «Новое» на layer-desktop.web.app/spaces.",
+    "publishBody": "Ищите в разделе «Новое» на layer-desktop.vercel.app/spaces.",
     "battery20Title": "Заряд батареи 20%",
     "battery20Body": "Возможно, пора подключить зарядку.",
     "battery10Title": "Заряд батареи 10%",

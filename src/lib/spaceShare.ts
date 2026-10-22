@@ -14,7 +14,7 @@ import i18n from './i18n'
 import { useToastStore } from '../store/toastStore'
 import { rememberMySpace } from '../hooks/useGalleryNotifications'
 
-const GALLERY_URL = 'https://layer-desktop.web.app/spaces'
+const GALLERY_URL = 'https://layer-desktop.vercel.app/spaces'
 import type { Space, Widget } from '../types/widget'
 
 // Captures the desktop canvas as a base64 PNG (no data: prefix).

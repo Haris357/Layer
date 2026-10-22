@@ -829,7 +829,7 @@
   },
   "notify": {
     "publishTitle": "\"{{name}}\" publicado en la galería ✦",
-    "publishBody": "Búscalo en Más recientes en layer-desktop.web.app/spaces.",
+    "publishBody": "Búscalo en Más recientes en layer-desktop.vercel.app/spaces.",
     "battery20Title": "Batería al 20%",
     "battery20Body": "Quizá sea hora de enchufar.",
     "battery10Title": "Batería al 10%",

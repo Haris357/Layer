@@ -826,7 +826,7 @@
   },
   "notify": {
     "publishTitle": "“{{name}}”已发布到图库 ✦",
-    "publishBody": "可在 layer-desktop.web.app/spaces 的“最新”中找到它。",
+    "publishBody": "可在 layer-desktop.vercel.app/spaces 的“最新”中找到它。",
     "battery20Title": "电量剩余 20%",
     "battery20Body": "也许该插上电源了。",
     "battery10Title": "电量剩余 10%",

@@ -826,7 +826,7 @@
   },
   "notify": {
     "publishTitle": "「{{name}}」をギャラリーに公開しました ✦",
-    "publishBody": "layer-desktop.web.app/spaces の「最新」からご覧いただけます。",
+    "publishBody": "layer-desktop.vercel.app/spaces の「最新」からご覧いただけます。",
     "battery20Title": "バッテリー残量 20%",
     "battery20Body": "そろそろ充電する時間かもしれません。",
     "battery10Title": "バッテリー残量 10%",

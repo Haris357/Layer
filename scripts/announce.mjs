@@ -17,7 +17,7 @@ import nodemailer from 'nodemailer'
 import { announceEmail, notesToHtml } from './email-template.mjs'
 
 // Where the /unsubscribe page lives (Firebase Hosting).
-const SITE = 'https://layer-desktop.web.app'
+const SITE = 'https://layer-desktop.vercel.app'
 
 function skip(msg) {
   console.log(`announce: skipped — ${msg}`)

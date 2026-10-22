@@ -829,7 +829,7 @@
   },
   "notify": {
     "publishTitle": "„{{name}}“ in der Galerie veröffentlicht ✦",
-    "publishBody": "Du findest es unter „Neueste“ auf layer-desktop.web.app/spaces.",
+    "publishBody": "Du findest es unter „Neueste“ auf layer-desktop.vercel.app/spaces.",
     "battery20Title": "Akku bei 20 %",
     "battery20Body": "Vielleicht Zeit zum Aufladen.",
     "battery10Title": "Akku bei 10 %",
