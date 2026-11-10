@@ -8,8 +8,7 @@ so outside eyes and PRs genuinely help.
 - **Small fix or bug?** Just open a PR.
 - **New widget or bigger feature?** Open an issue first describing what you
   want to build, so we can align on approach before you sink time into it.
-  [ROADMAP.md](ROADMAP.md) has ideas already earmarked if you want inspiration
-  — anything marked *good first issue* is a solid place to start.
+  Issues labelled *good first issue* are a solid place to start.
 
 ## Building from source
 

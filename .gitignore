@@ -40,3 +40,12 @@ src-tauri/msix/staging/
 src-tauri/msix/out/
 src-tauri/msix/priconfig.xml
 src-tauri/msix/*.pfx
+
+# Private notes and machine-specific helpers: kept locally, never published.
+LAYER_MASTER_PLAN.md
+ROADMAP.md
+docs/
+scripts/dev.bat
+scripts/build.bat
+scripts/rust-build.bat
+scripts/capture-screensaver.ps1
