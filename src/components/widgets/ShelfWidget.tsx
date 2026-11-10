@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { convertFileSrc } from '@tauri-apps/api/core'
+import { useAssetSrc } from '../../lib/assetSrc'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { open } from '@tauri-apps/plugin-dialog'
 import {
@@ -55,7 +55,8 @@ function Tile({ item }: { item: ShelfItem }) {
     const path = removeFromStore(item.id)
     if (path) shelfRemove(path).catch(() => {})
   }
-  const src = item.kind === 'image' ? convertFileSrc(item.path) : null
+  const asset = useAssetSrc(item.kind === 'image' ? item.path : null)
+  const src = asset.src ?? null
   const isFolder = item.kind === 'folder'
   const open = () =>
     (isFolder ? showInFolder(item.path) : openUrl(item.path)).catch(() => {})
@@ -71,6 +72,7 @@ function Tile({ item }: { item: ShelfItem }) {
         {src ? (
           <img
             src={src}
+            onError={asset.onError}
             alt={item.name}
             className="h-full w-full object-cover"
             draggable={false}

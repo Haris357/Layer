@@ -29,7 +29,7 @@ import {
 import { months, weekdays, dateLocale } from '../../lib/locale'
 import { cn } from '../../lib/utils'
 import { Menu } from '../Menu'
-import { Segmented } from '../ui'
+import { FieldRow, Segmented, Toggle } from '../ui'
 import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 import { useCalendarSourcesStore } from '../../store/calendarSourcesStore'
@@ -457,7 +457,11 @@ function EventEditor({
   const hint = !isEditing ? initial.dateHint : new Date(initial.start)
 
   const [title, setTitle] = useState(isEditing ? initial.title : '')
-  const [date, setDate] = useState(hint.toISOString().slice(0, 10))
+  // Local Y-M-D: toISOString() would give the UTC date, a day early for
+  // anyone east of UTC when the hint is local midnight.
+  const [date, setDate] = useState(
+    `${hint.getFullYear()}-${String(hint.getMonth() + 1).padStart(2, '0')}-${String(hint.getDate()).padStart(2, '0')}`,
+  )
   const [time, setTime] = useState(
     isEditing
       ? new Date(initial.start).toTimeString().slice(0, 5)
@@ -706,7 +710,31 @@ function EventEditor({
 
 // ─── Main renderer ──────────────────────────────────────────────────────────
 
-function CalendarRenderer() {
+// A thin "2026 · 84%" line under the header: how much of the year is gone.
+function YearLine() {
+  const { t } = useTranslation()
+  const now = new Date()
+  const start = new Date(now.getFullYear(), 0, 1).getTime()
+  const end = new Date(now.getFullYear() + 1, 0, 1).getTime()
+  const pct = Math.floor(((now.getTime() - start) / (end - start)) * 100)
+  return (
+    <div className="mb-2 flex items-center gap-2">
+      <div className="h-1 flex-1 overflow-hidden rounded-full bg-[var(--fill-2)]">
+        <motion.div
+          className="h-full rounded-full bg-[var(--widget-accent)]"
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+        />
+      </div>
+      <span className="shrink-0 text-[10.5px] font-semibold tabular-nums text-[var(--text-tertiary)]">
+        {t('calendar.progress', { year: now.getFullYear(), pct })}
+      </span>
+    </div>
+  )
+}
+
+function CalendarRenderer({ widget }: { widget: CalendarWidgetType }) {
   const { t } = useTranslation()
   const events = useAllEvents()
   const today = useMemo(() => startOfDay(new Date()), [])
@@ -785,6 +813,8 @@ function CalendarRenderer() {
           </button>
         </Tooltip>
       </div>
+
+      {widget.showProgress && <YearLine />}
 
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-0.5 rounded-[7px] bg-[var(--fill-1)] p-0.5">
@@ -866,7 +896,13 @@ function CalendarRenderer() {
 
 // Manage external calendar subscriptions (.ics URLs). Shown in the widget's
 // settings popover. Sources are global (shared across calendar widgets).
-function CalendarSettings() {
+function CalendarSettings({
+  widget,
+  onUpdate,
+}: {
+  widget: CalendarWidgetType
+  onUpdate: (patch: Partial<CalendarWidgetType>) => void
+}) {
   const { t } = useTranslation()
   const weekStart = useSettingsStore((s) => s.weekStart)
   const setWeekStart = useSettingsStore((s) => s.setWeekStart)
@@ -910,6 +946,9 @@ function CalendarSettings() {
           onChange={(v) => setWeekStart(Number(v) as 0 | 1)}
         />
       </div>
+      <FieldRow label={t('calendar.settings.showProgress')}>
+        <Toggle checked={!!widget.showProgress} onChange={(v) => onUpdate({ showProgress: v })} />
+      </FieldRow>
       <div className="h-px bg-[var(--border)]" />
       <div className="text-[12px] font-semibold text-[var(--text-secondary)]">
         {t('calendar.settings.title')}
@@ -1023,6 +1062,14 @@ export const calendarDefinition: WidgetDefinition<CalendarWidgetType> = {
   enabled: true,
   minSize: { width: 240, height: 230 },
   maxSize: { width: 560, height: 520 },
+  // Year Progress lives here as styles of the Calendar (it keeps its own
+  // widget type underneath, so existing ones keep working).
+  styles: [
+    { key: 'calendar', label: 'Calendar', patch: {} },
+    { key: 'year', label: 'Year progress', patch: { type: 'yearprogress', mode: 'year' } },
+    { key: 'life', label: 'Life in weeks', patch: { type: 'yearprogress', mode: 'life', width: 360, height: 300 } },
+    { key: 'countdown', label: 'Countdown', patch: { type: 'countdown' } },
+  ],
   create: (x, y) => ({
     type: 'calendar',
     x,

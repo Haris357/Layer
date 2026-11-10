@@ -14,6 +14,19 @@ function daysFromNow(days: number): string {
   return new Date(Date.now() + days * DAY).toISOString()
 }
 
+// The date picker speaks "YYYY-MM-DD" in the user's own time zone. Never feed
+// that string to `new Date()` (it's read as midnight UTC, so the countdown was
+// off by the user's UTC offset), and never slice it out of toISOString()
+// (that's the UTC date, which can be a day earlier or later).
+function localMidnightIso(ymd: string): string {
+  const [y, m, d] = ymd.split('-').map(Number)
+  return new Date(y!, m! - 1, d!).toISOString()
+}
+function localYmd(iso: string): string {
+  const d = new Date(iso)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 interface Breakdown {
   passed: boolean
   days: number
@@ -148,11 +161,11 @@ function CountdownSettings({
       />
       <input
         type="date"
-        value={widget.target.slice(0, 10)}
+        value={localYmd(widget.target)}
         onMouseDown={(e) => e.stopPropagation()}
         onChange={(e) => {
           if (e.target.value) {
-            onUpdate({ target: new Date(e.target.value).toISOString() })
+            onUpdate({ target: localMidnightIso(e.target.value) })
           }
         }}
         className="w-full rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-2.5 py-1.5 text-[13px] text-[var(--text-primary)] outline-none"

@@ -31,7 +31,9 @@ import { runUpdate } from '../lib/updateFlow'
 import { Toggle, Slider, FieldRow, Segmented, Select } from './ui'
 import { useNotchStore, type NotchModuleId } from '../notch/notchStore'
 import { IS_STORE } from '../lib/dist'
+import { useTourStore } from '../store/tourStore'
 import { LANGUAGES, changeLanguage, type LanguageCode } from '../lib/i18n'
+import { releaseToShow } from './whatsnew/releases'
 
 // ☕ Support link — shown only in the direct-download build (the Microsoft Store
 // rejects external donation/payment links).
@@ -108,7 +110,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function SettingsModal({ onClose }: { onClose: () => void }) {
+export function SettingsModal({ onClose, embedded = false }: { onClose: () => void; embedded?: boolean }) {
   const { t } = useTranslation()
   const language = useSettingsStore((s) => s.language)
   const setLanguage = useSettingsStore((s) => s.setLanguage)
@@ -158,6 +160,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   )
   const [autostart, setAutostart] = useState(false)
   const [version, setVersion] = useState('1.0.0')
+  const aboutRelease = releaseToShow(version)
   const [updateBusy, setUpdateBusy] = useState(false)
   const [updateMsg, setUpdateMsg] = useState('')
 
@@ -250,35 +253,8 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const ghostBtn =
     'rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-2 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]'
 
-  return (
-    <div
-      data-hit
-      className="fixed inset-0 z-[10000]"
-      style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
-      onMouseDown={onClose}
-    >
-      {/* Centre the modal within the primary monitor (not the whole virtual
-          desktop) so it never opens in the gap between monitors. */}
-      <div
-        className="absolute flex items-center justify-center"
-        style={{
-          left: primary ? primary.x : 0,
-          top: primary ? primary.y : 0,
-          width: primary ? primary.w : '100%',
-          height: primary ? primary.h : '100%',
-        }}
-      >
-        <motion.div
-          drag
-          dragListener={false}
-          dragControls={dragControls}
-          dragMomentum={false}
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="glass flex h-[min(560px,90vh)] w-[min(720px,94vw)] overflow-hidden rounded-[18px] border border-[var(--border)]"
-          onMouseDown={(e) => e.stopPropagation()}
-        >
+  const inner = (
+    <>
         {/* sidebar */}
         <div className="flex w-[176px] shrink-0 flex-col gap-1 border-r border-[var(--border)] bg-[var(--fill-1)] p-3">
           <div
@@ -314,6 +290,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* header bar: drag handle pinned left, close pinned right, divider
               underneath so the settings below can never collide with them */}
+          {!embedded && (
           <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-3 py-2">
             <button
               type="button"
@@ -332,6 +309,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               <X size={17} />
             </button>
           </div>
+          )}
 
           <div className="flex flex-1 flex-col overflow-y-auto p-6">
           {tab === 'general' && (
@@ -722,6 +700,16 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 >
                   {t('settings.about.feedback')}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose()
+                    useTourStore.getState().start()
+                  }}
+                  className="rounded-[8px] border border-[var(--border)] bg-[var(--fill-1)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
+                >
+                  {t('settings.about.replayTour')}
+                </button>
                 {!IS_STORE && SUPPORT_ENABLED && (
                   <button
                     type="button"
@@ -732,6 +720,45 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                   </button>
                 )}
               </div>
+
+              {/* This version's release notes, with the video + tour behind them. */}
+              {aboutRelease && (
+                <div className="flex flex-col gap-2.5 rounded-[12px] border border-[var(--border)] bg-[var(--fill-1)] p-4">
+                  <div className="text-[13px] font-semibold text-[var(--text-primary)]">
+                    {t('settings.about.whatsNewTitle', { version: aboutRelease.version })}
+                  </div>
+                  <ul className="flex flex-col gap-1.5">
+                    {aboutRelease.notes.map(({ id, icon: Icon }) => (
+                      <li key={id} className="flex items-start gap-2.5 text-[12px] leading-relaxed text-[var(--text-secondary)]">
+                        <Icon size={14} strokeWidth={1.7} className="mt-0.5 shrink-0 text-[var(--text-primary)]" />
+                        {t(`whatsNew.${aboutRelease.key}.notes.${id}`)}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose()
+                        useTourStore.getState().openWhatsNew()
+                      }}
+                      className="rounded-[8px] bg-[var(--accent)] px-3 py-1.5 text-[12px] font-semibold text-[var(--on-accent)]"
+                    >
+                      {t('settings.about.openWhatsNew')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose()
+                        useTourStore.getState().start('whatsnew')
+                      }}
+                      className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
+                    >
+                      {t('settings.about.tourWhatsNew')}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="button"
@@ -787,6 +814,42 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           )}
           </div>
         </div>
+    </>
+  )
+
+  // Inside the Layer Hub: just the content, the hub is the frame.
+  if (embedded) return <div className="flex h-full w-full overflow-hidden">{inner}</div>
+
+  return (
+    <div
+      data-hit
+      className="fixed inset-0 z-[10000]"
+      style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+      onMouseDown={onClose}
+    >
+      {/* Centre the modal within the primary monitor (not the whole virtual
+          desktop) so it never opens in the gap between monitors. */}
+      <div
+        className="absolute flex items-center justify-center"
+        style={{
+          left: primary ? primary.x : 0,
+          top: primary ? primary.y : 0,
+          width: primary ? primary.w : '100%',
+          height: primary ? primary.h : '100%',
+        }}
+      >
+        <motion.div
+          drag
+          dragListener={false}
+          dragControls={dragControls}
+          dragMomentum={false}
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="glass flex h-[min(560px,90vh)] w-[min(720px,94vw)] overflow-hidden rounded-[18px] border border-[var(--border)]"
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {inner}
         </motion.div>
       </div>
     </div>

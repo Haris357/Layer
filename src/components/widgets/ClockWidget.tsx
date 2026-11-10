@@ -449,6 +449,7 @@ export const clockDefinition: WidgetDefinition<ClockWidgetType> = {
         font: 'anurati',
       },
     },
+    { key: 'world', label: 'World clock', patch: { type: 'worldclock' } },
   ],
   create: (x, y) => ({
     type: 'clock',

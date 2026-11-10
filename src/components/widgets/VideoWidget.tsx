@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Video as VideoIcon } from 'lucide-react'
-import { convertFileSrc } from '@tauri-apps/api/core'
+import { useAssetSrc } from '../../lib/assetSrc'
 import { open } from '@tauri-apps/plugin-dialog'
 import type { VideoWidget as VideoWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
@@ -23,6 +23,7 @@ async function pickVideo(): Promise<string | null> {
 function VideoRenderer({ widget }: { widget: VideoWidgetType }) {
   const mode = useCanvasStore((s) => s.mode)
   const ref = useRef<HTMLVideoElement>(null)
+  const asset = useAssetSrc(widget.src)
 
   useEffect(() => {
     const el = ref.current
@@ -39,7 +40,7 @@ function VideoRenderer({ widget }: { widget: VideoWidgetType }) {
   return (
     <video
       ref={ref}
-      src={convertFileSrc(widget.src)}
+      {...asset}
       autoPlay={widget.autoplay}
       loop={widget.loop}
       muted={widget.muted}

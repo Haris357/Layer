@@ -8,5 +8,8 @@ export default defineConfig({
   server: {
     port: 1420,
     strictPort: true,
+    // The Rust side has its own watcher; watching target/ also crashes Vite
+    // (EBUSY) when cargo has a build-script exe locked.
+    watch: { ignored: ['**/src-tauri/**'] },
   },
 })

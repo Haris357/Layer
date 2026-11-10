@@ -8,12 +8,14 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, animate, motion, useMotionValue } from 'framer-motion'
 import { listen } from '@tauri-apps/api/event'
 import {
   Layers,
   Settings as SettingsIcon,
   LayoutTemplate,
+  PanelTopClose,
+  PanelTopOpen,
   Lock,
   LockOpen,
   Square,
@@ -31,12 +33,16 @@ import { useToastStore } from '../store/toastStore'
 import { useAnchorMonitor } from '../store/monitorStore'
 import { useNotificationStore } from '../store/notificationStore'
 import { notify } from '../lib/notify'
+import { setForceInteractive } from '../lib/ipc'
 import { getUpdate } from '../lib/updater'
-import { widgetList, type WidgetDefinition } from '../lib/widgetRegistry'
+import { widgetList, widgetRegistry, type WidgetDefinition } from '../lib/widgetRegistry'
+import type { WidgetType } from '../types/widget'
 import { cn } from '../lib/utils'
 import { SettingsModal } from './SettingsModal'
 import { SpacesModal } from './SpacesModal'
 import { NotificationsPanel } from './NotificationsPanel'
+import { LayerHub, type HubView } from './LayerHub'
+import { useTourStore } from '../store/tourStore'
 import { Tooltip } from './Tooltip'
 
 const spring = { type: 'spring', stiffness: 380, damping: 34 } as const
@@ -52,17 +58,21 @@ function ToolButton({
   danger,
   onClick,
   children,
+  tour,
 }: {
   index?: number
   label: string
   danger?: boolean
   onClick: () => void
   children: ReactNode
+  // Anchor for the guided tour's spotlight.
+  tour?: string
 }) {
   return (
     <Tooltip label={label} side="bottom">
       <motion.button
         type="button"
+        data-tour={tour}
         onClick={onClick}
         // Clean reveal: the icons just fade in place (no fly-in / slide) while
         // the bar expands around them. variants are driven by the parent so the
@@ -277,7 +287,7 @@ function WidgetScroller({
   )
 
   return (
-    <div className="relative flex min-w-0 items-center">
+    <div data-tour="widgets" className="relative flex min-w-0 items-center">
       <div
         ref={ref}
         className="flex select-none items-center gap-1 overflow-x-auto"
@@ -437,6 +447,104 @@ export function TopIsland() {
   const [showSettings, setShowSettings] = useState(false)
   const [showSpaces, setShowSpaces] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  // The Layer Hub: the bar pulled down into a sheet with every widget.
+  const [showHub, setShowHub] = useState(false)
+  // True from closing until the sheet has fully retracted: the bar stays out
+  // (and square-cornered) so the sheet slides back into it, not into air.
+  const [hubLeaving, setHubLeaving] = useState(false)
+  const [hubView, setHubView] = useState<HubView>('widgets')
+  // How far the hub sheet is out (0 = tucked in, 1 = open). Clicks animate it;
+  // pulling the bar or the sheet's handle sets it directly, frame by frame.
+  const hubReveal = useMotionValue(0)
+  const hubAnim = useRef<ReturnType<typeof animate> | null>(null)
+  const leavingRef = useRef(false)
+  const sheetEase = [0.32, 0.72, 0, 1] as const
+  const openHub = () => {
+    hubAnim.current?.stop()
+    leavingRef.current = false
+    setHubLeaving(false)
+    useCanvasStore.getState().setMode('edit')
+    setShowHub(true)
+    hubAnim.current = animate(hubReveal, 1, { duration: 0.55 * (1 - hubReveal.get()) + 0.15, ease: sheetEase })
+  }
+  const closeHub = () => {
+    if (leavingRef.current) return
+    leavingRef.current = true
+    hubAnim.current?.stop()
+    setHubLeaving(true)
+    hubAnim.current = animate(hubReveal, 0, { duration: 0.42 * hubReveal.get() + 0.1, ease: sheetEase })
+    hubAnim.current.then(() => {
+      if (!leavingRef.current) return // re-opened meanwhile
+      leavingRef.current = false
+      setShowHub(false)
+      setHubLeaving(false)
+      setHubView('widgets')
+    })
+  }
+
+  // ── Pull-down drawer on the pill: a short pull opens the toolbar, a long
+  // one keeps going into the hub, which follows the cursor live. ─────────
+  const PULL_BAR = 36 // px down that opens the toolbar
+  const PULL_HUB = 70 // px down where the hub starts coming out
+  const PULL_RANGE = 260 // px over which the hub goes from 0 to fully out
+  const pillY = useMotionValue(0) // rubber-band offset of the bar
+  const pull = useRef<{ y: number; lastY: number; lastT: number; v: number; dragging: boolean; hub: boolean } | null>(null)
+  const swallowClick = useRef(false)
+  const onPillDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.button !== 0) return
+    // A fresh press: forget any click-swallow left over from an earlier pull
+    // whose release never turned into a click (that ate the next real click).
+    swallowClick.current = false
+    e.currentTarget.setPointerCapture(e.pointerId)
+    pull.current = { y: e.clientY, lastY: e.clientY, lastT: performance.now(), v: 0, dragging: false, hub: showHub }
+  }
+  const onPillMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const p = pull.current
+    if (!p) return
+    const dy = e.clientY - p.y
+    if (!p.dragging) {
+      if (dy < 6) return
+      p.dragging = true
+      swallowClick.current = true
+      // The drag may leave the pill's own hit box: take the whole window.
+      setForceInteractive(true).catch(() => {})
+      document.body.style.cursor = 'grabbing'
+      hubAnim.current?.stop()
+      leavingRef.current = false
+    }
+    const now = performance.now()
+    p.v = (e.clientY - p.lastY) / Math.max(1, now - p.lastT)
+    p.lastY = e.clientY
+    p.lastT = now
+    if (dy >= PULL_BAR && useCanvasStore.getState().mode !== 'edit') useCanvasStore.getState().setMode('edit')
+    if (dy < PULL_HUB && !p.hub) {
+      // Rubber band: follows at first, resists more the further you go.
+      pillY.set(Math.max(0, 22 * (1 - Math.exp(-dy / 40))))
+      return
+    }
+    if (!p.hub) {
+      p.hub = true
+      animate(pillY, 0, { type: 'spring', stiffness: 500, damping: 36 })
+      setHubLeaving(false)
+      setShowHub(true)
+    }
+    hubReveal.set(Math.min(1, Math.max(0, (dy - PULL_HUB) / PULL_RANGE)))
+  }
+  const onPillUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const p = pull.current
+    pull.current = null
+    if (!p) return
+    e.currentTarget.releasePointerCapture?.(e.pointerId)
+    if (!p.dragging) return
+    setForceInteractive(false).catch(() => {})
+    document.body.style.cursor = ''
+    animate(pillY, 0, { type: 'spring', stiffness: 500, damping: 30 })
+    if (!p.hub) return
+    // A quick downward flick or most of the way out opens; otherwise it
+    // tucks back in and the toolbar stays open.
+    if (p.v > 0.5 || (p.v > -0.4 && hubReveal.get() > 0.35)) openHub()
+    else closeHub()
+  }
   const leaveTimer = useRef<number | undefined>(undefined)
   const unreadCount = useNotificationStore((s) =>
     s.items.reduce((n, i) => n + (i.read ? 0 : 1), 0),
@@ -502,12 +610,21 @@ export function TopIsland() {
   }, [])
 
   const open = mode === 'edit'
+  // The hub hangs from the full toolbar; leaving edit mode collapses the bar
+  // to its pill, so the hub retracts first instead of squeezing down with it.
+  useEffect(() => {
+    if (!open && showHub) closeHub()
+    // closeHub only sets state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, showHub])
   const down =
     hovered ||
     open ||
     showSettings ||
     showSpaces ||
     showNotifications ||
+    showHub ||
+    hubLeaving ||
     styleMenu !== null
 
   // Close the style dropdown on any click outside it, and when leaving edit
@@ -554,7 +671,13 @@ export function TopIsland() {
     patch?: Record<string, unknown>,
   ) => {
     setStyleMenu(null)
-    const created = await def.create(0, 0)
+    // A style can stand for another widget type (Clock → World clock,
+    // Calendar → Countdown, …): build it from that type's own defaults.
+    const target =
+      typeof patch?.type === 'string' && patch.type !== def.type
+        ? (widgetRegistry[patch.type as WidgetType] ?? def)
+        : def
+    const created = await target.create(0, 0)
     if (!created) return
     const merged = (patch ? { ...created, ...patch } : created) as typeof created
     const snap = (v: number) =>
@@ -588,19 +711,35 @@ export function TopIsland() {
           animate={{ y: down ? 0 : -40 }}
           transition={spring}
         >
+          {/* rubber-band offset while the pill is being pulled */}
+          <motion.div style={{ y: pillY }}>
           <motion.div
             layout
             transition={spring}
+            data-tour="island"
             className="glass flex items-center gap-1 border border-t-0 border-[var(--border)] px-1.5 py-1.5"
+            // Square bottom while the hub hangs from it, so they read as one.
+            animate={{ borderRadius: showHub || hubLeaving ? '0px 0px 0px 0px' : '0px 0px 16px 16px' }}
             style={{ borderRadius: '0 0 16px 16px' }}
           >
             <Tooltip label={open ? t('toolbar.exitEdit') : t('toolbar.openMenu')} side="bottom">
               <motion.button
                 type="button"
-                onClick={toggleMode}
+                onClick={() => {
+                  // The click that ends a pull isn't a click.
+                  if (swallowClick.current) {
+                    swallowClick.current = false
+                    return
+                  }
+                  toggleMode()
+                }}
+                onPointerDown={onPillDown}
+                onPointerMove={onPillMove}
+                onPointerUp={onPillUp}
+                onPointerCancel={onPillUp}
                 whileTap={{ scale: 0.92 }}
                 className={cn(
-                  'flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] px-2 transition-colors duration-150',
+                  'flex h-9 shrink-0 cursor-grab touch-none items-center gap-1.5 rounded-[10px] px-2 transition-colors duration-150 active:cursor-grabbing',
                   open
                     ? 'bg-[var(--surface-active)]'
                     : 'hover:bg-[var(--surface-hover)]',
@@ -700,6 +839,7 @@ export function TopIsland() {
                   <ToolButton
                     index={widgetList.length}
                     label={allLocked ? t('toolbar.unlockAll') : t('toolbar.lockAll')}
+                    tour="lock"
                     onClick={() => lockAll(!allLocked)}
                   >
                     {allLocked ? (
@@ -715,6 +855,7 @@ export function TopIsland() {
                         ? t('toolbar.hideBackgrounds')
                         : t('toolbar.showBackgrounds')
                     }
+                    tour="backgrounds"
                     onClick={() => setBackgroundAll(!anyBg)}
                   >
                     {anyBg ? (
@@ -726,6 +867,7 @@ export function TopIsland() {
                   <motion.div variants={dividerVariants} className="mx-0.5 h-6 w-px shrink-0 bg-[var(--border)]" />
                   <ToolButton
                     index={widgetList.length + 2}
+                    tour="reset"
                     danger={confirmReset}
                     label={
                       confirmReset
@@ -748,45 +890,131 @@ export function TopIsland() {
                       <RotateCcw size={18} strokeWidth={1.5} />
                     )}
                   </ToolButton>
+                  <div className="relative flex items-center">
+                    {/* Spaces, Notifications and Settings live inside the hub while it's
+                        open, so their bar buttons fade away (in place: the bar's width
+                        must not change, the hub is sized to it). */}
+                    <div
+                      className="flex items-center gap-1 transition-[opacity,transform,filter] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                      // A plain element on purpose: an animated wrapper would cut the
+                      // bar's reveal variants off from the buttons inside.
+                      style={{
+                        opacity: showHub ? 0 : 1,
+                        transform: showHub ? 'scale(0.6)' : 'scale(1)',
+                        filter: showHub ? 'blur(2px)' : 'blur(0px)',
+                        pointerEvents: showHub ? 'none' : 'auto',
+                      }}
+                      aria-hidden={showHub || undefined}
+                    >
+                      <ToolButton
+                        index={widgetList.length + 3}
+                        label={t('toolbar.spaces')}
+                        tour="spaces"
+                        onClick={() => setShowSpaces(true)}
+                      >
+                        <LayoutTemplate size={18} strokeWidth={1.5} />
+                      </ToolButton>
+                      <ToolButton
+                        index={widgetList.length + 4}
+                        label={
+                          unreadCount > 0
+                            ? t('toolbar.notificationsNew', { count: unreadCount })
+                            : t('toolbar.notifications')
+                        }
+                        tour="notifications"
+                        onClick={() => setShowNotifications(true)}
+                      >
+                        <span className="relative inline-flex">
+                          <BellRing size={18} strokeWidth={1.5} />
+                          {unreadCount > 0 && (
+                            <span
+                              className="absolute -right-[3px] -top-[2px] h-[7px] w-[7px] rounded-full ring-2 ring-[var(--surface)]"
+                              style={{ background: 'var(--accent)' }}
+                            />
+                          )}
+                        </span>
+                      </ToolButton>
+                      <ToolButton
+                        index={widgetList.length + 5}
+                        label={t('toolbar.settings')}
+                        tour="settings"
+                        onClick={() => setShowSettings(true)}
+                      >
+                        <SettingsIcon size={18} strokeWidth={1.5} />
+                      </ToolButton>
+                      </div>
+                    {/* While the hub is open the slot those buttons leave becomes its
+                        header: "Layer Hub › <view>", crossfading as you switch. */}
+                    <div
+                      className="pointer-events-none absolute inset-0 flex items-center justify-center gap-1.5 whitespace-nowrap text-[12px] transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                      style={{
+                        opacity: showHub ? 1 : 0,
+                        transform: showHub ? 'translateY(0)' : 'translateY(-4px)',
+                      }}
+                      aria-hidden={!showHub || undefined}
+                    >
+                      <span className="font-semibold text-[var(--text-primary)]">{t('hub.title')}</span>
+                      <ChevronRight size={12} className="text-[var(--text-tertiary)]" />
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        <motion.span
+                          key={hubView}
+                          className="text-[var(--text-secondary)]"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+                        >
+                          {hubView === 'widgets'
+                            ? t('hub.widgets')
+                            : hubView === 'spaces'
+                              ? t('toolbar.spaces')
+                              : hubView === 'notifications'
+                                ? t('toolbar.notifications')
+                                : t('toolbar.settings')}
+                        </motion.span>
+                      </AnimatePresence>
+                    </div>
+                    </div>
                   <ToolButton
-                    index={widgetList.length + 3}
-                    label={t('toolbar.spaces')}
-                    onClick={() => setShowSpaces(true)}
+                    index={widgetList.length + 6}
+                    label={showHub ? t('hub.close') : t('hub.open')}
+                    tour="hub"
+                    onClick={() => (showHub && !hubLeaving ? closeHub() : openHub())}
                   >
-                    <LayoutTemplate size={18} strokeWidth={1.5} />
-                  </ToolButton>
-                  <ToolButton
-                    index={widgetList.length + 4}
-                    label={
-                      unreadCount > 0
-                        ? t('toolbar.notificationsNew', { count: unreadCount })
-                        : t('toolbar.notifications')
-                    }
-                    onClick={() => setShowNotifications(true)}
-                  >
-                    <span className="relative inline-flex">
-                      <BellRing size={18} strokeWidth={1.5} />
-                      {unreadCount > 0 && (
-                        <span
-                          className="absolute -right-[3px] -top-[2px] h-[7px] w-[7px] rounded-full ring-2 ring-[var(--surface)]"
-                          style={{ background: 'var(--accent)' }}
-                        />
-                      )}
-                    </span>
-                  </ToolButton>
-                  <ToolButton
-                    index={widgetList.length + 5}
-                    label={t('toolbar.settings')}
-                    onClick={() => setShowSettings(true)}
-                  >
-                    <SettingsIcon size={18} strokeWidth={1.5} />
+                    {showHub ? (
+                      <PanelTopClose size={18} strokeWidth={1.5} />
+                    ) : (
+                      <PanelTopOpen size={18} strokeWidth={1.5} />
+                    )}
                   </ToolButton>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
+          </motion.div>
         </motion.div>
       </div>
+
+      {/* Mounted while out or retracting; all its motion comes from hubReveal. */}
+      {showHub && (
+          <LayerHub
+            key="hub"
+            view={hubView}
+            onView={setHubView}
+            reveal={hubReveal}
+            frozen={hubLeaving}
+            onSettle={(o) => (o ? openHub() : closeHub())}
+            onClose={closeHub}
+            onAdd={(def, patch) => {
+              closeHub()
+              handleAdd(def, patch)
+            }}
+            onTour={() => {
+              closeHub()
+              useTourStore.getState().start()
+            }}
+          />
+        )}
 
       <AnimatePresence>
         {showSettings && (

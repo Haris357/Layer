@@ -126,6 +126,17 @@ export const listAudioDevices = () =>
 export const setAudioDevice = (id: string) =>
   invoke<boolean>('set_audio_device', { id })
 
+export const getIdleMs = () => invoke<number>('get_idle_ms')
+
+// ── Screen time ──
+export interface ScreenTimeDay {
+  date: string
+  totalSeconds: number
+  apps: { name: string; seconds: number }[]
+}
+export const getScreenTime = (date?: string) =>
+  invoke<ScreenTimeDay>('get_screen_time', { date: date ?? null })
+
 // ── App updates (winget) ──
 export interface WingetUpgrade {
   name: string

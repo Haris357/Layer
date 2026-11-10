@@ -17,6 +17,14 @@ export const COLOR_OPTIONS: EventColor[] = [
   'blue', 'green', 'amber', 'rose', 'violet', 'gray',
 ]
 
+// A "YYYY-MM-DD" date (like a repeat's `until`) as local midnight.
+// `new Date("YYYY-MM-DD")` would be midnight UTC: the evening before for
+// anyone west of UTC, so repeats ended a day early.
+function localDay(ymd: string): Date {
+  const [y, m, d] = ymd.slice(0, 10).split('-').map(Number)
+  return new Date(y!, m! - 1, d!)
+}
+
 export function startOfDay(d: Date): Date {
   const x = new Date(d)
   x.setHours(0, 0, 0, 0)
@@ -48,7 +56,7 @@ export function occursOnDay(e: CalendarEvent, target: Date): boolean {
   const targetDay = startOfDay(target)
   if (targetDay.getTime() < startDay.getTime()) return false
   if (e.until) {
-    const until = startOfDay(new Date(e.until))
+    const until = localDay(e.until)
     if (targetDay.getTime() > until.getTime()) return false
   }
   switch (e.recurrence) {
@@ -89,7 +97,7 @@ export function nextOccurrenceAfter(
   from: Date,
 ): Date | null {
   const start = new Date(e.start)
-  const limit = e.until ? startOfDay(new Date(e.until)) : null
+  const limit = e.until ? localDay(e.until) : null
 
   // Walk forward day by day until we find an occurrence (cap at ~370 days).
   for (let i = 0; i < 370; i++) {

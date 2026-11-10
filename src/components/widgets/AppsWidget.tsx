@@ -509,6 +509,11 @@ export const appsDefinition: WidgetDefinition<AppsWidgetType> = {
   icon: LayoutGrid,
   enabled: true,
   minSize: { width: 200, height: 140 },
+  // The app grid and single links share this toolbar icon; each style below adds that widget.
+  styles: [
+    { key: 'apps', label: 'App grid', patch: {} },
+    { key: 'link', label: 'Single link', patch: { type: 'link' } },
+  ],
   create: (x, y) => ({
     type: 'apps',
     x,

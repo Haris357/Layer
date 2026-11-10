@@ -1,6 +1,6 @@
 [package]
 name = "layer"
-version = "1.11.2"
+version = "1.12.0"
 description = "A quiet layer on your desktop"
 authors = ["Layer"]
 edition = "2021"
@@ -39,6 +39,7 @@ windows-sys = { version = "0.60", features = [
     "Win32_Graphics_Dwm",
     "Win32_System_Registry",
     "Win32_System_Shutdown",
+    "Win32_System_SystemInformation",
     "Win32_UI_Shell",
 ] }
 windows = { version = "0.59", features = [

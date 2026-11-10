@@ -175,6 +175,11 @@ export const audioDefinition: WidgetDefinition<AudioWidgetType> = {
   icon: Volume2,
   enabled: true,
   minSize: { width: 200, height: 150 },
+  // Audio devices and the volume mixer share this toolbar icon; each style below adds that widget.
+  styles: [
+    { key: 'devices', label: 'Devices', patch: {} },
+    { key: 'mixer', label: 'Mixer', patch: { type: 'mixer' } },
+  ],
   create: (x, y) => ({
     type: 'audio',
     x,

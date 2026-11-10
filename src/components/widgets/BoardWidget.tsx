@@ -494,7 +494,7 @@ function Card({
 
 export const boardDefinition: WidgetDefinition<BoardWidgetType> = {
   type: 'board',
-  label: 'Board',
+  label: 'Idea board',
   icon: Workflow,
   enabled: true,
   minSize: { width: 480, height: 360 },

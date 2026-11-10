@@ -31,6 +31,9 @@ export type WidgetType =
   | 'mixer'
   | 'quick'
   | 'winget'
+  | 'yearprogress'
+  | 'screentime'
+  | 'pet'
 
 export type Mode = 'edit' | 'view'
 
@@ -50,6 +53,11 @@ export interface BaseWidget {
   // Both are optional (older saved files simply lack them) and sync to cloud.
   accent?: string
   appearance?: 'auto' | 'light' | 'dark'
+  // Set when the monitor this widget lives on is disconnected and it's moved
+  // onto the main screen: where it really belongs (relative to the main
+  // monitor's top-left) and which monitor that was. It goes back there when
+  // that monitor returns; moving it by hand forgets this.
+  parked?: { x: number; y: number; screen: string }
 }
 
 export interface NoteWidget extends BaseWidget {
@@ -175,6 +183,8 @@ export interface WorldClockWidget extends BaseWidget {
 
 export interface CalendarWidget extends BaseWidget {
   type: 'calendar'
+  // Thin "year is N% done" line under the header.
+  showProgress?: boolean
 }
 
 export interface PinnedApp {
@@ -340,6 +350,45 @@ export interface WingetWidget extends BaseWidget {
   ignored?: string[]
 }
 
+export interface YearProgressWidget extends BaseWidget {
+  type: 'yearprogress'
+  mode: 'year' | 'month' | 'week' | 'life'
+  // Life-in-weeks mode only.
+  birthYear?: number
+  lifespan?: number
+}
+
+export interface ScreenTimeWidget extends BaseWidget {
+  type: 'screentime'
+  // How many apps to list.
+  topN: number
+}
+
+// What the desktop pet has learned. Lives with the widget, so it travels with
+// export/import and never leaves the PC.
+export interface PetBrain {
+  born: number
+  // 0-100; grows when you pet it, slowly fades if ignored.
+  affection: number
+  // Minutes you were active in each hour of the day (0-23), slowly decayed
+  // so it follows your current routine rather than all of history.
+  hours: number[]
+  // Day ("YYYY-MM-DD") of the last bedtime yawn, so it happens once a day.
+  lastYawnDay?: string
+}
+
+export interface PetWidget extends BaseWidget {
+  type: 'pet'
+  // Empty until the setup card is completed.
+  petName: string
+  ownerName?: string
+  // Soft glow of its own color around it (default on). The pet's color is
+  // the widget accent.
+  glow?: boolean
+  bubbles?: boolean
+  brain?: PetBrain
+}
+
 export interface BoardCard {
   id: string
   x: number
@@ -397,6 +446,9 @@ export type Widget =
   | MixerWidget
   | QuickWidget
   | WingetWidget
+  | YearProgressWidget
+  | ScreenTimeWidget
+  | PetWidget
 
 export type NewWidget = Omit<Widget, 'id' | 'zIndex'>
 
@@ -418,4 +470,12 @@ export interface SpacesFile {
   templates: Space[]
   activeId: string
   savedAt: string
+  // Where the main monitor's top-left sat on the canvas when this was saved.
+  // Widget positions are canvas coordinates (the canvas starts at the top-left
+  // of ALL monitors), so when that corner moves (a monitor added or removed
+  // left of / above the main one) everything is shifted by the difference.
+  anchor?: { x: number; y: number }
+  // The monitors (canvas coords, same moment as anchor) the layout was saved
+  // for, so a monitor unplugged while Layer was closed is still recognised.
+  screens?: { x: number; y: number; w: number; h: number }[]
 }

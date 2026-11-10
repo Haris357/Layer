@@ -11,8 +11,20 @@ function widgetAssets(widget: Widget): string[] {
   return []
 }
 
+export interface Rect {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
 interface CanvasState {
   widgets: Widget[]
+  // Main monitor's top-left on the canvas for the current positions (see
+  // SpacesFile.anchor). null = not known yet (older saves).
+  anchor: { x: number; y: number } | null
+  // The monitors (canvas coords) the current positions were laid out for.
+  screens: Rect[]
   mode: Mode
   selectedId: string | null
   hydrated: boolean
@@ -41,8 +53,16 @@ interface CanvasState {
   setSelected: (id: string | null) => void
   resetAll: () => void
   hydrate: (widgets: Widget[]) => void
-  clampViewport: (vw: number, vh: number) => void
-  hydrateSpaces: (spaces: Space[], activeId: string) => void
+  hydrateSpaces: (
+    spaces: Space[],
+    activeId: string,
+    anchor?: { x: number; y: number } | null,
+    screens?: Rect[],
+  ) => void
+  // Monitor setup changed: shift every space so widgets keep their place
+  // relative to the main monitor, then bring any widget stranded on a monitor
+  // that's gone back onto the main one.
+  reanchor: (main: { x: number; y: number }, screens: Rect[], home: Rect) => void
   switchSpace: (id: string) => void
   cycleSpace: (dir?: number) => void
   createSpace: (name: string) => void
@@ -116,6 +136,9 @@ const KNOWN_TYPES: ReadonlySet<string> = new Set([
   'mixer',
   'quick',
   'winget',
+  'yearprogress',
+  'screentime',
+  'pet',
   // Browser-extension-only widgets. The desktop has no renderer for these, so
   // WidgetWrapper draws nothing (its `if (!def) return null` guard) — but they
   // are listed here so a space synced from the Chrome extension keeps them in
@@ -146,6 +169,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
   return {
     widgets: [],
+    anchor: null,
+    screens: [],
     mode: isTauri() ? 'view' : 'edit',
     selectedId: null,
     hydrated: false,
@@ -172,9 +197,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     updateWidget: (id, patch) => {
       pushHistory()
+      // Moving a widget by hand means "it lives here now": forget any parked
+      // spot so reconnecting a monitor won't pull it back.
+      const moved = 'x' in patch || 'y' in patch
       set((state) => ({
         widgets: state.widgets.map((w) =>
-          w.id === id ? ({ ...w, ...patch } as Widget) : w,
+          w.id === id ? ({ ...w, ...patch, ...(moved ? { parked: undefined } : {}) } as Widget) : w,
         ),
       }))
     },
@@ -337,7 +365,60 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     hydrate: (widgets) =>
       set({ widgets: pruneUnknown(widgets), hydrated: true }),
 
-    hydrateSpaces: (spaces, activeId) => {
+    reanchor: (main, screens, home) => {
+      set((state) => {
+        const dx = state.anchor ? main.x - state.anchor.x : 0
+        const dy = state.anchor ? main.y - state.anchor.y : 0
+        // Monitors are identified relative to the main one, so the key
+        // survives the canvas origin moving.
+        const keyOf = (m: Rect) =>
+          `${Math.round(m.x - main.x)},${Math.round(m.y - main.y)},${Math.round(m.w)},${Math.round(m.h)}`
+        const present = new Map(screens.map((m) => [keyOf(m), m]))
+        // The previous setup, moved into today's coordinates.
+        const before = state.screens.map((m) => ({ ...m, x: m.x + dx, y: m.y + dy }))
+        const at = (list: Rect[], x: number, y: number) =>
+          list.find((m) => x >= m.x && x < m.x + m.w && y >= m.y && y < m.y + m.h)
+        let changed = false
+        const fix = (ws: Widget[]) =>
+          ws.map((w) => {
+            // A parked widget whose monitor is back goes home.
+            if (w.parked && present.has(w.parked.screen)) {
+              changed = true
+              const { parked, ...rest } = w
+              return { ...rest, x: main.x + parked.x, y: main.y + parked.y } as Widget
+            }
+            let x = w.x + dx
+            let y = w.y + dy
+            // Judge by the top strip's centre: that's what you grab to move it.
+            const px = x + w.width / 2
+            const py = y + Math.min(w.height, 40) / 2
+            let parked = w.parked
+            if (!at(screens, px, py)) {
+              const lost = at(before, px, py)
+              if (lost) {
+                // Its monitor is gone: map it onto the main screen in
+                // proportion, so a whole monitor's layout keeps its shape
+                // instead of piling up, and remember where it came from.
+                parked = { x: x - main.x, y: y - main.y, screen: keyOf(lost) }
+                x = home.x + ((x - lost.x) / lost.w) * home.w
+                y = home.y + ((y - lost.y) / lost.h) * home.h
+              }
+              x = Math.max(home.x + 8, Math.min(x, home.x + home.w - w.width - 8))
+              y = Math.max(home.y + 8, Math.min(y, home.y + home.h - w.height - 8))
+            }
+            if (x === w.x && y === w.y && parked === w.parked) return w
+            changed = true
+            return { ...w, x, y, parked } as Widget
+          })
+        const synced = syncSpaces(state.spaces, state.activeId, state.widgets)
+        const spaces = synced.map((sp) => ({ ...sp, widgets: fix(sp.widgets) }))
+        const active = spaces.find((sp) => sp.id === state.activeId)
+        if (!changed) return { anchor: main, screens }
+        return { anchor: main, screens, spaces, widgets: active ? active.widgets : state.widgets }
+      })
+    },
+
+    hydrateSpaces: (spaces, activeId, anchor, screens) => {
       const cleaned = spaces.map((t) => ({
         ...t,
         widgets: pruneUnknown(t.widgets),
@@ -347,6 +428,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         spaces: cleaned,
         activeId: active ? active.id : '',
         widgets: active ? active.widgets : [],
+        anchor: anchor ?? null,
+        screens: screens ?? [],
         selectedId: null,
         hydrated: true,
         past: [],
@@ -485,28 +568,5 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       })
     },
 
-    clampViewport: (vw, vh) => {
-      if (vw <= 0 || vh <= 0) return
-      set((state) => {
-        let changed = false
-        const widgets = state.widgets.map((w) => {
-          const width = Math.min(w.width, vw)
-          const height = Math.min(w.height, vh)
-          const x = Math.min(Math.max(0, w.x), Math.max(0, vw - width))
-          const y = Math.min(Math.max(0, w.y), Math.max(0, vh - height))
-          if (
-            width !== w.width ||
-            height !== w.height ||
-            x !== w.x ||
-            y !== w.y
-          ) {
-            changed = true
-            return { ...w, width, height, x, y }
-          }
-          return w
-        })
-        return changed ? { widgets } : {}
-      })
-    },
   }
 })

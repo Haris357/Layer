@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Images } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { convertFileSrc } from '@tauri-apps/api/core'
+import { useAssetSrc } from '../../lib/assetSrc'
 import { open } from '@tauri-apps/plugin-dialog'
 import type { GalleryWidget as GalleryWidgetType } from '../../types/widget'
 import { importAsset } from '../../lib/ipc'
@@ -42,10 +42,10 @@ function Media({
   className?: string
   style?: React.CSSProperties
 }) {
-  const url = convertFileSrc(src)
+  const asset = useAssetSrc(src)
   return isVideo(src) ? (
     <video
-      src={url}
+      {...asset}
       autoPlay
       loop
       muted
@@ -54,7 +54,7 @@ function Media({
       style={style}
     />
   ) : (
-    <img src={url} alt="" draggable={false} className={className} style={style} />
+    <img {...asset} alt="" draggable={false} className={className} style={style} />
   )
 }
 

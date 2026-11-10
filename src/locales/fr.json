@@ -30,38 +30,41 @@
     "checkFailed": "Impossible de rechercher des mises à jour"
   },
   "widgets": {
-    "note": "Note",
+    "note": "Notes",
     "clock": "Horloge",
     "link": "Lien",
-    "image": "Image",
+    "image": "Médias",
     "video": "Vidéo",
     "gallery": "Galerie",
     "weather": "Météo",
-    "stats": "Statistiques",
-    "todo": "À faire",
+    "stats": "Système",
+    "todo": "Tâches",
     "countdown": "Compte à rebours",
+    "yearprogress": "Progression de l’année",
     "worldclock": "Horloge mondiale",
     "calendar": "Calendrier",
-    "apps": "Applications",
+    "apps": "Lanceur",
     "search": "Recherche",
     "nowplaying": "En cours de lecture",
     "notifications": "Notifications",
     "converter": "Convertisseur",
     "pomodoro": "Pomodoro",
     "sticky": "Pense-bête",
+    "pet": "Galets de bureau",
     "inbox": "Boîte de réception",
     "clipboard": "Presse-papiers",
     "webembed": "Intégration web",
     "diskinfo": "Infos disque",
     "greeting": "Salutation",
     "shelf": "Étagère",
-    "audio": "Périphériques audio",
+    "audio": "Son",
     "mixer": "Mélangeur de volume",
     "camera": "Caméra",
     "keepawake": "Empêcher la veille",
     "quick": "Raccourcis rapides",
     "winget": "Mises à jour des apps",
-    "board": "Tableau"
+    "screentime": "Temps d’écran",
+    "board": "Tableau d’idées"
   },
   "settings": {
     "title": "Paramètres",
@@ -138,7 +141,11 @@
       "store": "Microsoft Store",
       "github": "GitHub",
       "feedback": "Envoyer un avis",
-      "support": "☕ Soutenir Layer"
+      "support": "☕ Soutenir Layer",
+      "replayTour": "Revoir la visite",
+      "whatsNewTitle": "Nouveautés de {{version}}",
+      "openWhatsNew": "Ouvrir les nouveautés",
+      "tourWhatsNew": "Visiter les nouveautés"
     },
     "toasts": {
       "canvasExported": "Toile exportée",
@@ -367,8 +374,10 @@
       "add": "Ajouter",
       "weekStart": "La semaine commence le",
       "sunday": "Dimanche",
-      "monday": "Lundi"
-    }
+      "monday": "Lundi",
+      "showProgress": "Ligne de progression de l’année"
+    },
+    "progress": "{{year}} · {{pct}} %"
   },
   "search": {
     "placeholder": "Rechercher sur le web…",
@@ -539,6 +548,67 @@
     "hiddenCount_one": "{{count}} app masquée",
     "hiddenCount_other": "{{count}} apps masquées",
     "unhideAll": "Afficher les apps masquées"
+  },
+  "yearprogress": {
+    "thisWeek": "Cette semaine",
+    "life": "Votre vie en semaines",
+    "daysLeft_one": "{{count}} jour restant",
+    "daysLeft_other": "{{count}} jours restants",
+    "weeksLeft_one": "{{count}} semaine restante",
+    "weeksLeft_other": "{{count}} semaines restantes",
+    "birthYear": "Année de naissance",
+    "lifespan": "Espérance de vie : {{years}} ans",
+    "modes": {
+      "year": "Année",
+      "month": "Mois",
+      "week": "Semaine",
+      "life": "Vie"
+    }
+  },
+  "screentime": {
+    "today": "Temps d’écran aujourd’hui",
+    "hm": "{{h}} h {{m}} min",
+    "m": "{{m}} min",
+    "lessThanMin": "< 1 min",
+    "empty": "Rien d’enregistré aujourd’hui",
+    "private": "Mesuré sur ce PC uniquement",
+    "appsShown": "Apps affichées"
+  },
+  "pet": {
+    "friend": "ami",
+    "color": "Couleur {{n}}",
+    "setup": {
+      "title": "Voici ton nouvel ami",
+      "petName": "Donne-lui un nom",
+      "yourName": "Ton prénom (facultatif)",
+      "adopt": "Adopter"
+    },
+    "lines": {
+      "morning": "Bonjour, {{name}} !",
+      "hello": "Salut, {{name}} !",
+      "evening": "Bonsoir, {{name}} !",
+      "welcomeBack": "Bon retour, {{name}} !",
+      "break": "{{name}}, ça fait {{h}} h d’affilée. On s’étire ?",
+      "sleepy": "*bâille* C’est bientôt l’heure de dormir, {{name}}…",
+      "wokeUp": "Hein ? Je suis réveillé !",
+      "yay": "Youpi !",
+      "hehe": "Hihi, ça chatouille !",
+      "again": "Encore ! Encore !",
+      "wee": "Youpiii !",
+      "ouch": "Aïe !",
+      "held": "Hé, pose-moi !"
+    },
+    "settings": {
+      "name": "Nom du galet",
+      "you": "Ton prénom",
+      "bubbles": "Bulles de dialogue",
+      "bond": "Lien {{n}} / 100",
+      "age_one": "Ensemble depuis {{count}} jour",
+      "age_other": "Ensemble depuis {{count}} jours",
+      "bedtime": "A appris ta fin de journée : ~{{h}}",
+      "learning": "Apprend encore ta routine…",
+      "glow": "Halo"
+    }
   },
   "converter": {
     "swap": "Inverser les unités",
@@ -722,22 +792,79 @@
       "signOut": "Se déconnecter"
     }
   },
-  "onboarding": {
-    "welcome": "Bienvenue dans Layer",
-    "subtitle": "Une couche discrète de widgets sur votre bureau. Trois choses rapides :",
-    "getStarted": "Commencer",
+  "tour": {
+    "start": "Faire la visite",
+    "next": "Suivant",
+    "back": "Retour",
+    "skip": "Passer",
+    "done": "C'est parti",
+    "stepOf": "{{n}} sur {{total}}",
+    "view": "Affichage",
+    "edit": "Édition",
     "steps": {
-      "hotkey": {
-        "title": "Invoquer avec un raccourci",
-        "body": "Appuyez sur Ctrl + Shift + Space à tout moment pour amener Layer au premier plan et commencer à éditer. Appuyez à nouveau pour le replacer derrière vos applications."
+      "welcome": {
+        "title": "Bienvenue dans Layer",
+        "body": "Une couche discrète de widgets posée sur ton bureau, derrière tes apps. Voici une visite d'une minute."
       },
       "island": {
-        "title": "Le menu îlot",
-        "body": "Une pastille se trouve en haut au centre de votre écran. Ouvrez-la pour ajouter des widgets — notes, horloges, météo, applications, et plus encore."
+        "title": "L'îlot",
+        "body": "Tout commence ici. Survole le haut de l'écran pour le faire apparaître, puis clique dessus pour ouvrir le menu."
+      },
+      "widgets": {
+        "title": "Ajouter des widgets",
+        "body": "Clique sur une icône pour poser ce widget sur ton bureau. Fais défiler, glisse ou utilise les flèches pour tous les voir."
+      },
+      "allWidgets": {
+        "title": "Il y en a pour tout",
+        "body": "Notes, horloges, météo, musique, stats système, calendriers, des galets de bureau et bien plus. Combine-les pour créer ton bureau idéal."
       },
       "arrange": {
-        "title": "Organisez votre toile",
-        "body": "Glissez les widgets par leur poignée, redimensionnez-les depuis les coins, faites un clic droit pour les options. Les widgets s’alignent les uns sur les autres lorsque vous les déplacez."
+        "title": "Fais-le à ton image",
+        "body": "Glisse un widget par sa poignée pour le déplacer, tire un coin pour le redimensionner et fais un clic droit pour les options. Clique dessus pour ouvrir ses réglages."
+      },
+      "lock": {
+        "title": "Verrouiller",
+        "body": "Content de ta disposition ? Verrouille tous les widgets pour que rien ne bouge par erreur."
+      },
+      "backgrounds": {
+        "title": "Cartes ou pas",
+        "body": "Masque les fonds des widgets pour un rendu plus épuré, posé sur ton fond d'écran."
+      },
+      "reset": {
+        "title": "Repartir de zéro",
+        "body": "Vide l'espace actuel. Il faut cliquer deux fois, pour que ça n'arrive jamais par erreur."
+      },
+      "spaces": {
+        "title": "Espaces",
+        "body": "Garde des configurations séparées pour le travail, les loisirs ou la concentration, et passe de l'une à l'autre d'un clic. Layer retient même quel espace va avec quels écrans."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "body": "Les alertes de Layer arrivent ici : mises à jour, rappels et astuces."
+      },
+      "settings": {
+        "title": "Réglages",
+        "body": "Thèmes, langue, démarrage, raccourcis et plus encore. Tu peux revoir cette visite à tout moment dans Réglages → À propos."
+      },
+      "hotkey": {
+        "title": "Une seule touche",
+        "body": "Ton raccourci bascule entre le mode Affichage, où les widgets restent derrière tes apps, et le mode Édition, où tu les ajoutes et les places."
+      },
+      "shortcuts": {
+        "title": "Raccourcis pratiques",
+        "body": "Note une idée en vitesse, masque tout avant un partage d'écran ou change d'espace. Ils ne marchent que sur le bureau, donc ils ne gênent jamais."
+      },
+      "screensaver": {
+        "title": "Un bel écran de veille",
+        "body": "Fais de Layer ton écran de veille Windows, en style ambiance, minimal ou citation. Active-le dans Réglages → Écran de veille."
+      },
+      "tray": {
+        "title": "Toujours dans ta barre",
+        "body": "Layer vit dans le coin de ta barre des tâches. Clique sur son icône pour changer de mode, ou clic droit pour Espaces, Réglages et plus."
+      },
+      "done": {
+        "title": "Tout est prêt !",
+        "body": "Ajoute quelques widgets et fais de ton bureau le tien. Amuse-toi bien !"
       }
     }
   },
@@ -904,7 +1031,150 @@
     "clock": {
       "analog": "Analogique",
       "digital": "Numérique",
-      "display": "Affichage"
+      "display": "Affichage",
+      "world": "Horloge mondiale"
+    },
+    "calendar": {
+      "calendar": "Calendrier",
+      "year": "Progression de l’année",
+      "life": "Vie en semaines",
+      "countdown": "Compte à rebours"
+    },
+    "image": {
+      "image": "Image",
+      "video": "Vidéo",
+      "gallery": "Diaporama"
+    },
+    "audio": {
+      "devices": "Appareils",
+      "mixer": "Mélangeur"
+    },
+    "stats": {
+      "overview": "Aperçu",
+      "disks": "Disques"
+    },
+    "apps": {
+      "apps": "Grille d’apps",
+      "link": "Lien unique"
+    },
+    "todo": {
+      "checklist": "Liste",
+      "inbox": "Boîte de réception"
+    },
+    "note": {
+      "notebook": "Carnet",
+      "sticky": "Pense-bête",
+      "board": "Tableau d’idées"
+    }
+  },
+  "hub": {
+    "open": "Ouvrir le Layer Hub",
+    "close": "Fermer",
+    "search": "Rechercher des widgets",
+    "styles": "Styles",
+    "add": "Ajouter au bureau",
+    "noResults": "Aucun widget ne correspond",
+    "cat": {
+      "all": "Tous les widgets",
+      "productivity": "Productivité",
+      "time": "Temps",
+      "media": "Médias",
+      "system": "Système",
+      "web": "Web et outils",
+      "fun": "Fun"
+    },
+    "desc": {
+      "note": "Un carnet, un pense-bête ou un tableau d’idées.",
+      "sticky": "Un pense-bête rapide, façon manuscrite.",
+      "todo": "Une liste pour aujourd’hui ou une boîte pour tes idées.",
+      "board": "Un tableau de cartes à relier entre elles.",
+      "inbox": "Note tes idées maintenant, trie-les plus tard.",
+      "pomodoro": "Sessions de concentration avec pauses.",
+      "shelf": "Fichiers et dossiers à portée de main.",
+      "clipboard": "Tout ce que tu as copié, prêt à recoller.",
+      "clock": "Analogique, numérique, affichage ou horloge mondiale.",
+      "worldclock": "L’heure dans les villes qui comptent.",
+      "calendar": "Calendrier, progression de l’année, vie en semaines ou compte à rebours.",
+      "countdown": "Compte à rebours vers un jour important.",
+      "yearprogress": "Ce qui est écoulé de l’année, du mois ou de la semaine.",
+      "nowplaying": "Vois et contrôle ce qui joue.",
+      "audio": "Change d’appareil audio ou règle le volume par app.",
+      "mixer": "Règle le volume de chaque app.",
+      "camera": "Un miroir en direct de ta webcam.",
+      "image": "Une image, une vidéo en boucle ou un diaporama.",
+      "video": "Une vidéo en boucle sur ton bureau.",
+      "gallery": "Un diaporama de tes photos préférées.",
+      "stats": "CPU, mémoire, batterie et réseau, ou tes disques.",
+      "diskinfo": "Espace, vitesse et santé de tes disques.",
+      "quick": "Wi-Fi, Bluetooth, éclairage nocturne et plus en un clic.",
+      "keepawake": "Empêche ton PC de se mettre en veille.",
+      "winget": "Vois les mises à jour d’apps et installe-les.",
+      "screentime": "Le temps passé dans chaque app aujourd’hui.",
+      "notifications": "Tes notifications Windows récentes.",
+      "search": "Cherche sur le web depuis ton bureau.",
+      "apps": "Tes apps favorites en grille, ou un lien en un clic.",
+      "link": "Un raccourci en un clic vers un site.",
+      "webembed": "Épingle une page web en direct, comme YouTube.",
+      "weather": "La météo du jour chez toi.",
+      "converter": "Convertis unités et devises en un instant.",
+      "pet": "Un petit galet qui sautille sur ton bureau.",
+      "greeting": "Un bonjour qui change au fil de la journée."
+    },
+    "widgets": "Widgets",
+    "title": "Layer Hub"
+  },
+  "whatsNew": {
+    "badge": "Nouveau dans Layer {{version}}",
+    "later": "Plus tard",
+    "see": "Voir les nouveautés",
+    "play": "Lire la vidéo",
+    "skipVideo": "Passer la vidéo",
+    "watchOnline": "Regarder en ligne",
+    "videoOffline": "Tu es hors ligne. Regarde la vidéo sur notre site.",
+    "v112": {
+      "headline": "Layer Hub, Galets de bureau et un bureau plus calme",
+      "notes": {
+        "hub": "Layer Hub : tire la barre vers le bas pour tous les widgets avec aperçu, plus Espaces, Notifications et Réglages.",
+        "pull": "Tirer pour ouvrir : un petit geste ouvre la barre, continue et le Hub suit ton curseur.",
+        "pebbles": "Galets de bureau : un petit compagnon qui sautille sur tes widgets. Attrape-le, lance-le, regarde-le rebondir.",
+        "merged": "Une barre plus nette : les widgets proches partagent une icône. Choisis-y le style voulu.",
+        "insights": "Temps d’écran montre ta journée par app, et la progression de l’année est désormais dans Calendrier.",
+        "stays": "Les widgets restent en place quand tu débranches un écran, actualises l’Explorateur ou utilises Afficher le bureau."
+      },
+      "tour": {
+        "intro": {
+          "title": "Bienvenue dans Layer 1.12",
+          "body": "Un petit tour des nouveautés. Moins d’une minute."
+        },
+        "hub": {
+          "title": "Voici le Layer Hub",
+          "body": "Ce bouton ouvre le Hub : tous les widgets avec aperçu, plus Espaces, Notifications et Réglages."
+        },
+        "pull": {
+          "title": "Ou tire-le simplement",
+          "body": "Appuie sur la pilule Layer et tire. Court : la barre, long : le Hub. Remonte-le pour le fermer."
+        },
+        "merged": {
+          "title": "Moins d’icônes, les mêmes widgets",
+          "body": "Les widgets proches partagent une icône. Clique sur Horloge, Calendrier, Notes… pour choisir le style."
+        },
+        "pebbles": {
+          "title": "Dis bonjour aux Galets",
+          "body": "Ajoute un galet et il sautille sur tes widgets. Attrape-le, lance-le, double-clique pour ses réglages."
+        },
+        "insights": {
+          "title": "Sache où passe ton temps",
+          "body": "Temps d’écran montre le temps passé dans chaque app aujourd’hui. La progression de l’année est un style de Calendrier."
+        },
+        "stays": {
+          "title": "Ta disposition ne bouge pas",
+          "body": "Débranche un écran : ses widgets attendent sur l’écran principal, puis reviennent quand tu le rebranches."
+        },
+        "done": {
+          "title": "Voilà la 1.12 !",
+          "body": "Profite de la mise à jour. Retrouve ces notes dans Réglages → À propos."
+        }
+      }
     }
   }
 }

@@ -52,38 +52,41 @@
     "checkFailed": "Could not check for updates"
   },
   "widgets": {
-    "note": "Note",
+    "note": "Notes",
     "clock": "Clock",
     "link": "Link",
-    "image": "Image",
+    "image": "Media",
     "video": "Video",
     "gallery": "Gallery",
     "weather": "Weather",
-    "stats": "Stats",
-    "todo": "To-do",
+    "stats": "System",
+    "todo": "Tasks",
     "countdown": "Countdown",
+    "yearprogress": "Year Progress",
     "worldclock": "World Clock",
     "calendar": "Calendar",
-    "apps": "Apps",
+    "apps": "Launcher",
     "search": "Search",
     "nowplaying": "Now Playing",
     "notifications": "Notifications",
     "converter": "Converter",
     "pomodoro": "Pomodoro",
     "sticky": "Sticky note",
+    "pet": "Desktop Pebbles",
     "inbox": "Inbox",
     "clipboard": "Clipboard",
     "webembed": "Web Embed",
     "diskinfo": "Disk Info",
     "greeting": "Greeting",
     "shelf": "Shelf",
-    "audio": "Audio Devices",
+    "audio": "Sound",
     "mixer": "Volume Mixer",
     "camera": "Camera",
     "keepawake": "Keep Awake",
     "quick": "Quick Toggles",
     "winget": "App Updates",
-    "board": "Board"
+    "screentime": "Screen Time",
+    "board": "Idea board"
   },
   "settings": {
     "title": "Settings",
@@ -160,7 +163,11 @@
       "store": "Microsoft Store",
       "github": "GitHub",
       "feedback": "Give Feedback",
-      "support": "☕ Support Layer"
+      "support": "☕ Support Layer",
+      "replayTour": "Replay tour",
+      "whatsNewTitle": "What's new in {{version}}",
+      "openWhatsNew": "Open What's new",
+      "tourWhatsNew": "Tour the new features"
     },
     "toasts": {
       "canvasExported": "Canvas exported",
@@ -389,8 +396,10 @@
       "add": "Add",
       "weekStart": "Week starts on",
       "sunday": "Sunday",
-      "monday": "Monday"
-    }
+      "monday": "Monday",
+      "showProgress": "Year progress line"
+    },
+    "progress": "{{year}} · {{pct}}%"
   },
   "search": {
     "placeholder": "Search the web…",
@@ -561,6 +570,67 @@
     "hiddenCount_one": "{{count}} app hidden",
     "hiddenCount_other": "{{count}} apps hidden",
     "unhideAll": "Show hidden apps"
+  },
+  "yearprogress": {
+    "thisWeek": "This week",
+    "life": "Your life in weeks",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "weeksLeft_one": "{{count}} week left",
+    "weeksLeft_other": "{{count}} weeks left",
+    "birthYear": "Birth year",
+    "lifespan": "Lifespan: {{years}} years",
+    "modes": {
+      "year": "Year",
+      "month": "Month",
+      "week": "Week",
+      "life": "Life"
+    }
+  },
+  "screentime": {
+    "today": "Screen time today",
+    "hm": "{{h}}h {{m}}m",
+    "m": "{{m}}m",
+    "lessThanMin": "< 1m",
+    "empty": "Nothing tracked yet today",
+    "private": "Tracked on this PC only",
+    "appsShown": "Apps shown"
+  },
+  "pet": {
+    "friend": "friend",
+    "color": "Color {{n}}",
+    "setup": {
+      "title": "Meet your new friend",
+      "petName": "Name your pebble",
+      "yourName": "Your name (optional)",
+      "adopt": "Adopt"
+    },
+    "lines": {
+      "morning": "Good morning, {{name}}!",
+      "hello": "Hi, {{name}}!",
+      "evening": "Good evening, {{name}}!",
+      "welcomeBack": "Welcome back, {{name}}!",
+      "break": "{{name}}, that's {{h}}h straight. Stretch?",
+      "sleepy": "*yawn* Nearly your bedtime, {{name}}…",
+      "wokeUp": "Huh? I'm up!",
+      "yay": "Yay!",
+      "hehe": "Hehe, that tickles!",
+      "again": "Again! Again!",
+      "wee": "Wheee!",
+      "ouch": "Ouch!",
+      "held": "Hey, put me down!"
+    },
+    "settings": {
+      "name": "Pebble name",
+      "you": "Your name",
+      "bubbles": "Speech bubbles",
+      "bond": "Bond {{n}} / 100",
+      "age_one": "Together {{count}} day",
+      "age_other": "Together {{count}} days",
+      "bedtime": "Learned your wind-down: ~{{h}}",
+      "learning": "Still learning your routine…",
+      "glow": "Glow"
+    }
   },
   "converter": {
     "swap": "Swap units",
@@ -744,22 +814,79 @@
       "signOut": "Sign out"
     }
   },
-  "onboarding": {
-    "welcome": "Welcome to Layer",
-    "subtitle": "A quiet layer of widgets on your desktop. Three quick things:",
-    "getStarted": "Get started",
+  "tour": {
+    "start": "Take the tour",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "done": "Let's go",
+    "stepOf": "{{n}} of {{total}}",
+    "view": "View",
+    "edit": "Edit",
     "steps": {
-      "hotkey": {
-        "title": "Summon with a hotkey",
-        "body": "Press Ctrl + Shift + Space anytime to bring Layer to the front and start editing. Press it again to tuck it back behind your apps."
+      "welcome": {
+        "title": "Welcome to Layer",
+        "body": "A quiet layer of widgets that lives right on your desktop, behind your apps. Here's a one-minute tour."
       },
       "island": {
-        "title": "The island menu",
-        "body": "A pill sits at the top-center of your screen. Open it to add widgets — notes, clocks, weather, apps, and more."
+        "title": "The island",
+        "body": "Everything starts here. Hover the top of your screen to reveal it, then click it to open the menu."
+      },
+      "widgets": {
+        "title": "Add widgets",
+        "body": "Click any icon to drop that widget onto your desktop. Scroll, drag or use the arrows to see them all."
+      },
+      "allWidgets": {
+        "title": "Something for everything",
+        "body": "Notes, clocks, weather, music, system stats, calendars, desktop pebbles and much more. Mix and match to build your perfect desktop."
       },
       "arrange": {
-        "title": "Arrange your canvas",
-        "body": "Drag widgets by their grip handle, resize from the corners, right-click for options. Widgets snap to each other as you move them."
+        "title": "Make it yours",
+        "body": "Drag a widget by its grip to move it, pull a corner to resize, and right-click for options. Click a widget to open its settings."
+      },
+      "lock": {
+        "title": "Lock in place",
+        "body": "Happy with your layout? Lock every widget so nothing moves by accident."
+      },
+      "backgrounds": {
+        "title": "Cards on or off",
+        "body": "Hide widget backgrounds for a cleaner look that floats right on your wallpaper."
+      },
+      "reset": {
+        "title": "Start fresh",
+        "body": "Clears the current space. It asks you to click twice, so it never happens by accident."
+      },
+      "spaces": {
+        "title": "Spaces",
+        "body": "Keep separate setups for work, play or focus and switch in a click. Layer even remembers which space goes with which monitor setup."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "body": "Layer's own alerts land here: updates, reminders and tips."
+      },
+      "settings": {
+        "title": "Settings",
+        "body": "Themes, language, startup, shortcuts and more. You can replay this tour anytime from Settings → About."
+      },
+      "hotkey": {
+        "title": "One key does it",
+        "body": "Your hotkey switches between View mode, where widgets sit quietly behind your apps, and Edit mode, where you add and arrange them."
+      },
+      "shortcuts": {
+        "title": "Handy shortcuts",
+        "body": "Jot a quick note, hide everything before a screen share, or flip between spaces. They only work on the desktop, so they never get in your way."
+      },
+      "screensaver": {
+        "title": "A beautiful screensaver",
+        "body": "Make Layer your Windows screensaver in ambient, minimal or quote style. Turn it on in Settings → Screensaver."
+      },
+      "tray": {
+        "title": "Always in your tray",
+        "body": "Layer lives in the corner of your taskbar. Click its icon to switch modes, or right-click for Spaces, Settings and more."
+      },
+      "done": {
+        "title": "You're all set!",
+        "body": "Add a few widgets and make your desktop yours. Have fun!"
       }
     }
   },
@@ -904,7 +1031,150 @@
     "clock": {
       "analog": "Analog",
       "digital": "Digital",
-      "display": "Display"
+      "display": "Display",
+      "world": "World clock"
+    },
+    "calendar": {
+      "calendar": "Calendar",
+      "year": "Year progress",
+      "life": "Life in weeks",
+      "countdown": "Countdown"
+    },
+    "image": {
+      "image": "Image",
+      "video": "Video",
+      "gallery": "Slideshow"
+    },
+    "audio": {
+      "devices": "Devices",
+      "mixer": "Mixer"
+    },
+    "stats": {
+      "overview": "Overview",
+      "disks": "Disks"
+    },
+    "apps": {
+      "apps": "App grid",
+      "link": "Single link"
+    },
+    "todo": {
+      "checklist": "Checklist",
+      "inbox": "Inbox"
+    },
+    "note": {
+      "notebook": "Notebook",
+      "sticky": "Sticky note",
+      "board": "Idea board"
+    }
+  },
+  "hub": {
+    "open": "Open Layer Hub",
+    "close": "Close",
+    "search": "Search widgets",
+    "styles": "Styles",
+    "add": "Add to desktop",
+    "noResults": "No widgets match your search",
+    "cat": {
+      "all": "All widgets",
+      "productivity": "Productivity",
+      "time": "Time",
+      "media": "Media",
+      "system": "System",
+      "web": "Web & tools",
+      "fun": "Fun"
+    },
+    "desc": {
+      "note": "A notebook, a quick sticky note or an idea board.",
+      "sticky": "A quick handwritten-style sticky note.",
+      "todo": "A checklist for today, or an inbox for quick thoughts.",
+      "board": "A canvas of cards you can link together.",
+      "inbox": "Drop thoughts in now, sort them later.",
+      "pomodoro": "Focus sessions with timed breaks.",
+      "shelf": "Keep files and folders handy on your desktop.",
+      "clipboard": "Everything you copied, ready to paste again.",
+      "clock": "Analog, digital, display or a world clock.",
+      "worldclock": "Times in the cities you care about.",
+      "calendar": "Calendar, year progress, life in weeks or a countdown.",
+      "countdown": "Count down to a day that matters.",
+      "yearprogress": "How much of the year, month or week has passed.",
+      "nowplaying": "See and control what’s playing.",
+      "audio": "Switch audio devices or set each app’s volume.",
+      "mixer": "Set the volume of each app.",
+      "camera": "A live mirror from your webcam.",
+      "image": "A picture, a looping video or a photo slideshow.",
+      "video": "Loop a video right on your desktop.",
+      "gallery": "A slideshow of your favourite photos.",
+      "stats": "CPU, memory, battery and network, or your disks.",
+      "diskinfo": "Space, speed and health of your drives.",
+      "quick": "Wi-Fi, Bluetooth, night light and more in one tap.",
+      "keepawake": "Stop your PC from going to sleep.",
+      "winget": "See app updates and install them.",
+      "screentime": "How long you spent in each app today.",
+      "notifications": "Your recent Windows notifications.",
+      "search": "Search the web straight from your desktop.",
+      "apps": "Your favourite apps in a grid, or a one-click link.",
+      "link": "A one-click shortcut to any website.",
+      "webembed": "Pin a live web page, like YouTube or a dashboard.",
+      "weather": "Today’s weather where you are.",
+      "converter": "Convert units and currencies quickly.",
+      "pet": "A little pebble that hops around your desktop.",
+      "greeting": "A friendly hello that changes through the day."
+    },
+    "widgets": "Widgets",
+    "title": "Layer Hub"
+  },
+  "whatsNew": {
+    "badge": "New in Layer {{version}}",
+    "later": "Later",
+    "see": "See what's new",
+    "play": "Play video",
+    "skipVideo": "Skip video",
+    "watchOnline": "Watch online",
+    "videoOffline": "You're offline. Watch the video on our website.",
+    "v112": {
+      "headline": "Layer Hub, Desktop Pebbles and a calmer desktop",
+      "notes": {
+        "hub": "Layer Hub: pull the toolbar down for every widget with a live demo, plus Spaces, Notifications and Settings.",
+        "pull": "Pull to open: a short pull opens the toolbar, keep going and the Hub follows your cursor.",
+        "pebbles": "Desktop Pebbles: a little companion that hops across your widgets. Grab it, throw it, watch it bounce.",
+        "merged": "A cleaner toolbar: related widgets share one icon now. Pick the style you want from it.",
+        "insights": "Screen Time shows your day in each app, and Year progress now lives in Calendar.",
+        "stays": "Widgets stay put when you unplug a monitor, refresh Explorer or use Show desktop."
+      },
+      "tour": {
+        "intro": {
+          "title": "Welcome to Layer 1.12",
+          "body": "Here's a quick look at what's new. It takes less than a minute."
+        },
+        "hub": {
+          "title": "Meet the Layer Hub",
+          "body": "This button opens the Hub: every widget with a live demo, plus Spaces, Notifications and Settings."
+        },
+        "pull": {
+          "title": "Or just pull it down",
+          "body": "Press the Layer pill and pull. A short pull opens the toolbar, a long one opens the Hub. Push it back up to close."
+        },
+        "merged": {
+          "title": "Fewer icons, same widgets",
+          "body": "Related widgets share one icon now. Click Clock, Calendar, Notes and others to pick the style you want."
+        },
+        "pebbles": {
+          "title": "Say hi to Desktop Pebbles",
+          "body": "Add a pebble and it hops across your widgets. Grab it, throw it, double-click it for its settings."
+        },
+        "insights": {
+          "title": "Know where your time goes",
+          "body": "Screen Time shows how long you spent in each app today. Year progress is now a Calendar style."
+        },
+        "stays": {
+          "title": "Your layout stays put",
+          "body": "Unplug a monitor and its widgets wait on your main screen, then go back when you plug it in."
+        },
+        "done": {
+          "title": "That's 1.12!",
+          "body": "Enjoy the update. You can find these notes again in Settings → About."
+        }
+      }
     }
   }
 }

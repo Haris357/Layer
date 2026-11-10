@@ -41,6 +41,9 @@ interface SettingsState {
   // Which monitor the pill + modals anchor to. -1 = auto (primary monitor).
   uiMonitor: number
   onboarded: boolean
+  // The app version whose "What's new" popup was last shown (or skipped).
+  // '' = never: set on first run so brand-new users don't get it.
+  lastSeenVersion: string
   // Layer Notch (separate top-center window).
   notchEnabled: boolean
   notchMonitor: number
@@ -64,6 +67,7 @@ interface SettingsState {
   setHotCorner: (value: boolean) => void
   setUiMonitor: (value: number) => void
   setOnboarded: (value: boolean) => void
+  setLastSeenVersion: (value: string) => void
   setNotchEnabled: (value: boolean) => void
   setNotchMonitor: (value: number) => void
 }
@@ -93,6 +97,7 @@ export const useSettingsStore = create<SettingsState>()(
       hotCorner: false,
       uiMonitor: -1,
       onboarded: false,
+      lastSeenVersion: '',
       notchEnabled: false,
       notchMonitor: -1,
       setGridSize: (gridSize) => set({ gridSize }),
@@ -122,6 +127,7 @@ export const useSettingsStore = create<SettingsState>()(
       setHotCorner: (hotCorner) => set({ hotCorner }),
       setUiMonitor: (uiMonitor) => set({ uiMonitor }),
       setOnboarded: (onboarded) => set({ onboarded }),
+      setLastSeenVersion: (lastSeenVersion) => set({ lastSeenVersion }),
       setNotchEnabled: (notchEnabled) => set({ notchEnabled }),
       setNotchMonitor: (notchMonitor) => set({ notchMonitor }),
     }),

@@ -11,11 +11,15 @@ import {
 import { buildBuiltins } from '../lib/builtins'
 import type { JournalFile, Space, SpacesFile } from '../types/widget'
 
-function ensureBuiltins(loaded: Space[]): Space[] {
+// Built-in layouts are designed for the main monitor at canvas (0,0); one
+// that's missing from an older save is shifted to where the main monitor was.
+function ensureBuiltins(loaded: Space[], anchor?: { x: number; y: number }): Space[] {
   const result = [...loaded]
   for (const b of buildBuiltins()) {
     if (!result.some((t) => t.id === b.id)) {
-      result.unshift(b)
+      const ox = anchor?.x ?? 0
+      const oy = anchor?.y ?? 0
+      result.unshift({ ...b, widgets: b.widgets.map((w) => ({ ...w, x: w.x + ox, y: w.y + oy })) })
     }
   }
   return result
@@ -26,6 +30,8 @@ export function usePersistence(): void {
   const spaces = useCanvasStore((s) => s.spaces)
   const activeId = useCanvasStore((s) => s.activeId)
   const hydrated = useCanvasStore((s) => s.hydrated)
+  const anchor = useCanvasStore((s) => s.anchor)
+  const screens = useCanvasStore((s) => s.screens)
   const hydrateSpaces = useCanvasStore((s) => s.hydrateSpaces)
 
   const entries = useJournalStore((s) => s.entries)
@@ -36,7 +42,9 @@ export function usePersistence(): void {
     const seed = () => {
       const builtins = buildBuiltins()
       const first = builtins[0]
-      hydrateSpaces(builtins, first ? first.id : '')
+      // Built-ins are laid out for the main monitor at (0,0); once the real
+      // monitors are known they're shifted onto it (useMonitorAnchor).
+      hydrateSpaces(builtins, first ? first.id : '', { x: 0, y: 0 })
     }
 
     if (!isTauri()) {
@@ -57,8 +65,8 @@ export function usePersistence(): void {
             Array.isArray(parsed.templates) &&
             parsed.templates.length > 0
           ) {
-            const merged = ensureBuiltins(parsed.templates)
-            hydrateSpaces(merged, parsed.activeId)
+            const merged = ensureBuiltins(parsed.templates, parsed.anchor)
+            hydrateSpaces(merged, parsed.activeId, parsed.anchor ?? null, parsed.screens)
           } else {
             seed()
           }
@@ -96,11 +104,13 @@ export function usePersistence(): void {
         templates: synced,
         activeId,
         savedAt: new Date().toISOString(),
+        ...(anchor ? { anchor } : {}),
+        ...(screens.length ? { screens } : {}),
       }
       saveSpaces(JSON.stringify(file, null, 2)).catch(() => {})
     }, 500)
     return () => clearTimeout(timer)
-  }, [widgets, spaces, activeId, hydrated])
+  }, [widgets, spaces, activeId, hydrated, anchor, screens])
 
   useEffect(() => {
     if (!journalHydrated || !isTauri()) return

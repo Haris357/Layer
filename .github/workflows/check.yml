@@ -28,3 +28,8 @@ jobs:
 
       - name: Regex safety (ReDoS)
         run: npm run check:regex
+
+      # Every t('key') used in code must exist in the locales, and no two
+      # widgets may share a toolbar icon.
+      - name: Translation keys + unique widget icons
+        run: npm run check:i18n && npm run check:icons

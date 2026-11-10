@@ -1,6 +1,6 @@
 import { Image as ImageIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { convertFileSrc } from '@tauri-apps/api/core'
+import { useAssetSrc } from '../../lib/assetSrc'
 import { open } from '@tauri-apps/plugin-dialog'
 import type { ImageWidget as ImageWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
@@ -21,6 +21,7 @@ async function pickImage(): Promise<string | null> {
 
 function ImageRenderer({ widget }: { widget: ImageWidgetType }) {
   const mode = useCanvasStore((s) => s.mode)
+  const asset = useAssetSrc(widget.src)
   return (
     <div
       className="h-full w-full overflow-hidden"
@@ -31,7 +32,7 @@ function ImageRenderer({ widget }: { widget: ImageWidgetType }) {
       }}
     >
       <img
-        src={convertFileSrc(widget.src)}
+        {...asset}
         alt=""
         draggable={false}
         className="h-full w-full"
@@ -94,6 +95,12 @@ export const imageDefinition: WidgetDefinition<ImageWidgetType> = {
   icon: ImageIcon,
   enabled: true,
   minSize: { width: 120, height: 90 },
+  // Image, Video and Slideshow share this toolbar icon; each style below adds that widget.
+  styles: [
+    { key: 'image', label: 'Image', patch: {} },
+    { key: 'video', label: 'Video', patch: { type: 'video' } },
+    { key: 'gallery', label: 'Slideshow', patch: { type: 'gallery' } },
+  ],
   create: async (x, y) => {
     const src = await pickImage()
     if (!src) return null

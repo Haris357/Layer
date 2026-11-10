@@ -127,6 +127,11 @@ export const todoDefinition: WidgetDefinition<TodoWidgetType> = {
   icon: ListChecks,
   enabled: true,
   minSize: { width: 220, height: 170 },
+  // To-do and Inbox share this toolbar icon; each style below adds that widget.
+  styles: [
+    { key: 'checklist', label: 'Checklist', patch: {} },
+    { key: 'inbox', label: 'Inbox', patch: { type: 'inbox' } },
+  ],
   create: (x, y) => ({
     type: 'todo',
     x,

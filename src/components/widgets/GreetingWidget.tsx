@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Sparkles, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
+import { Hand, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import type {
   GreetingWidget as GreetingWidgetType,
   GreetingStyle,
@@ -230,7 +230,7 @@ function GreetingSettings({
 export const greetingDefinition: WidgetDefinition<GreetingWidgetType> = {
   type: 'greeting',
   label: 'Greeting',
-  icon: Sparkles,
+  icon: Hand,
   enabled: true,
   minSize: { width: 220, height: 110 },
   maxSize: { width: 560, height: 320 },

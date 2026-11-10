@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -28,6 +29,7 @@ import {
 } from 'lucide-react'
 import type { NoteWidget as NoteWidgetType } from '../../types/widget'
 import { useCanvasStore } from '../../store/canvasStore'
+import { useMonitorStore } from '../../store/monitorStore'
 import { useJournalStore } from '../../store/journalStore'
 import { cn } from '../../lib/utils'
 import { notify } from '../../lib/notify'
@@ -286,22 +288,18 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
   // into a portal doesn't unmount Journal — the timer/freewrite state survives
   // toggling fullscreen.
   const [fullscreen, setFullscreen] = useState(false)
-  // How far the desktop window extends behind the taskbar, so fullscreen
-  // controls don't slip under it.
-  const [bottomInset, setBottomInset] = useState(0)
-  useEffect(() => {
-    if (!fullscreen) {
-      setBottomInset(0)
-      return
-    }
-    const calc = () =>
-      setBottomInset(
-        Math.max(0, Math.round(window.innerHeight - window.screen.availHeight)),
-      )
-    calc()
-    window.addEventListener('resize', calc)
-    return () => window.removeEventListener('resize', calc)
-  }, [fullscreen])
+  // Fullscreen fills the work area (screen minus taskbar) of the monitor the
+  // note is on — never the taskbar strip. Covering it made Layer's clickable
+  // region sit over the taskbar, so taskbar clicks landed in Layer instead.
+  const work = useMonitorStore((s) => s.work)
+  const fsRect = useMemo(() => {
+    const cx = widget.x + widget.width / 2
+    const cy = widget.y + widget.height / 2
+    const hit = work.find((m) => cx >= m.x && cx < m.x + m.w && cy >= m.y && cy < m.y + m.h) ?? work[0]
+    if (hit) return { left: hit.x, top: hit.y, width: hit.w, height: hit.h }
+    // No monitor info (browser preview): the screen's available height.
+    return { left: 0, top: 0, width: window.innerWidth, height: Math.min(window.innerHeight, window.screen.availHeight) }
+  }, [work, widget.x, widget.y, widget.width, widget.height])
 
   const [fontMenu, setFontMenu] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -1053,16 +1051,16 @@ function Journal({ widget }: { widget: NoteWidgetType }) {
 
   // Fullscreen relocates the same Journal subtree into a portal (so `position:
   // fixed` escapes the canvas's transformed ancestor). Journal itself stays
-  // mounted, so timer/freewrite state is preserved across the toggle. The
-  // bottom inset keeps controls clear of the taskbar.
+  // mounted, so timer/freewrite state is preserved across the toggle. It
+  // covers the monitor's work area only, leaving the taskbar clickable.
   if (fullscreen) {
     return createPortal(
       <motion.div
         data-hit
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 z-[9500]"
-        style={{ paddingBottom: bottomInset, boxSizing: 'border-box' }}
+        className="fixed z-[9500]"
+        style={{ ...fsRect, boxSizing: 'border-box' }}
       >
         {body}
       </motion.div>,
@@ -1082,6 +1080,13 @@ export const noteDefinition: WidgetDefinition<NoteWidgetType> = {
   icon: NotebookPen,
   enabled: true,
   minSize: { width: 380, height: 300 },
+  // Notebook, Sticky note and Idea board share this toolbar icon; each style
+  // below adds that widget.
+  styles: [
+    { key: 'notebook', label: 'Notebook', patch: {} },
+    { key: 'sticky', label: 'Sticky note', patch: { type: 'sticky' } },
+    { key: 'board', label: 'Idea board', patch: { type: 'board' } },
+  ],
   create: (x, y) => ({
     type: 'note',
     x,

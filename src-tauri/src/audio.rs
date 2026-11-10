@@ -126,95 +126,6 @@ mod imp {
         device.Activate::<IAudioSessionManager2>(CLSCTX_ALL, None)
     }
 
-    // Display name for a pid: the exe's FileDescription (what Windows' own
-    // mixer shows, e.g. "Google Chrome"), falling back to the process name.
-    // Cached per exe path — the widget polls every 1.5s and version resources
-    // never change for a given file.
-    fn process_name(pid: u32) -> Option<String> {
-        use std::collections::HashMap;
-        use std::path::PathBuf;
-        use std::sync::{Mutex, OnceLock};
-        use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
-
-        static CACHE: OnceLock<Mutex<HashMap<PathBuf, String>>> = OnceLock::new();
-
-        let pid = Pid::from_u32(pid);
-        let mut sys = System::new();
-        sys.refresh_processes_specifics(
-            ProcessesToUpdate::Some(&[pid]),
-            true,
-            ProcessRefreshKind::nothing().with_exe(UpdateKind::OnlyIfNotSet),
-        );
-        let proc_ = sys.process(pid)?;
-        let raw = proc_.name().to_string_lossy().to_string();
-        let fallback = raw.strip_suffix(".exe").unwrap_or(&raw).to_string();
-        let Some(exe) = proc_.exe().map(|p| p.to_path_buf()) else {
-            return Some(fallback);
-        };
-
-        let cache = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
-        if let Some(hit) = cache.lock().ok().and_then(|c| c.get(&exe).cloned()) {
-            return Some(hit);
-        }
-        let name = unsafe { file_description(&exe) }.unwrap_or(fallback);
-        if let Ok(mut c) = cache.lock() {
-            c.insert(exe, name.clone());
-        }
-        Some(name)
-    }
-
-    unsafe fn file_description(path: &std::path::Path) -> Option<String> {
-        use std::os::windows::ffi::OsStrExt;
-        use windows::Win32::Storage::FileSystem::{
-            GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW,
-        };
-
-        let wide: Vec<u16> = path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
-        let file = PCWSTR(wide.as_ptr());
-        let size = GetFileVersionInfoSizeW(file, None);
-        if size == 0 {
-            return None;
-        }
-        let mut data = vec![0u8; size as usize];
-        GetFileVersionInfoW(file, None, size, data.as_mut_ptr() as *mut _).ok()?;
-
-        let query = |sub: &str| -> Option<(*const u8, u32)> {
-            let sub_w: Vec<u16> = sub.encode_utf16().chain(std::iter::once(0)).collect();
-            let mut ptr: *mut core::ffi::c_void = core::ptr::null_mut();
-            let mut len: u32 = 0;
-            let ok = VerQueryValueW(
-                data.as_ptr() as *const _,
-                PCWSTR(sub_w.as_ptr()),
-                &mut ptr,
-                &mut len,
-            );
-            (ok.as_bool() && !ptr.is_null() && len > 0).then_some((ptr as *const u8, len))
-        };
-
-        // Prefer the file's own declared language/codepage, then US English.
-        let mut langs: Vec<String> = Vec::new();
-        if let Some((p, len)) = query("\\VarFileInfo\\Translation") {
-            let pairs = std::slice::from_raw_parts(p as *const u16, (len / 2) as usize);
-            for pair in pairs.chunks_exact(2) {
-                langs.push(format!("{:04x}{:04x}", pair[0], pair[1]));
-            }
-        }
-        langs.extend(["040904b0".into(), "040904e4".into()]);
-
-        for lang in langs {
-            if let Some((p, len)) = query(&format!("\\StringFileInfo\\{lang}\\FileDescription")) {
-                // len is in characters, including the trailing NUL.
-                let chars = std::slice::from_raw_parts(p as *const u16, len as usize);
-                let s = String::from_utf16_lossy(chars);
-                let s = s.trim_end_matches('\0').trim();
-                if !s.is_empty() {
-                    return Some(s.to_string());
-                }
-            }
-        }
-        None
-    }
-
     unsafe fn each_session(
         mut f: impl FnMut(&IAudioSessionControl2, &ISimpleAudioVolume, u32) -> bool,
     ) -> bool {
@@ -254,7 +165,7 @@ mod imp {
                 let name = if is_system {
                     "System Sounds".to_string()
                 } else {
-                    process_name(pid).unwrap_or_else(|| format!("PID {pid}"))
+                    crate::appname::for_pid(pid).map(|a| a.name).unwrap_or_else(|| format!("PID {pid}"))
                 };
                 let volume = vol.GetMasterVolume().unwrap_or(-1.0);
                 if volume < 0.0 {

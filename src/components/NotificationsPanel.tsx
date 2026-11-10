@@ -128,7 +128,7 @@ function Row({ n }: { n: AppNotification }) {
   )
 }
 
-export function NotificationsPanel({ onClose }: { onClose: () => void }) {
+export function NotificationsPanel({ onClose, embedded = false }: { onClose: () => void; embedded?: boolean }) {
   const { t } = useTranslation()
   const items = useNotificationStore((s) => s.items)
   const markAllRead = useNotificationStore((s) => s.markAllRead)
@@ -136,30 +136,8 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const hasUnread = items.some((i) => !i.read)
   const primary = useAnchorMonitor()
 
-  // Pick the right icon for the empty state.
-  return (
-    <div
-      data-hit
-      className="fixed inset-0 z-[10000]"
-      style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
-      onMouseDown={onClose}
-    >
-      <div
-        className="absolute flex items-center justify-center"
-        style={{
-          left: primary ? primary.x : 0,
-          top: primary ? primary.y : 0,
-          width: primary ? primary.w : '100%',
-          height: primary ? primary.h : '100%',
-        }}
-      >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: -8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.18, ease: 'easeOut' }}
-        className="glass flex max-h-[80vh] w-[440px] flex-col rounded-[16px] border border-[var(--border)] p-5"
-        onMouseDown={(e) => e.stopPropagation()}
-      >
+  const inner = (
+    <>
         <div className="mb-3 flex items-center justify-between">
           <h2
             className="text-[var(--text-primary)]"
@@ -190,6 +168,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                 </Tooltip>
               </>
             )}
+            {!embedded && (
             <Tooltip label={t('common.close')} side="bottom">
               <button
                 type="button"
@@ -199,6 +178,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                 <X size={18} />
               </button>
             </Tooltip>
+            )}
           </div>
         </div>
 
@@ -214,6 +194,36 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         )}
+    </>
+  )
+
+  // Inside the Layer Hub: just the content, the hub is the frame.
+  if (embedded) return <div className="mx-auto flex h-full w-full max-w-[640px] flex-col p-5">{inner}</div>
+
+  return (
+    <div
+      data-hit
+      className="fixed inset-0 z-[10000]"
+      style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+      onMouseDown={onClose}
+    >
+      <div
+        className="absolute flex items-center justify-center"
+        style={{
+          left: primary ? primary.x : 0,
+          top: primary ? primary.y : 0,
+          width: primary ? primary.w : '100%',
+          height: primary ? primary.h : '100%',
+        }}
+      >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: -8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+        className="glass flex max-h-[80vh] w-[440px] flex-col rounded-[16px] border border-[var(--border)] p-5"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        {inner}
       </motion.div>
       </div>
     </div>

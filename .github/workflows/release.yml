@@ -85,6 +85,9 @@ jobs:
       - name: Regex safety (ReDoS)
         run: npm run check:regex
 
+      - name: Translation keys + unique widget icons
+        run: npm run check:i18n && npm run check:icons
+
       # Strip the instructional HTML comment from RELEASE_NOTES.md and reuse
       # the cleaned text everywhere: GitHub release body, in-app updater notes,
       # and the announcement email.

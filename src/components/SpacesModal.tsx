@@ -28,7 +28,7 @@ import { Tooltip } from './Tooltip'
 import type { Space } from '../types/widget'
 import { cn } from '../lib/utils'
 
-export function SpacesModal({ onClose }: { onClose: () => void }) {
+export function SpacesModal({ onClose, embedded = false }: { onClose: () => void; embedded?: boolean }) {
   const { t } = useTranslation()
   const spaces = useCanvasStore((s) => s.spaces)
   const activeId = useCanvasStore((s) => s.activeId)
@@ -113,30 +113,8 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
     }, 600)
   }
 
-  return (
+  const inner = (
     <>
-      <div
-        data-hit
-        className="fixed inset-0 z-[10000]"
-        style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
-        onMouseDown={onClose}
-      >
-        <div
-          className="absolute flex items-center justify-center"
-          style={{
-            left: primary ? primary.x : 0,
-            top: primary ? primary.y : 0,
-            width: primary ? primary.w : '100%',
-            height: primary ? primary.h : '100%',
-          }}
-        >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="glass flex max-h-[88vh] w-[480px] flex-col rounded-[16px] border border-[var(--border)] p-6"
-          onMouseDown={(e) => e.stopPropagation()}
-        >
           <div className="mb-1 flex items-center justify-between">
             <h2
               className="text-[var(--text-primary)]"
@@ -144,6 +122,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
             >
               {t('spaces.heading')}
             </h2>
+            {!embedded && (
             <Tooltip label={t('common.close')} side="bottom">
               <button
                 type="button"
@@ -153,6 +132,7 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
                 <X size={18} />
               </button>
             </Tooltip>
+            )}
           </div>
           <p
             className="mb-4 text-[var(--text-secondary)]"
@@ -330,17 +310,56 @@ export function SpacesModal({ onClose }: { onClose: () => void }) {
               {t('spaces.import')}
             </button>
           </div>
-        </motion.div>
-        </div>
-      </div>
+    </>
+  )
 
-      {publishing && (
+  const publish = publishing && (
         <PublishDialog
           space={publishing}
           onCancel={() => setPublishing(null)}
           onPublish={doPublish}
         />
-      )}
+      )
+
+  // Inside the Layer Hub: just the content, the hub is the frame.
+  if (embedded) {
+    return (
+      <>
+        <div className="mx-auto flex h-full w-full max-w-[640px] flex-col p-6">{inner}</div>
+        {publish}
+      </>
+    )
+  }
+
+  return (
+    <>
+      <div
+        data-hit
+        className="fixed inset-0 z-[10000]"
+        style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+        onMouseDown={onClose}
+      >
+        <div
+          className="absolute flex items-center justify-center"
+          style={{
+            left: primary ? primary.x : 0,
+            top: primary ? primary.y : 0,
+            width: primary ? primary.w : '100%',
+            height: primary ? primary.h : '100%',
+          }}
+        >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="glass flex max-h-[88vh] w-[480px] flex-col rounded-[16px] border border-[var(--border)] p-6"
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {inner}
+        </motion.div>
+        </div>
+      </div>
+      {publish}
     </>
   )
 }

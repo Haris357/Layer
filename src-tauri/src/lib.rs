@@ -1,8 +1,10 @@
+mod appname;
 mod audio;
 mod commands;
 mod notch;
 mod quick;
 mod screensaver;
+mod screentime;
 mod storage;
 mod window;
 mod winget;
@@ -138,6 +140,7 @@ pub fn run() {
             app.manage(gate);
             let _ = commands::apply_shortcuts(app.handle(), &commands::default_shortcuts());
             commands::start_shortcut_gate(app.handle().clone());
+            screentime::start();
 
             let toggle_item =
                 MenuItemBuilder::with_id("toggle", "Toggle edit mode").build(app)?;
@@ -197,7 +200,10 @@ pub fn run() {
                     }
                     // Hard-exit so quit can never hang on teardown if a
                     // background thread or COM call is mid-flight.
-                    "quit" => std::process::exit(0),
+                    "quit" => {
+                        screentime::flush();
+                        std::process::exit(0)
+                    }
                     _ => {}
                 })
                 .on_tray_icon_event(|tray, event| {
@@ -232,6 +238,7 @@ pub fn run() {
             commands::reset_all,
             commands::open_url,
             commands::import_asset,
+            commands::read_asset,
             commands::delete_asset,
             commands::quit_app,
             commands::get_app_version,
@@ -274,6 +281,8 @@ pub fn run() {
             commands::set_notch_hitbox,
             commands::is_desktop_foreground,
             commands::set_shortcuts_everywhere,
+            commands::get_screen_time,
+            commands::get_idle_ms,
             commands::list_audio_devices,
             commands::set_audio_device,
             commands::list_audio_sessions,

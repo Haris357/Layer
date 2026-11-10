@@ -33,6 +33,9 @@ import { keepAwakeDefinition } from '../components/widgets/KeepAwakeWidget'
 import { mixerDefinition } from '../components/widgets/MixerWidget'
 import { quickDefinition } from '../components/widgets/QuickTogglesWidget'
 import { wingetDefinition } from '../components/widgets/WingetWidget'
+import { yearProgressDefinition } from '../components/widgets/YearProgressWidget'
+import { screenTimeDefinition } from '../components/widgets/ScreenTimeWidget'
+import { petDefinition } from '../components/widgets/pet/PetWidget'
 
 export interface WidgetSize {
   width: number
@@ -104,21 +107,29 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   mixer: mixerDefinition as WidgetDefinition,
   quick: quickDefinition as WidgetDefinition,
   winget: wingetDefinition as WidgetDefinition,
+  yearprogress: yearProgressDefinition as WidgetDefinition,
+  screentime: screenTimeDefinition as WidgetDefinition,
+  pet: petDefinition as WidgetDefinition,
 }
 
+// The toolbar strip. Related widgets share one icon and are picked from its
+// style menu, so these types have no icon of their own here (they stay in the
+// registry, so existing ones keep working):
+//   Notes → Sticky note, Idea board
+//   Clock → World clock · Calendar → Year progress, Life in weeks, Countdown
+//   Media (image) → Video, Slideshow · Sound (audio) → Mixer
+//   System (stats) → Disks · Launcher (apps) → Link · Tasks (todo) → Inbox
 export const widgetOrder: WidgetType[] = [
   'note',
-  'sticky',
-  'board',
+  'pet',
   'shelf',
   'greeting',
-  'inbox',
   'todo',
   'pomodoro',
   'clock',
-  'worldclock',
   'calendar',
-  'countdown',
+  // 'yearprogress' has no toolbar icon of its own: it's added through the
+  // Calendar's style picker (Year progress / Life in weeks).
   'search',
   'apps',
   'clipboard',
@@ -126,19 +137,15 @@ export const widgetOrder: WidgetType[] = [
   'nowplaying',
   'notifications',
   'audio',
-  'mixer',
   'camera',
   'keepawake',
   'quick',
   'winget',
+  'screentime',
   'converter',
-  'link',
   'image',
-  'video',
-  'gallery',
   'weather',
   'stats',
-  'diskinfo',
 ]
 
 export const widgetList: WidgetDefinition[] = widgetOrder.map(

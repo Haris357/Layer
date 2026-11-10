@@ -440,7 +440,8 @@ fn start_hit_poll(window: WebviewWindow, hits: SharedHits) {
                 if was_peek {
                     set_topmost(&window, false);
                 }
-                pin_to_bottom(&window);
+                enforce_ex_style(&window);
+                keep_in_desktop_layer(&window);
             }
             was_peek = peek;
 
@@ -519,24 +520,76 @@ unsafe fn app_window_below(hwnd: windows_sys::Win32::Foundation::HWND) -> bool {
     false
 }
 
+// Keep TOOLWINDOW (show on every virtual desktop) and never APPWINDOW. One
+// GetWindowLongPtr per tick; writes only when tao has reset them.
+// NOACTIVATE is deliberately NOT enforced here: the window must be able to
+// take keyboard focus so you can type into notes and fields. Forcing it on
+// every tick made every text input in every widget dead.
 #[cfg(target_os = "windows")]
-fn pin_to_bottom(window: &WebviewWindow) {
+fn enforce_ex_style(window: &WebviewWindow) {
     use windows_sys::Win32::Foundation::HWND;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
-        SetWindowPos, HWND_BOTTOM, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-        SWP_NOSENDCHANGING,
+        GetWindowLongPtrW, SetWindowLongPtrW, GWL_EXSTYLE, WS_EX_APPWINDOW, WS_EX_TOOLWINDOW,
     };
     let hwnd: HWND = match window.hwnd() {
         Ok(handle) => handle.0 as HWND,
         Err(_) => return,
     };
     unsafe {
-        if !app_window_below(hwnd) {
-            return;
+        let cur = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        let want = (cur | WS_EX_TOOLWINDOW as isize) & !(WS_EX_APPWINDOW as isize);
+        if want != cur {
+            SetWindowLongPtrW(hwnd, GWL_EXSTYLE, want);
         }
+    }
+}
+#[cfg(not(target_os = "windows"))]
+fn enforce_ex_style(_window: &WebviewWindow) {}
+
+// Layer's home is directly above the desktop window: under every app, over
+// the wallpaper and icons. Two things knock it out of place:
+//  - "Show desktop" (Win+D / the taskbar corner) raises the desktop above
+//    everything, Layer included, so the widgets vanished;
+//  - an app window ending up below Layer.
+// Either way, slot Layer back in just above the desktop window — never
+// HWND_TOP (that would cover apps when you merely click the desktop) — and do
+// nothing while it's already there, so nothing fights over the z-order.
+#[cfg(target_os = "windows")]
+fn keep_in_desktop_layer(window: &WebviewWindow) {
+    use windows_sys::w;
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        FindWindowW, GetWindow, SetWindowPos, GW_HWNDPREV, HWND_BOTTOM, HWND_TOP,
+        SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSENDCHANGING, SWP_NOSIZE,
+    };
+    let hwnd: HWND = match window.hwnd() {
+        Ok(handle) => handle.0 as HWND,
+        Err(_) => return,
+    };
+    unsafe {
+        let desktop = match desktop_window_above(hwnd) {
+            Some(d) => d,
+            None if app_window_below(hwnd) => FindWindowW(w!("Progman"), core::ptr::null()),
+            None => return,
+        };
+        let insert_after = if desktop.is_null() {
+            HWND_BOTTOM
+        } else {
+            // SetWindowPos puts us *below* insert_after, i.e. between the
+            // window currently above the desktop and the desktop itself.
+            let above = GetWindow(desktop, GW_HWNDPREV);
+            if above == hwnd {
+                return;
+            }
+            if above.is_null() {
+                HWND_TOP
+            } else {
+                above
+            }
+        };
         SetWindowPos(
             hwnd,
-            HWND_BOTTOM,
+            insert_after,
             0,
             0,
             0,
@@ -545,6 +598,31 @@ fn pin_to_bottom(window: &WebviewWindow) {
         );
     }
 }
-
 #[cfg(not(target_os = "windows"))]
-fn pin_to_bottom(_window: &WebviewWindow) {}
+fn keep_in_desktop_layer(_window: &WebviewWindow) {}
+
+// The shell's desktop window (Progman, or a WorkerW on older layouts) if it is
+// above Layer in the z-order.
+#[cfg(target_os = "windows")]
+unsafe fn desktop_window_above(
+    hwnd: windows_sys::Win32::Foundation::HWND,
+) -> Option<windows_sys::Win32::Foundation::HWND> {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GetClassNameW, GetWindow, IsWindowVisible, GW_HWNDPREV,
+    };
+    let mut prev = GetWindow(hwnd, GW_HWNDPREV);
+    let mut checked = 0;
+    while !prev.is_null() && checked < 512 {
+        checked += 1;
+        if IsWindowVisible(prev) != 0 {
+            let mut buf = [0u16; 16];
+            let len = GetClassNameW(prev, buf.as_mut_ptr(), buf.len() as i32);
+            let class = String::from_utf16_lossy(&buf[..len.max(0) as usize]);
+            if class == "Progman" || class == "WorkerW" {
+                return Some(prev);
+            }
+        }
+        prev = GetWindow(prev, GW_HWNDPREV);
+    }
+    None
+}

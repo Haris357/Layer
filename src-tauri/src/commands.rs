@@ -71,9 +71,35 @@ pub fn read_text_file(path: String) -> Result<String, String> {
 
 #[tauri::command]
 pub fn quit_app() {
+    crate::screentime::flush();
     // Hard-exit: never wait on teardown (a stuck thread/COM call could
     // otherwise leave the window "not responding" instead of closing).
     std::process::exit(0);
+}
+
+// Milliseconds since the last keyboard/mouse input anywhere (one cheap
+// syscall). The desktop pet uses it to sleep while you're away.
+#[tauri::command]
+pub fn get_idle_ms() -> u32 {
+    #[cfg(target_os = "windows")]
+    {
+        crate::screentime::idle_ms()
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        0
+    }
+}
+
+// Screen time for a day ("YYYY-MM-DD"), or today when omitted.
+#[tauri::command]
+pub async fn get_screen_time(date: Option<String>) -> crate::screentime::DayUsage {
+    tauri::async_runtime::spawn_blocking(move || {
+        let d = date.unwrap_or_else(crate::screentime::today);
+        crate::screentime::day(&d)
+    })
+    .await
+    .unwrap_or_else(|_| crate::screentime::day(&crate::screentime::today()))
 }
 
 #[tauri::command]
@@ -289,6 +315,28 @@ pub fn import_asset(app: AppHandle, source_path: String) -> Result<String, Strin
     let dest = assets.join(&new_name);
     std::fs::copy(source, &dest).map_err(|e| e.to_string())?;
     Ok(dest.to_string_lossy().to_string())
+}
+
+// Fallback for showing an imported image/video when the asset protocol
+// refuses it. Seen with the Microsoft Store build: Windows redirects AppData
+// into the package's hidden folder, the protocol resolves the file to that
+// real path, and it no longer matches the allowed scope, so the picture shows
+// as broken. Reading the bytes here doesn't depend on that scope. Only files
+// inside Layer's own assets/shelf folders are served (both sides canonicalized,
+// so the redirect can't confuse the check).
+#[tauri::command]
+pub fn read_asset(app: AppHandle, asset_path: String) -> Result<tauri::ipc::Response, String> {
+    let file = std::fs::canonicalize(&asset_path).map_err(|e| e.to_string())?;
+    let allowed = [storage::assets_dir(&app)?, storage::shelf_dir(&app)?];
+    let inside = allowed
+        .iter()
+        .filter_map(|d| std::fs::canonicalize(d).ok())
+        .any(|d| file.starts_with(&d));
+    if !inside {
+        return Err("not a Layer asset".into());
+    }
+    let bytes = std::fs::read(&file).map_err(|e| e.to_string())?;
+    Ok(tauri::ipc::Response::new(bytes))
 }
 
 #[tauri::command]

@@ -330,6 +330,11 @@ export const statsDefinition: WidgetDefinition<StatsWidgetType> = {
   enabled: true,
   minSize: { width: 230, height: 120 },
   maxSize: { width: 460, height: 440 },
+  // System stats and disk info share this toolbar icon; each style below adds that widget.
+  styles: [
+    { key: 'overview', label: 'Overview', patch: {} },
+    { key: 'disks', label: 'Disks', patch: { type: 'diskinfo' } },
+  ],
   create: (x, y) => ({
     type: 'stats',
     x,

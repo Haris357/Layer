@@ -13,7 +13,7 @@ export function Toggle({ checked, onChange }: ToggleProps) {
       type="button"
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative h-[20px] w-[34px] rounded-full transition-all duration-200',
+        'relative h-[20px] w-[34px] shrink-0 rounded-full transition-all duration-200',
         checked ? 'bg-[var(--accent)]' : 'bg-[var(--fill-3)]',
       )}
     >

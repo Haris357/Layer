@@ -33,35 +33,38 @@
     "note": "笔记",
     "clock": "时钟",
     "link": "链接",
-    "image": "图片",
+    "image": "媒体",
     "video": "视频",
     "gallery": "相册",
     "weather": "天气",
-    "stats": "状态",
-    "todo": "待办",
+    "stats": "系统",
+    "todo": "任务",
     "countdown": "倒计时",
+    "yearprogress": "年度进度",
     "worldclock": "世界时钟",
     "calendar": "日历",
-    "apps": "应用",
+    "apps": "启动器",
     "search": "搜索",
     "nowplaying": "正在播放",
     "notifications": "通知",
     "converter": "换算器",
     "pomodoro": "番茄钟",
     "sticky": "便签",
+    "pet": "桌面小石子",
     "inbox": "收件箱",
     "clipboard": "剪贴板",
     "webembed": "网页嵌入",
     "diskinfo": "磁盘信息",
     "greeting": "问候语",
     "shelf": "搁架",
-    "audio": "音频设备",
+    "audio": "声音",
     "mixer": "音量合成器",
     "camera": "摄像头",
     "keepawake": "保持唤醒",
     "quick": "快捷开关",
     "winget": "应用更新",
-    "board": "看板"
+    "screentime": "屏幕使用时间",
+    "board": "创意板"
   },
   "settings": {
     "title": "设置",
@@ -138,7 +141,11 @@
       "store": "Microsoft Store",
       "github": "GitHub",
       "feedback": "发送反馈",
-      "support": "☕ 支持 Layer"
+      "support": "☕ 支持 Layer",
+      "replayTour": "重新查看导览",
+      "whatsNewTitle": "{{version}} 新功能",
+      "openWhatsNew": "打开新功能",
+      "tourWhatsNew": "新功能导览"
     },
     "toasts": {
       "canvasExported": "画布已导出",
@@ -367,8 +374,10 @@
       "add": "添加",
       "weekStart": "一周的起始日",
       "sunday": "周日",
-      "monday": "周一"
-    }
+      "monday": "周一",
+      "showProgress": "显示年度进度条"
+    },
+    "progress": "{{year}} · {{pct}}%"
   },
   "search": {
     "placeholder": "在网络上搜索…",
@@ -536,6 +545,64 @@
     "failedTip": "更新失败，点击重试。",
     "hiddenCount_other": "已隐藏 {{count}} 个应用",
     "unhideAll": "显示隐藏的应用"
+  },
+  "yearprogress": {
+    "thisWeek": "本周",
+    "life": "以周计的人生",
+    "daysLeft_other": "还剩 {{count}} 天",
+    "weeksLeft_other": "还剩 {{count}} 周",
+    "birthYear": "出生年份",
+    "lifespan": "寿命：{{years}} 年",
+    "modes": {
+      "year": "年",
+      "month": "月",
+      "week": "周",
+      "life": "人生"
+    }
+  },
+  "screentime": {
+    "today": "今日屏幕使用时间",
+    "hm": "{{h}}小时{{m}}分",
+    "m": "{{m}}分钟",
+    "lessThanMin": "不到1分钟",
+    "empty": "今天还没有记录",
+    "private": "仅在此电脑上记录",
+    "appsShown": "显示的应用数"
+  },
+  "pet": {
+    "friend": "朋友",
+    "color": "颜色 {{n}}",
+    "setup": {
+      "title": "认识你的新朋友",
+      "petName": "给小石子起个名字",
+      "yourName": "你的名字（可选）",
+      "adopt": "领养"
+    },
+    "lines": {
+      "morning": "早上好，{{name}}！",
+      "hello": "嗨，{{name}}！",
+      "evening": "晚上好，{{name}}！",
+      "welcomeBack": "欢迎回来，{{name}}！",
+      "break": "{{name}}，已经连续 {{h}} 小时了，伸个懒腰？",
+      "sleepy": "*打哈欠* 快到你的睡觉时间了，{{name}}…",
+      "wokeUp": "嗯？我醒啦！",
+      "yay": "耶！",
+      "hehe": "嘿嘿，好痒！",
+      "again": "再来！再来！",
+      "wee": "呜呼～！",
+      "ouch": "哎哟！",
+      "held": "喂，放我下来！"
+    },
+    "settings": {
+      "name": "小石子名字",
+      "you": "你的名字",
+      "bubbles": "对话气泡",
+      "bond": "亲密度 {{n}} / 100",
+      "age_other": "相伴 {{count}} 天",
+      "bedtime": "已学会你的休息时间：约 {{h}}",
+      "learning": "还在学习你的作息…",
+      "glow": "光晕"
+    }
   },
   "converter": {
     "swap": "交换单位",
@@ -719,22 +786,79 @@
       "signOut": "退出登录"
     }
   },
-  "onboarding": {
-    "welcome": "欢迎使用 Layer",
-    "subtitle": "桌面上一层静谧的组件。三件快速上手的小事：",
-    "getStarted": "开始使用",
+  "tour": {
+    "start": "开始导览",
+    "next": "下一步",
+    "back": "上一步",
+    "skip": "跳过",
+    "done": "开始吧",
+    "stepOf": "{{n}} / {{total}}",
+    "view": "查看",
+    "edit": "编辑",
     "steps": {
-      "hotkey": {
-        "title": "用热键唤起",
-        "body": "随时按 Ctrl + Shift + Space 将 Layer 调到前台并开始编辑。再按一次即可将它收回到应用之后。"
+      "welcome": {
+        "title": "欢迎使用 Layer",
+        "body": "一层安静的小组件，就在你的桌面上、应用的后面。来看看一分钟导览吧。"
       },
       "island": {
-        "title": "岛式菜单",
-        "body": "屏幕顶部中央有一个胶囊。打开它即可添加组件——笔记、时钟、天气、应用等等。"
+        "title": "岛屿",
+        "body": "一切从这里开始。把鼠标移到屏幕顶部让它出现，点击即可打开菜单。"
+      },
+      "widgets": {
+        "title": "添加小组件",
+        "body": "点击任意图标，就会把该小组件放到桌面上。滚动、拖动或用箭头查看全部。"
+      },
+      "allWidgets": {
+        "title": "应有尽有",
+        "body": "便签、时钟、天气、音乐、系统信息、日历、桌面小石子等等。自由组合，打造理想桌面。"
       },
       "arrange": {
-        "title": "整理你的画布",
-        "body": "通过抓取手柄拖动组件，从四角调整大小，右键查看选项。移动时组件会相互吸附对齐。"
+        "title": "随心布置",
+        "body": "拖动把手移动小组件，拉动角落调整大小，右键查看更多选项。点击小组件即可打开其设置。"
+      },
+      "lock": {
+        "title": "固定位置",
+        "body": "布局满意了？锁定所有小组件，避免误碰移动。"
+      },
+      "backgrounds": {
+        "title": "卡片背景开关",
+        "body": "隐藏小组件背景，让它们干净地浮在壁纸上。"
+      },
+      "reset": {
+        "title": "重新开始",
+        "body": "清空当前空间。需要点击两次，避免误操作。"
+      },
+      "spaces": {
+        "title": "空间",
+        "body": "为工作、娱乐或专注分别保存布局，一键切换。Layer 还会记住每种显示器组合对应的空间。"
+      },
+      "notifications": {
+        "title": "通知",
+        "body": "Layer 的提醒都在这里：更新、提醒事项和小技巧。"
+      },
+      "settings": {
+        "title": "设置",
+        "body": "主题、语言、开机启动、快捷键等。随时可在“设置 → 关于”中重新查看本导览。"
+      },
+      "hotkey": {
+        "title": "一键切换",
+        "body": "你的快捷键可在查看模式（小组件静静待在应用后面）和编辑模式（添加和摆放小组件）之间切换。"
+      },
+      "shortcuts": {
+        "title": "实用快捷键",
+        "body": "快速记下一条笔记、共享屏幕前隐藏一切、切换空间。它们只在桌面上生效，绝不打扰你。"
+      },
+      "screensaver": {
+        "title": "漂亮的屏幕保护",
+        "body": "把 Layer 设为 Windows 屏幕保护程序，有氛围、极简和名言三种风格。在“设置 → 屏幕保护”中开启。"
+      },
+      "tray": {
+        "title": "常驻托盘",
+        "body": "Layer 住在任务栏的角落。点击图标切换模式，右键可打开空间、设置等。"
+      },
+      "done": {
+        "title": "一切就绪！",
+        "body": "添加几个小组件，打造属于你的桌面。玩得开心！"
       }
     }
   },
@@ -901,7 +1025,150 @@
     "clock": {
       "analog": "指针",
       "digital": "数字",
-      "display": "显示"
+      "display": "显示",
+      "world": "世界时钟"
+    },
+    "calendar": {
+      "calendar": "日历",
+      "year": "年度进度",
+      "life": "人生周历",
+      "countdown": "倒计时"
+    },
+    "image": {
+      "image": "图片",
+      "video": "视频",
+      "gallery": "幻灯片"
+    },
+    "audio": {
+      "devices": "设备",
+      "mixer": "混音器"
+    },
+    "stats": {
+      "overview": "概览",
+      "disks": "磁盘"
+    },
+    "apps": {
+      "apps": "应用网格",
+      "link": "单个链接"
+    },
+    "todo": {
+      "checklist": "清单",
+      "inbox": "收集箱"
+    },
+    "note": {
+      "notebook": "笔记本",
+      "sticky": "便利贴",
+      "board": "创意板"
+    }
+  },
+  "hub": {
+    "open": "打开 Layer Hub",
+    "close": "关闭",
+    "search": "搜索小组件",
+    "styles": "样式",
+    "add": "添加到桌面",
+    "noResults": "没有匹配的小组件",
+    "cat": {
+      "all": "全部",
+      "productivity": "效率",
+      "time": "时间",
+      "media": "媒体",
+      "system": "系统",
+      "web": "网页与工具",
+      "fun": "趣味"
+    },
+    "desc": {
+      "note": "笔记本、便利贴或创意板。",
+      "sticky": "手写风格的便利贴。",
+      "todo": "今日清单，或随手记想法的收集箱。",
+      "board": "可相互连线的卡片画板。",
+      "inbox": "先记下想法，稍后整理。",
+      "pomodoro": "带休息的专注时段。",
+      "shelf": "把文件和文件夹放在手边。",
+      "clipboard": "复制过的内容，随时再次粘贴。",
+      "clock": "指针、数字、大号显示或世界时钟。",
+      "worldclock": "你关心的城市时间。",
+      "calendar": "日历、年度进度、人生周历或倒计时。",
+      "countdown": "为重要日子倒计时。",
+      "yearprogress": "本年、本月或本周已过去多少。",
+      "nowplaying": "查看并控制正在播放的内容。",
+      "audio": "切换音频设备或调节各应用音量。",
+      "mixer": "分别调节每个应用的音量。",
+      "camera": "来自摄像头的实时镜像。",
+      "image": "图片、循环视频或照片幻灯片。",
+      "video": "在桌面循环播放视频。",
+      "gallery": "最爱照片的幻灯片。",
+      "stats": "CPU、内存、电池和网络，或磁盘。",
+      "diskinfo": "磁盘的空间、速度和健康状况。",
+      "quick": "一键切换 Wi-Fi、蓝牙、夜间模式等。",
+      "keepawake": "阻止电脑进入睡眠。",
+      "winget": "查看并安装应用更新。",
+      "screentime": "今天在各应用中花费的时间。",
+      "notifications": "最近的 Windows 通知。",
+      "search": "直接从桌面搜索网页。",
+      "apps": "常用应用网格，或一键链接。",
+      "link": "一键直达任意网站。",
+      "webembed": "固定一个实时网页，如 YouTube。",
+      "weather": "你所在地的今日天气。",
+      "converter": "快速换算单位和货币。",
+      "pet": "在桌面上蹦跳的小石子。",
+      "greeting": "随时间变化的问候。"
+    },
+    "widgets": "小组件",
+    "title": "Layer Hub"
+  },
+  "whatsNew": {
+    "badge": "Layer {{version}} 新功能",
+    "later": "稍后",
+    "see": "查看新功能",
+    "play": "播放视频",
+    "skipVideo": "跳过视频",
+    "watchOnline": "在线观看",
+    "videoOffline": "你当前处于离线状态。可在我们的网站观看视频。",
+    "v112": {
+      "headline": "Layer Hub、桌面小石子，以及更安静的桌面",
+      "notes": {
+        "hub": "Layer Hub：下拉工具栏即可看到所有带实时预览的小组件，以及空间、通知和设置。",
+        "pull": "下拉打开：轻拉打开工具栏，继续下拉 Hub 会跟随光标展开。",
+        "pebbles": "桌面小石子：在小组件上蹦跳的小伙伴。抓起、扔出，看它弹跳。",
+        "merged": "更整洁的工具栏：相关小组件共用一个图标，从中选择想要的样式。",
+        "insights": "屏幕使用时间显示你在各应用中的一天，年度进度现在位于日历中。",
+        "stays": "拔掉显示器、刷新资源管理器或显示桌面时，小组件都会留在原位。"
+      },
+      "tour": {
+        "intro": {
+          "title": "欢迎使用 Layer 1.12",
+          "body": "快速了解新功能，不到一分钟。"
+        },
+        "hub": {
+          "title": "认识 Layer Hub",
+          "body": "这个按钮打开 Hub：所有带实时预览的小组件，以及空间、通知和设置。"
+        },
+        "pull": {
+          "title": "或者直接往下拉",
+          "body": "按住 Layer 标志往下拉。轻拉打开工具栏，长拉打开 Hub。往上推即可关闭。"
+        },
+        "merged": {
+          "title": "图标更少，小组件不变",
+          "body": "相关小组件共用一个图标。点击时钟、日历、笔记等即可选择样式。"
+        },
+        "pebbles": {
+          "title": "和桌面小石子打个招呼",
+          "body": "添加一颗小石子，它会在小组件上蹦跳。抓起、扔出，双击打开设置。"
+        },
+        "insights": {
+          "title": "了解时间都去哪儿了",
+          "body": "屏幕使用时间显示你今天在每个应用上花的时间。年度进度现在是日历的一种样式。"
+        },
+        "stays": {
+          "title": "布局保持不动",
+          "body": "拔掉显示器后，它的小组件会在主屏幕上等待，重新连接后回到原处。"
+        },
+        "done": {
+          "title": "这就是 1.12！",
+          "body": "尽情享受更新吧。你可以在 设置 → 关于 中再次查看这些说明。"
+        }
+      }
     }
   }
 }
