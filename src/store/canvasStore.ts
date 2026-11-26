@@ -63,6 +63,11 @@ interface CanvasState {
   // relative to the main monitor, then bring any widget stranded on a monitor
   // that's gone back onto the main one.
   reanchor: (main: { x: number; y: number }, screens: Rect[], home: Rect) => void
+  // UI scale changed by `ratio` (old / new scale): CSS pixels changed size, so
+  // move every widget (every space) so it stays at the same spot on screen,
+  // measured from the main monitor's top-left. Sizes stay in CSS px, so the
+  // widgets themselves get smaller/bigger — that's the point of the setting.
+  rescaleLayout: (ratio: number) => void
   switchSpace: (id: string) => void
   cycleSpace: (dir?: number) => void
   createSpace: (name: string) => void
@@ -364,6 +369,30 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     hydrate: (widgets) =>
       set({ widgets: pruneUnknown(widgets), hydrated: true }),
+
+    rescaleLayout: (ratio) => {
+      if (!ratio || Math.abs(ratio - 1) < 0.001) return
+      set((state) => {
+        const a = state.anchor ?? { x: 0, y: 0 }
+        const na = { x: a.x * ratio, y: a.y * ratio }
+        const move = (ws: Widget[]) =>
+          ws.map((w) => ({
+            ...w,
+            x: Math.round(na.x + (w.x - a.x) * ratio),
+            y: Math.round(na.y + (w.y - a.y) * ratio),
+            ...(w.parked ? { parked: { ...w.parked, x: w.parked.x * ratio, y: w.parked.y * ratio } } : {}),
+          }) as Widget)
+        const synced = syncSpaces(state.spaces, state.activeId, state.widgets)
+        const spaces = synced.map((sp) => ({ ...sp, widgets: move(sp.widgets) }))
+        const active = spaces.find((sp) => sp.id === state.activeId)
+        return {
+          spaces,
+          widgets: active ? active.widgets : move(state.widgets),
+          anchor: state.anchor ? na : null,
+          screens: state.screens.map((m) => ({ x: m.x * ratio, y: m.y * ratio, w: m.w * ratio, h: m.h * ratio })),
+        }
+      })
+    },
 
     reanchor: (main, screens, home) => {
       set((state) => {

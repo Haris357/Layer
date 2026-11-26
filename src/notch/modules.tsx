@@ -27,7 +27,6 @@ import {
   MonitorPlay,
   type LucideIcon,
 } from 'lucide-react'
-import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import {
   getNowPlaying,
   mediaControl,
@@ -46,6 +45,7 @@ import {
 import { useTimerStore, timerRemaining } from './timerStore'
 import { useNotchStore, type NotchModuleId } from './notchStore'
 import { useClipboardStore } from '../store/clipboardStore'
+import { clipLabel, copyClip } from '../lib/clipActions'
 import { useNotificationStore } from '../store/notificationStore'
 import { useEventsStore } from '../store/eventsStore'
 import { eventsOnDay } from '../lib/calendar'
@@ -366,8 +366,8 @@ const ClipboardExpanded: FC = () => {
   return (
     <div className="flex max-h-[180px] flex-col gap-1 overflow-y-auto">
       {items.slice(0, 25).map((c) => (
-        <button key={c.id} type="button" onClick={() => { writeText(c.text).catch(() => {}); setCopied(c.id); window.setTimeout(() => setCopied(null), 900) }} onContextMenu={(e) => { e.preventDefault(); togglePin(c.id) }} className="truncate rounded-[7px] px-2 py-1.5 text-left text-[12px] hover:bg-[var(--fill-2)]" title={c.pinned ? t('notch.pinnedHint') : t('notch.copyHint')}>
-          {copied === c.id ? t('notch.copied') : (c.pinned ? '📌 ' : '') + c.text}
+        <button key={c.id} type="button" onClick={() => { copyClip(c).catch(() => {}); setCopied(c.id); window.setTimeout(() => setCopied(null), 900) }} onContextMenu={(e) => { e.preventDefault(); togglePin(c.id) }} className="truncate rounded-[7px] px-2 py-1.5 text-left text-[12px] hover:bg-[var(--fill-2)]" title={c.pinned ? t('notch.pinnedHint') : t('notch.copyHint')}>
+          {copied === c.id ? t('notch.copied') : (c.pinned ? '📌 ' : '') + clipLabel(c)}
         </button>
       ))}
     </div>

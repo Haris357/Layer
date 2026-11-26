@@ -34,6 +34,7 @@ import { IS_STORE } from '../lib/dist'
 import { useTourStore } from '../store/tourStore'
 import { LANGUAGES, changeLanguage, type LanguageCode } from '../lib/i18n'
 import { releaseToShow } from './whatsnew/releases'
+import { PointerSettings } from './settings/PointerSettings'
 
 // ☕ Support link — shown only in the direct-download build (the Microsoft Store
 // rejects external donation/payment links).
@@ -134,6 +135,10 @@ export function SettingsModal({ onClose, embedded = false }: { onClose: () => vo
   const setScreensaverEnabled = useSettingsStore((s) => s.setScreensaverEnabled)
   const setWallpaperAccent = useSettingsStore((s) => s.setWallpaperAccent)
   const setHotCorner = useSettingsStore((s) => s.setHotCorner)
+  const showNub = useSettingsStore((s) => s.showNub)
+  const uiScale = useSettingsStore((s) => s.uiScale)
+  const setUiScale = useSettingsStore((s) => s.setUiScale)
+  const setShowNub = useSettingsStore((s) => s.setShowNub)
   const wallpaperLoading = useThemeStatus((s) => s.wallpaperLoading)
   const resetSpace = useCanvasStore((s) => s.resetSpace)
   const activeId = useCanvasStore((s) => s.activeId)
@@ -341,6 +346,9 @@ export function SettingsModal({ onClose, embedded = false }: { onClose: () => vo
               <FieldRow label={t('settings.general.hotCorner')}>
                 <Toggle checked={hotCorner} onChange={setHotCorner} />
               </FieldRow>
+              <FieldRow label={t('settings.general.showNub')}>
+                <Toggle checked={showNub} onChange={setShowNub} />
+              </FieldRow>
 
               <div className="flex flex-col gap-2">
                 <SectionTitle>{t('settings.general.language')}</SectionTitle>
@@ -398,6 +406,25 @@ export function SettingsModal({ onClose, embedded = false }: { onClose: () => vo
                   ]}
                   onChange={(v) => setTheme(v as 'light' | 'dark' | 'system')}
                 />
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <SectionTitle>{t('settings.appearance.uiScale')}</SectionTitle>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] font-semibold tabular-nums text-[var(--text-primary)]">{Math.round(uiScale * 100)}%</span>
+                    {Math.abs(uiScale - 1) > 0.001 && (
+                      <button
+                        type="button"
+                        onClick={() => setUiScale(1)}
+                        className="rounded-[6px] px-1.5 py-0.5 text-[11px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--fill-2)] hover:text-[var(--text-primary)]"
+                      >
+                        {t('settings.appearance.uiScaleReset')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <Slider value={Math.round(uiScale * 100)} min={75} max={125} step={5} onChange={(v) => setUiScale(v / 100)} />
+                <div className="text-[11px] leading-relaxed text-[var(--text-tertiary)]">{t('settings.appearance.uiScaleHint')}</div>
               </div>
               <FieldRow label={t('settings.appearance.matchWallpaper')}>
                 <div className="flex items-center gap-2">
@@ -464,6 +491,8 @@ export function SettingsModal({ onClose, embedded = false }: { onClose: () => vo
                   </div>
                 </div>
               )}
+
+              <PointerSettings />
             </div>
           )}
 

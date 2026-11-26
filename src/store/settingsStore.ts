@@ -38,6 +38,11 @@ interface SettingsState {
   screensaverTheme: ScreensaverTheme
   wallpaperAccent: boolean
   hotCorner: boolean
+  // The small Layer pill peeking from the top edge. Off = fully hidden until
+  // you hover the top-centre of the screen (or use the hotkey / tray).
+  showNub: boolean
+  // Scale of all of Layer (webview zoom). 1 = 100%; 0.75–1.25.
+  uiScale: number
   // Which monitor the pill + modals anchor to. -1 = auto (primary monitor).
   uiMonitor: number
   onboarded: boolean
@@ -65,6 +70,8 @@ interface SettingsState {
   setScreensaverTheme: (value: ScreensaverTheme) => void
   setWallpaperAccent: (value: boolean) => void
   setHotCorner: (value: boolean) => void
+  setShowNub: (value: boolean) => void
+  setUiScale: (value: number) => void
   setUiMonitor: (value: number) => void
   setOnboarded: (value: boolean) => void
   setLastSeenVersion: (value: string) => void
@@ -95,6 +102,8 @@ export const useSettingsStore = create<SettingsState>()(
       screensaverTheme: 'ambient',
       wallpaperAccent: false,
       hotCorner: false,
+      showNub: true,
+      uiScale: 1,
       uiMonitor: -1,
       onboarded: false,
       lastSeenVersion: '',
@@ -125,6 +134,8 @@ export const useSettingsStore = create<SettingsState>()(
       setScreensaverTheme: (screensaverTheme) => set({ screensaverTheme }),
       setWallpaperAccent: (wallpaperAccent) => set({ wallpaperAccent }),
       setHotCorner: (hotCorner) => set({ hotCorner }),
+      setShowNub: (showNub) => set({ showNub }),
+      setUiScale: (uiScale) => set({ uiScale }),
       setUiMonitor: (uiMonitor) => set({ uiMonitor }),
       setOnboarded: (onboarded) => set({ onboarded }),
       setLastSeenVersion: (lastSeenVersion) => set({ lastSeenVersion }),

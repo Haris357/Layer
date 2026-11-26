@@ -32,6 +32,8 @@
 :root,
 :root[data-theme='dark'] {
   --surface: rgba(23, 23, 27, 0.9);
+  --wb-base: #18181c;
+  --wb-panel: #232328;
   --surface-hover: rgba(33, 33, 39, 0.94);
   --surface-active: rgba(42, 42, 49, 0.96);
   --border: rgba(255, 255, 255, 0.14);
@@ -50,6 +52,8 @@
 
 :root[data-theme='light'] {
   --surface: rgba(249, 249, 247, 0.93);
+  --wb-base: #fbfbf9;
+  --wb-panel: #ffffff;
   --surface-hover: rgba(236, 236, 233, 0.96);
   --surface-active: rgba(226, 226, 222, 0.97);
   --border: rgba(0, 0, 0, 0.12);
@@ -72,6 +76,8 @@
    Keep these values in sync with the :root blocks above. */
 [data-widget-theme='dark'] {
   --surface: rgba(23, 23, 27, 0.9);
+  --wb-base: #18181c;
+  --wb-panel: #232328;
   --surface-hover: rgba(33, 33, 39, 0.94);
   --surface-active: rgba(42, 42, 49, 0.96);
   --border: rgba(255, 255, 255, 0.14);
@@ -89,6 +95,8 @@
 }
 [data-widget-theme='light'] {
   --surface: rgba(249, 249, 247, 0.93);
+  --wb-base: #fbfbf9;
+  --wb-panel: #ffffff;
   --surface-hover: rgba(236, 236, 233, 0.96);
   --surface-active: rgba(226, 226, 222, 0.97);
   --border: rgba(0, 0, 0, 0.12);
@@ -233,10 +241,12 @@ body {
   cursor: var(--cur-arrow), default;
 }
 
-.layer-grab {
+.layer-grab,
+.cursor-grab {
   cursor: var(--cur-grab), grab;
 }
 
+.cursor-grabbing,
 .layer-grab:active {
   cursor: var(--cur-grabbing), grabbing;
 }
@@ -300,5 +310,17 @@ input {
   }
   50% {
     height: 100%;
+  }
+}
+
+/* Pointer widget: animated cursor previews step through a frame strip. */
+.ptr-sprite {
+  background-repeat: no-repeat;
+  animation-name: ptr-sprite;
+  animation-iteration-count: infinite;
+}
+@keyframes ptr-sprite {
+  to {
+    background-position-x: calc(var(--ptr-w) * -1);
   }
 }

@@ -1,32 +1,45 @@
-import { useEffect, useRef } from 'react'
-import { readText } from '@tauri-apps/plugin-clipboard-manager'
-import { useClipboardStore } from '../store/clipboardStore'
+import { useEffect } from 'react'
+import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
+import { useClipboardStore, type NewClip } from '../store/clipboardStore'
 import { isTauri } from '../lib/ipc'
 
-// Polls the OS clipboard for text every 1.5s. New / changed text is
-// pushed onto the clipboardStore (deduped + capped). Lives once at the
-// app level — every Clipboard widget reads from the same store.
+// Clipboard history feed. Rust (clipboard.rs) listens for every copy the
+// moment it happens and sends it here; sensitive copies (password managers)
+// never arrive. This applies the user's filters and keeps the Rust side in
+// sync with Pause and the Quick Paste hotkey. Mounted once in App.
 export function useClipboardWatcher(): void {
-  const last = useRef('')
   useEffect(() => {
     if (!isTauri()) return
-    let alive = true
-    const tick = async () => {
-      if (!alive) return
-      try {
-        const text = await readText()
-        if (text && text !== last.current) {
-          last.current = text
-          useClipboardStore.getState().push(text)
-        }
-      } catch {
-        /* ignore — clipboard may briefly be locked by other apps */
-      }
+    const un = listen<NewClip>('clipboard-changed', ({ payload }) => {
+      const { settings, push } = useClipboardStore.getState()
+      if (settings.paused) return
+      if (payload.kind === 'image' && !settings.images) return
+      if (payload.kind === 'files' && !settings.files) return
+      const exe = payload.source?.exe.split(/[\\/]/).pop()?.toLowerCase()
+      if (exe && settings.ignoreApps.includes(exe)) return
+      push(payload)
+    })
+
+    // Keep Rust's pause / hotkey state in step with the settings.
+    const sync = () => {
+      const s = useClipboardStore.getState().settings
+      invoke('clip_options', { paused: s.paused, hotkey: s.hotkey }).catch(() => {})
     }
-    tick()
-    const id = window.setInterval(tick, 1500)
+    sync()
+    let prev = useClipboardStore.getState().settings
+    const unsub = useClipboardStore.subscribe((st) => {
+      if (st.settings.paused !== prev.paused || st.settings.hotkey !== prev.hotkey) sync()
+      prev = st.settings
+    })
+
+    // "Forget after N days" also applies while Layer stays open.
+    useClipboardStore.getState().prune()
+    const id = window.setInterval(() => useClipboardStore.getState().prune(), 60 * 60 * 1000)
+
     return () => {
-      alive = false
+      un.then((f) => f()).catch(() => {})
+      unsub()
       window.clearInterval(id)
     }
   }, [])

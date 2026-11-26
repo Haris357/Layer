@@ -58,7 +58,7 @@ function WorldClockRenderer({ widget }: { widget: WorldClockWidgetType }) {
   }, [])
 
   return (
-    <div className="glass flex h-full w-full flex-col gap-1 overflow-y-auto rounded-[12px] border border-[var(--border)] p-3.5">
+    <div className="glass flex h-full w-full flex-col justify-center gap-1 overflow-hidden rounded-[12px] border border-[var(--border)] p-3.5">
       {widget.zones.map((z) => (
         <div key={z.id} className="flex items-baseline justify-between">
           <span
@@ -174,7 +174,9 @@ export const worldClockDefinition: WidgetDefinition<WorldClockWidgetType> = {
   icon: Globe,
   enabled: true,
   minSize: { width: 200, height: 130 },
-  maxSize: { width: 420, height: 420 },
+  // 22px rows, 4px apart, inside 14px padding: every zone fits.
+  minSizeFor: (w) => ({ width: 200, height: 30 + w.zones.length * 26 }),
+  maxSize: { width: 420, height: 720 },
   create: (x, y) => ({
     type: 'worldclock',
     x,

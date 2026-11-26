@@ -1,0 +1,65 @@
+{
+  "sizes": [
+    28,
+    30,
+    32,
+    48,
+    64
+  ],
+  "themes": [
+    {
+      "id": "ink",
+      "name": "Ink",
+      "color": "#FFFFFF",
+      "extras": true
+    },
+    {
+      "id": "material-dark",
+      "name": "Material Dark",
+      "color": "#29B6F6",
+      "extras": true
+    },
+    {
+      "id": "rounded-light",
+      "name": "Rounded Light",
+      "color": "#FFFFFF",
+      "extras": true
+    },
+    {
+      "id": "facet",
+      "name": "Facet",
+      "color": "#2196F3",
+      "extras": true
+    },
+    {
+      "id": "facet-outline",
+      "name": "Facet Outline",
+      "color": "#2196F3",
+      "extras": true
+    },
+    {
+      "id": "contour",
+      "name": "Contour",
+      "color": "#B388FF",
+      "extras": true
+    },
+    {
+      "id": "afterglow",
+      "name": "Afterglow",
+      "color": "#FFAA54",
+      "extras": true
+    },
+    {
+      "id": "obsidian",
+      "name": "Obsidian",
+      "color": "#EDF1F7",
+      "extras": true
+    },
+    {
+      "id": "mono",
+      "name": "Mono",
+      "color": "#FFFFFF",
+      "extras": true
+    }
+  ]
+}

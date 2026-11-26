@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { WeatherLottie, sceneOf, type Scene } from './weather/WeatherLottie'
+import { Tooltip } from '../Tooltip'
 import { useTranslation } from 'react-i18next'
 import {
   Sun,
@@ -41,6 +44,7 @@ interface Current {
   temp: number
   code: number
   wind: number
+  isDay: boolean
 }
 
 function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
@@ -57,7 +61,7 @@ function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
           ? '&temperature_unit=fahrenheit&wind_speed_unit=mph'
           : ''
         const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${widget.lat}&longitude=${widget.lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto${units}`,
+          `https://api.open-meteo.com/v1/forecast?latitude=${widget.lat}&longitude=${widget.lon}&current=temperature_2m,weather_code,wind_speed_10m,is_day&timezone=auto${units}`,
         )
         const json = await res.json()
         if (cancelled) return
@@ -65,6 +69,7 @@ function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
           temp: Math.round(json.current.temperature_2m),
           code: json.current.weather_code,
           wind: Math.round(json.current.wind_speed_10m),
+          isDay: json.current.is_day !== 0,
         })
         setError(false)
       } catch {
@@ -80,21 +85,29 @@ function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
   }, [widget.lat, widget.lon, fahrenheit])
 
   const info = data ? codeInfo(data.code) : null
+  const scene = data ? sceneOf(data.code, data.isDay) : null
+  // A gust you'd notice: 30 km/h (≈19 mph) and up.
+  const windy = !!data && data.wind >= (fahrenheit ? 19 : 30)
+  const art = Math.max(56, Math.min(96, Math.round(Math.min(widget.width * 0.4, widget.height * 0.55))))
 
   return (
-    <div className="glass flex h-full w-full flex-col justify-between rounded-[12px] border border-[var(--border)] p-4">
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col">
-          <span
-            className="text-[var(--text-primary)]"
-            style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-2px' }}
-          >
-            {data ? `${data.temp}°` : '—'}
-          </span>
-          <span
-            className="text-[var(--text-secondary)]"
-            style={{ fontSize: 13, fontWeight: 500 }}
-          >
+    <div className="glass relative flex h-full w-full flex-col justify-between overflow-hidden rounded-[12px] border border-[var(--border)] p-4">
+      <div className="relative flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-col">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={data ? data.temp : 'none'}
+              className="text-[var(--text-primary)] tabular-nums"
+              style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-2px', lineHeight: 1.1 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+            >
+              {data ? `${data.temp}°` : '—'}
+            </motion.span>
+          </AnimatePresence>
+          <span className="truncate text-[var(--text-secondary)]" style={{ fontSize: 13, fontWeight: 500 }}>
             {error
               ? t('weather.renderer.unavailable')
               : info
@@ -102,27 +115,36 @@ function WeatherRenderer({ widget }: { widget: WeatherWidgetType }) {
                 : t('weather.renderer.loading')}
           </span>
         </div>
-        {info && (
-          <info.Icon
-            size={40}
-            strokeWidth={1.5}
-            className="text-[var(--text-primary)]"
-          />
-        )}
+        <div className="-mr-1 -mt-1 shrink-0" style={{ width: art, height: art }}>
+          <AnimatePresence mode="wait" initial={false}>
+            {scene ? (
+              <motion.div
+                key={scene}
+                initial={{ opacity: 0, scale: 0.85, y: 4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
+              >
+                <WeatherLottie scene={scene} size={art} />
+              </motion.div>
+            ) : (
+              <motion.div key="loading" className="flex h-full w-full items-center justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Loader2 size={20} className="animate-spin text-[var(--text-tertiary)]" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-      <div className="flex items-center justify-between">
-        <span
-          className="truncate text-[var(--text-primary)]"
-          style={{ fontSize: 14, fontWeight: 600 }}
-        >
+      <div className="relative flex items-center justify-between gap-2">
+        <span className="truncate text-[var(--text-primary)]" style={{ fontSize: 14, fontWeight: 600 }}>
           {widget.city}
         </span>
         {data && (
           <span
-            className="flex items-center gap-1 text-[var(--text-tertiary)]"
+            className={cn('flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 transition-colors duration-500', windy ? 'bg-sky-400/15 text-sky-300' : 'text-[var(--text-tertiary)]')}
             style={{ fontSize: 12, fontWeight: 500 }}
           >
-            <Wind size={12} strokeWidth={1.8} />
+            {windy ? <span className="-my-1"><WeatherLottie scene="wind" size={18} /></span> : <Wind size={12} strokeWidth={1.8} />}
             {data.wind} {fahrenheit ? t('weather.renderer.mph') : t('weather.renderer.kmh')}
           </span>
         )}
@@ -251,6 +273,41 @@ function WeatherSettings({
           ))}
         </div>
       )}
+      <AllConditions />
+    </div>
+  )
+}
+
+// Every scene the widget can show, so you can see them all without waiting
+// for the weather. Hover one for its name.
+const GALLERY: { scene: Scene; label: string; night?: boolean }[] = [
+  { scene: 'clear-day', label: 'weather.conditions.clear' },
+  { scene: 'clear-night', label: 'weather.conditions.clear', night: true },
+  { scene: 'partly-day', label: 'weather.conditions.partlyCloudy' },
+  { scene: 'partly-night', label: 'weather.conditions.partlyCloudy', night: true },
+  { scene: 'cloudy', label: 'weather.conditions.cloudy' },
+  { scene: 'fog', label: 'weather.conditions.fog' },
+  { scene: 'drizzle', label: 'weather.conditions.drizzle' },
+  { scene: 'rain', label: 'weather.conditions.rain' },
+  { scene: 'snow', label: 'weather.conditions.snow' },
+  { scene: 'storm', label: 'weather.conditions.thunderstorm' },
+  { scene: 'wind', label: 'weather.settings.windy' },
+]
+
+function AllConditions() {
+  const { t } = useTranslation()
+  return (
+    <div className="flex flex-col gap-1.5 pt-1">
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">{t('weather.settings.allConditions')}</span>
+      <div className="grid grid-cols-4 gap-1">
+        {GALLERY.map((g) => (
+          <Tooltip key={g.scene} label={`${t(g.label)}${g.night ? ` · ${t('weather.settings.night')}` : ''}`} side="top">
+            <div className="flex aspect-square w-full items-center justify-center rounded-[8px] bg-[var(--fill-1)]">
+              <WeatherLottie scene={g.scene} size={40} />
+            </div>
+          </Tooltip>
+        ))}
+      </div>
     </div>
   )
 }

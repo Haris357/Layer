@@ -6,10 +6,11 @@ import { useEffect, useState } from 'react'
 import { Tour } from './components/tour/Tour'
 import { useTourStore } from './store/tourStore'
 import { WhatsNewModal } from './components/whatsnew/WhatsNewModal'
-import { minorOf, releaseFor, releaseToShow } from './components/whatsnew/releases'
+import { releaseFor, releaseToShow } from './components/whatsnew/releases'
 import { getAppVersion, isTauri } from './lib/ipc'
 import { Toast } from './components/Toast'
 import { QuickCaptureModal } from './components/QuickCaptureModal'
+import { QuickPaste } from './components/QuickPaste'
 import { useHotkey } from './hooks/useHotkey'
 import { useShortcuts } from './hooks/useShortcuts'
 import { usePersistence } from './hooks/usePersistence'
@@ -30,12 +31,14 @@ import { useHotcorner } from './hooks/useHotcorner'
 import { useMonitors } from './hooks/useMonitors'
 import { useMonitorProfiles } from './hooks/useMonitorProfiles'
 import { useMonitorAnchor } from './hooks/useMonitorAnchor'
+import { useUiScale } from './hooks/useUiScale'
 import { useHideAll } from './hooks/useHideAll'
 // Layer Dock is parked — not shipped in current updates. Code kept in src/dock
 // and the Settings → Notch tab is hidden. Re-enable when it's ready.
 // import { Dock } from './dock/Dock'
 import { useSettingsStore } from './store/settingsStore'
 import { useVisibilityStore } from './store/visibilityStore'
+import { refreshPointer } from './lib/pointerTheme'
 
 export default function App() {
   useHotkey()
@@ -58,6 +61,11 @@ export default function App() {
   useMonitors()
   useMonitorProfiles()
   useMonitorAnchor()
+  useUiScale()
+  // Re-skin Layer's own cursors with the applied Windows cursor theme.
+  useEffect(() => {
+    refreshPointer()
+  }, [])
   useHideAll()
 
   const onboarded = useSettingsStore((s) => s.onboarded)
@@ -87,7 +95,8 @@ export default function App() {
           s.setLastSeenVersion(v)
           return
         }
-        if (minorOf(s.lastSeenVersion) === minorOf(v)) return
+        // Show once per release entry (1.12 → 1.12.1 is new; 1.12.1 → 1.12.2 is not).
+        if (releaseFor(s.lastSeenVersion)?.version === releaseFor(v)?.version) return
         // Let the desktop settle first; it's a hello, not an interruption.
         id = window.setTimeout(() => useTourStore.getState().openWhatsNew(), 1500)
       })
@@ -107,6 +116,7 @@ export default function App() {
         <TopIsland />
         <CommandPalette />
         <QuickCaptureModal />
+        <QuickPaste />
         <Toast />
       </div>
       <AnimatePresence>{whatsNewOpen && <WhatsNewModal key="whatsnew" />}</AnimatePresence>

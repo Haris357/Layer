@@ -254,7 +254,7 @@ function QuickRenderer({ widget }: { widget: QuickWidgetType }) {
   }
 
   return (
-    <div className="glass flex h-full w-full flex-col overflow-y-auto rounded-[14px] border border-[var(--border)] p-2.5">
+    <div className="glass flex h-full w-full flex-col overflow-hidden rounded-[14px] border border-[var(--border)] p-2.5">
       {shown.length > 0 ? (
         <div className="flex flex-col gap-1.5">{shown.map((k) => tiles[k])}</div>
       ) : (
@@ -304,6 +304,11 @@ export const quickDefinition: WidgetDefinition<QuickWidgetType> = {
   icon: Zap,
   enabled: true,
   minSize: { width: 180, height: 70 },
+  // 44px tiles, 6px apart, inside 10px padding: every shown tile fits.
+  minSizeFor: (w) => {
+    const n = TILES.filter((k) => w.tiles?.[k] !== false).length
+    return { width: 180, height: n ? 22 + n * 44 + (n - 1) * 6 : 70 }
+  },
   create: (x, y) => ({
     type: 'quick',
     x,

@@ -64,7 +64,7 @@
     "quick": "快捷开关",
     "winget": "应用更新",
     "screentime": "屏幕使用时间",
-    "board": "创意板"
+    "board": "白板"
   },
   "settings": {
     "title": "设置",
@@ -89,7 +89,8 @@
       "canvas": "画布",
       "exportImage": "将画布导出为图片",
       "resetSpace": "重置此空间",
-      "resetSpaceConfirm": "再次点击以清空“{{name}}”"
+      "resetSpaceConfirm": "再次点击以清空“{{name}}”",
+      "showNub": "在顶部显示 Layer 小标签"
     },
     "appearance": {
       "theme": "主题",
@@ -100,7 +101,11 @@
       "showOn": "在以下显示器上显示 Layer",
       "showOnHint": "胶囊菜单、设置和弹窗显示在哪台显示器上。",
       "autoPrimary": "自动（主显示器）",
-      "display": "显示器 {{n}}"
+      "display": "显示器 {{n}}",
+      "uiScale": "界面缩放",
+      "uiScaleReset": "重置",
+      "uiScaleHint": "让整个 Layer 变小或变大，小组件位置保持不变。",
+      "pointer": "鼠标指针"
     },
     "screensaver": {
       "storeNote": "在 Microsoft Store 版本中无法将 Layer 设为 Windows 屏幕保护程序（沙盒无法注册系统屏保）。您仍可使用 Ctrl+Shift+S 预览各种样式。",
@@ -414,7 +419,90 @@
     "remove": "移除",
     "clearUnpinned": "清除未置顶项",
     "copied": "已复制到剪贴板",
-    "copyFailed": "无法复制"
+    "copyFailed": "无法复制",
+    "cancelSelect": "取消选择",
+    "clear": "清空",
+    "clearConfirm": "再次点击以清空未固定项",
+    "copy": "复制",
+    "copyAs": "复制为",
+    "copyMerged": "合并复制",
+    "folder": "文件夹",
+    "image": "图片",
+    "less": "收起",
+    "more": "展开",
+    "moreActions": "更多操作",
+    "nChars": "{{n}} 个字符",
+    "nFiles": "{{count}} 个文件",
+    "newBoard": "新建收藏板…",
+    "openFile": "打开文件",
+    "openLink": "打开链接",
+    "pause": "暂停记录",
+    "pausedBadge": "已暂停",
+    "pinboards": "收藏板",
+    "quickPasteHint": "在任意位置按 Win+Shift+V 打开快速粘贴",
+    "resume": "继续记录",
+    "selected": "已选 {{n}} 项",
+    "showInFolder": "在文件夹中显示",
+    "writeEmail": "写邮件",
+    "quick": {
+      "copyOnly": "仅复制",
+      "direct": "直接粘贴",
+      "paste": "粘贴",
+      "search": "搜索剪贴板…",
+      "switch": "切换",
+      "tabs": {
+        "all": "全部",
+        "pinned": "已固定",
+        "text": "文本",
+        "image": "图片",
+        "files": "文件"
+      }
+    },
+    "settings": {
+      "days": "{{n}} 天",
+      "files": "记录文件",
+      "forget": "未固定项保留时长",
+      "ignore": "不记录以下应用",
+      "ignoreHint": "密码管理器始终会被跳过。点按应用即可将其忽略。",
+      "images": "记录图片",
+      "keep": "保留历史条数",
+      "never": "永久",
+      "pause": "暂停记录",
+      "quickPaste": "快速粘贴 (Win+Shift+V)",
+      "quickPasteHint": "搜索历史记录并粘贴到任意应用。"
+    },
+    "time": {
+      "day": "{{n}} 天前",
+      "hour": "{{n}} 小时前",
+      "min": "{{n}} 分钟前",
+      "now": "刚刚"
+    },
+    "filters": {
+      "all": "全部",
+      "pinned": "已固定",
+      "text": "文本",
+      "link": "链接",
+      "image": "图片",
+      "files": "文件",
+      "color": "颜色",
+      "code": "代码"
+    },
+    "groups": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "earlier": "更早"
+    },
+    "transforms": {
+      "upper": "全部大写",
+      "lower": "全部小写",
+      "title": "单词首字母大写",
+      "sentence": "句首大写",
+      "trim": "去除多余空格",
+      "oneLine": "合并为一行",
+      "urlDecode": "URL 解码",
+      "urlEncode": "URL 编码",
+      "json": "格式化 JSON"
+    }
   },
   "webembed": {
     "addUrl": "在设置中添加网址",
@@ -679,7 +767,10 @@
       "myLocation": "我的位置",
       "findingYou": "正在定位…",
       "useMyLocation": "使用我的位置",
-      "searchCity": "搜索城市…"
+      "searchCity": "搜索城市…",
+      "allConditions": "所有天气",
+      "windy": "有风",
+      "night": "夜间"
     }
   },
   "stats": {
@@ -692,7 +783,9 @@
     "network": "网络",
     "session": "本次会话",
     "show": "显示",
-    "empty": "没有可显示的内容。请在设置中开启一项统计。"
+    "empty": "没有可显示的内容。请在设置中开启一项统计。",
+    "gpu": "GPU",
+    "vram": "显存"
   },
   "diskinfo": {
     "title": "磁盘",
@@ -1058,7 +1151,7 @@
     "note": {
       "notebook": "笔记本",
       "sticky": "便利贴",
-      "board": "创意板"
+      "board": "白板"
     }
   },
   "hub": {
@@ -1078,10 +1171,10 @@
       "fun": "趣味"
     },
     "desc": {
-      "note": "笔记本、便利贴或创意板。",
+      "note": "笔记本、便利贴或白板。",
       "sticky": "手写风格的便利贴。",
       "todo": "今日清单，或随手记想法的收集箱。",
-      "board": "可相互连线的卡片画板。",
+      "board": "在无限画布上绘画、草图和整理想法。",
       "inbox": "先记下想法，稍后整理。",
       "pomodoro": "带休息的专注时段。",
       "shelf": "把文件和文件夹放在手边。",
@@ -1169,6 +1262,246 @@
           "body": "尽情享受更新吧。你可以在 设置 → 关于 中再次查看这些说明。"
         }
       }
+    },
+    "v1121": {
+      "headline": "真正的白板、更聪明的剪贴板，以及更多",
+      "notes": {
+        "whiteboard": "白板：画笔、形状、便签，以及可连接任意内容的箭头。支持多页、导出和全屏。",
+        "clipboard": "剪贴板：文本、链接、颜色、图片和文件，附带来源应用、筛选和收藏板。",
+        "quickpaste": "快速粘贴：在任意应用中按 Win+Shift+V 搜索历史并粘贴。",
+        "weather": "天气：每种天气都有动画，白天夜晚都有。",
+        "pointer": "指针：9 套主题 × 5 种尺寸，位于设置 → 外观。Layer 自身的指针也会同步。",
+        "scale": "适配任意屏幕的界面缩放，还可以隐藏拉手。",
+        "gpu": "系统小组件中显示 GPU 使用率、温度和显存。",
+        "fixes": "修复：显示桌面闪烁、屏保唤醒画面、午夜后的日历以及倒计时时区。"
+      },
+      "tour": {
+        "intro": {
+          "title": "欢迎使用 Layer 1.12.1",
+          "body": "快速了解新功能，不到一分钟。"
+        },
+        "whiteboard": {
+          "title": "真正的白板",
+          "body": "绘画、添加形状和便签，拖动任意项目上的圆点即可连接到其他项目。"
+        },
+        "clipboard": {
+          "title": "更聪明的剪贴板",
+          "body": "你复制的一切，包括图片和文件，都有智能卡片、筛选和收藏板。"
+        },
+        "quickpaste": {
+          "title": "随处快速粘贴",
+          "body": "在任意应用中按 Win+Shift+V。搜索、回车，即可粘贴到原处。"
+        },
+        "weather": {
+          "title": "会动的天气",
+          "body": "每种天气都有白天和夜晚的动画。"
+        },
+        "pointer": {
+          "title": "选择你的指针",
+          "body": "设置 → 外观 → 鼠标指针。悬停试用，然后应用。"
+        },
+        "more": {
+          "title": "还有更多",
+          "body": "界面缩放、隐藏拉手、系统中的 GPU 信息，以及一批修复。"
+        },
+        "done": {
+          "title": "这就是 1.12.1！",
+          "body": "尽情使用。这些说明可在 设置 → 关于 中再次查看。"
+        }
+      }
+    }
+  },
+  "whiteboard": {
+    "tools": {
+      "select": "选择",
+      "hand": "平移",
+      "pen": "画笔",
+      "highlighter": "荧光笔",
+      "eraser": "橡皮擦",
+      "rect": "矩形",
+      "ellipse": "椭圆",
+      "diamond": "菱形",
+      "line": "直线",
+      "arrow": "箭头",
+      "text": "文本",
+      "sticky": "便利贴",
+      "image": "图片",
+      "laser": "激光笔"
+    },
+    "undo": "撤销",
+    "redo": "重做",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "zoomReset": "重置缩放",
+    "fit": "适应窗口",
+    "minimap": "小地图",
+    "page": "第 {{n}} 页",
+    "addPage": "新建页面",
+    "deletePage": "删除页面",
+    "renameHint": "双击页面即可重命名",
+    "background": "背景",
+    "bg": {
+      "dots": "点阵",
+      "grid": "网格",
+      "lines": "横线",
+      "none": "无"
+    },
+    "snap": "对齐网格",
+    "export": "导出",
+    "exportPng": "导出为 PNG",
+    "exportSvg": "导出为 SVG",
+    "copyImage": "复制为图片",
+    "exportPage": "导出整个页面",
+    "exportSelection": "导出所选内容",
+    "copied": "已复制为图片",
+    "exported": "已导出",
+    "exportFailed": "导出失败",
+    "fullscreen": "全屏",
+    "exitFullscreen": "退出全屏",
+    "empty": "选择一个工具开始绘画",
+    "textPlaceholder": "输入…",
+    "style": {
+      "stroke": "颜色",
+      "fill": "填充",
+      "width": "线宽",
+      "dash": "线型",
+      "opacity": "不透明度",
+      "fontSize": "文字大小",
+      "stickyColor": "便利贴颜色",
+      "curved": "曲线",
+      "doubleArrow": "双向箭头",
+      "auto": "自动"
+    },
+    "fill": {
+      "none": "无",
+      "semi": "浅色",
+      "solid": "实心"
+    },
+    "width": {
+      "thin": "细",
+      "medium": "中",
+      "bold": "粗"
+    },
+    "dash": {
+      "solid": "实线",
+      "dashed": "虚线",
+      "dotted": "点线"
+    },
+    "size": {
+      "s": "小",
+      "m": "中",
+      "l": "大",
+      "xl": "特大"
+    },
+    "actions": {
+      "forward": "置于顶层",
+      "backward": "置于底层",
+      "duplicate": "复制",
+      "group": "编组",
+      "ungroup": "取消编组",
+      "lock": "锁定",
+      "unlock": "解锁",
+      "delete": "删除",
+      "alignLeft": "左对齐",
+      "alignCenter": "水平居中",
+      "alignRight": "右对齐",
+      "alignTop": "顶端对齐",
+      "alignMiddle": "垂直居中",
+      "alignBottom": "底端对齐"
+    },
+    "groups": {
+      "draw": "绘制",
+      "shapes": "形状"
+    },
+    "more": "更多",
+    "clear": "清空页面",
+    "clearTitle": "清空“{{name}}”？",
+    "clearBody": "此页上的所有内容都将被移除。可按 Ctrl+Z 撤销。",
+    "cancel": "取消",
+    "clearConfirm": "清空"
+  },
+  "pointer": {
+    "active": "{{name}} · {{size}}",
+    "windowsDefault": "Windows 默认",
+    "applied": "已应用 {{name}}（{{size}} px）",
+    "restored": "已恢复 Windows 指针",
+    "exported": "已导出指针主题",
+    "exportTitle": "选择导出文件夹",
+    "failed": "无法完成：",
+    "filled": "填充",
+    "outline": "描边",
+    "sizeTooltip": "{{size}} px 指针",
+    "canvasLight": "在浅色背景上显示",
+    "canvasDark": "在深色背景上显示",
+    "restore": "恢复",
+    "restoreTooltip": "恢复为之前的指针",
+    "export": "导出",
+    "exportTooltip": "将主题保存为 .cur/.ani 文件",
+    "apply": "应用",
+    "inUse": "使用中",
+    "roles": {
+      "Arrow": "正常选择",
+      "Help": "帮助选择",
+      "AppStarting": "后台运行",
+      "Wait": "忙",
+      "Crosshair": "精确选择",
+      "IBeam": "文本选择",
+      "NWPen": "手写",
+      "No": "不可用",
+      "SizeNS": "垂直调整大小",
+      "SizeWE": "水平调整大小",
+      "SizeNWSE": "沿对角线调整大小 1",
+      "SizeNESW": "沿对角线调整大小 2",
+      "SizeAll": "移动",
+      "UpArrow": "候选",
+      "Hand": "链接选择",
+      "Pin": "位置选择",
+      "Person": "个人选择",
+      "Grab": "抓取",
+      "Grabbing": "抓取中",
+      "Copy": "复制",
+      "Alias": "快捷方式",
+      "ContextMenu": "上下文菜单",
+      "ZoomIn": "放大",
+      "ZoomOut": "缩小",
+      "LeftSelect": "左选择",
+      "ColorSelect": "颜色选择",
+      "HandCopy": "手形复制",
+      "HandAlias": "手形快捷方式",
+      "HandNo": "手形不可用",
+      "HandHelp": "手形帮助",
+      "ResizeN": "向上",
+      "ResizeS": "向下",
+      "ResizeW": "向左",
+      "ResizeE": "向右",
+      "ResizeNW": "左上",
+      "ResizeNE": "右上",
+      "ResizeSW": "左下",
+      "ResizeSE": "右下",
+      "HBeam": "竖排文本",
+      "Eyedropper": "吸管"
+    },
+    "prevTheme": "上一个主题",
+    "nextTheme": "下一个主题",
+    "sets": {
+      "windows": "Windows",
+      "extras": "额外",
+      "layer": "Layer"
+    },
+    "setHint": {
+      "windows": "Windows 各处使用的 17 种指针。将鼠标悬停在图块上即可试用。",
+      "extras": "用于拖动、复制、缩放等的额外指针，导出时一并包含。",
+      "layer": "应用后，Layer 自身的指针也会切换为此主题。"
+    },
+    "layerRoles": {
+      "normal": "正常",
+      "button": "按钮",
+      "grab": "抓取",
+      "grabbing": "抓取中",
+      "resize": "调整大小",
+      "resizeNesw": "调整大小（另一对角）",
+      "resizeNs": "垂直调整大小",
+      "resizeEw": "水平调整大小"
     }
   }
 }

@@ -10,21 +10,21 @@ import { useCanvasStore } from '../../store/canvasStore'
 import { useSnapToGrid } from '../../hooks/useSnapToGrid'
 import { setForceInteractive } from '../../lib/ipc'
 import { computeSnap } from '../../lib/align'
-import { widgetRegistry } from '../../lib/widgetRegistry'
+import { minSizeOf, widgetRegistry } from '../../lib/widgetRegistry'
 import { ContextMenu } from '../ContextMenu'
 import { Tooltip } from '../Tooltip'
 import { SettingsPopover } from './SettingsPopover'
 
 const RESIZE = 'var(--cur-resize)'
 const resizeHandleStyles: Record<string, React.CSSProperties> = {
-  top: { cursor: `${RESIZE}, ns-resize` },
-  bottom: { cursor: `${RESIZE}, ns-resize` },
-  left: { cursor: `${RESIZE}, ew-resize` },
-  right: { cursor: `${RESIZE}, ew-resize` },
+  top: { cursor: 'var(--cur-resize-ns, var(--cur-resize)), ns-resize' },
+  bottom: { cursor: 'var(--cur-resize-ns, var(--cur-resize)), ns-resize' },
+  left: { cursor: 'var(--cur-resize-ew, var(--cur-resize)), ew-resize' },
+  right: { cursor: 'var(--cur-resize-ew, var(--cur-resize)), ew-resize' },
   topLeft: { cursor: `${RESIZE}, nwse-resize` },
   bottomRight: { cursor: `${RESIZE}, nwse-resize` },
-  topRight: { cursor: `${RESIZE}, nesw-resize` },
-  bottomLeft: { cursor: `${RESIZE}, nesw-resize` },
+  topRight: { cursor: 'var(--cur-resize-nesw, var(--cur-resize)), nesw-resize' },
+  bottomLeft: { cursor: 'var(--cur-resize-nesw, var(--cur-resize)), nesw-resize' },
 }
 
 function WidgetWrapperBase({ widget }: { widget: Widget }) {
@@ -48,7 +48,7 @@ function WidgetWrapperBase({ widget }: { widget: Widget }) {
   const canResize = !widget.locked
   const lockAspect =
     widget.type === 'clock' && widget.variant === 'analog'
-  const minSize = def.minSize ?? { width: 120, height: 80 }
+  const minSize = minSizeOf(def, widget)
 
   useEffect(() => {
     if (widget.width < minSize.width || widget.height < minSize.height) {
@@ -58,7 +58,7 @@ function WidgetWrapperBase({ widget }: { widget: Widget }) {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [minSize.width, minSize.height])
 
   const handleMouseDown = () => {
     if (!widget.locked) setSelected(widget.id)

@@ -86,7 +86,7 @@
     "quick": "Quick Toggles",
     "winget": "App Updates",
     "screentime": "Screen Time",
-    "board": "Idea board"
+    "board": "Whiteboard"
   },
   "settings": {
     "title": "Settings",
@@ -111,7 +111,8 @@
       "canvas": "Canvas",
       "exportImage": "Export canvas as image",
       "resetSpace": "Reset this space",
-      "resetSpaceConfirm": "Click again to clear “{{name}}”"
+      "resetSpaceConfirm": "Click again to clear “{{name}}”",
+      "showNub": "Show the Layer nub at the top"
     },
     "appearance": {
       "theme": "Theme",
@@ -122,7 +123,11 @@
       "showOn": "Show Layer on",
       "showOnHint": "Which monitor the pill, Settings and pop-ups appear on.",
       "autoPrimary": "Auto (primary)",
-      "display": "Display {{n}}"
+      "display": "Display {{n}}",
+      "uiScale": "UI scale",
+      "uiScaleReset": "Reset",
+      "uiScaleHint": "Makes all of Layer smaller or bigger. Your widgets stay where they are.",
+      "pointer": "Mouse pointer"
     },
     "screensaver": {
       "storeNote": "Setting Layer as your Windows screensaver isn’t available in the Microsoft Store version (the sandbox can’t register a system screensaver). You can still preview the styles with Ctrl+Shift+S.",
@@ -436,7 +441,90 @@
     "remove": "Remove",
     "clearUnpinned": "Clear unpinned",
     "copied": "Copied to clipboard",
-    "copyFailed": "Could not copy"
+    "copyFailed": "Could not copy",
+    "cancelSelect": "Cancel selection",
+    "clear": "Clear",
+    "clearConfirm": "Click again to clear unpinned",
+    "copy": "Copy",
+    "copyAs": "Copy as",
+    "copyMerged": "Copy together",
+    "folder": "folder",
+    "image": "Image",
+    "less": "Less",
+    "more": "More",
+    "moreActions": "More actions",
+    "nChars": "{{n}} chars",
+    "nFiles": "{{count}} files",
+    "newBoard": "New pinboard…",
+    "openFile": "Open file",
+    "openLink": "Open link",
+    "pause": "Pause recording",
+    "pausedBadge": "Paused",
+    "pinboards": "Pinboards",
+    "quickPasteHint": "Win+Shift+V opens Quick Paste anywhere",
+    "resume": "Resume recording",
+    "selected": "{{n}} selected",
+    "showInFolder": "Show in folder",
+    "writeEmail": "Write email",
+    "quick": {
+      "copyOnly": "copy only",
+      "direct": "paste directly",
+      "paste": "paste",
+      "search": "Search your clipboard…",
+      "switch": "switch",
+      "tabs": {
+        "all": "All",
+        "pinned": "Pinned",
+        "text": "Text",
+        "image": "Images",
+        "files": "Files"
+      }
+    },
+    "settings": {
+      "days": "{{n}}d",
+      "files": "Record files",
+      "forget": "Forget unpinned after",
+      "ignore": "Never record from",
+      "ignoreHint": "Password managers are always skipped. Tap an app to ignore it too.",
+      "images": "Record images",
+      "keep": "Keep history",
+      "never": "Never",
+      "pause": "Pause recording",
+      "quickPaste": "Quick Paste (Win+Shift+V)",
+      "quickPasteHint": "Search and paste your history into any app."
+    },
+    "time": {
+      "day": "{{n}}d ago",
+      "hour": "{{n}}h ago",
+      "min": "{{n}}m ago",
+      "now": "just now"
+    },
+    "filters": {
+      "all": "All",
+      "pinned": "Pinned",
+      "text": "Text",
+      "link": "Links",
+      "image": "Images",
+      "files": "Files",
+      "color": "Colours",
+      "code": "Code"
+    },
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "earlier": "Earlier"
+    },
+    "transforms": {
+      "upper": "UPPERCASE",
+      "lower": "lowercase",
+      "title": "Title Case",
+      "sentence": "Sentence case",
+      "trim": "Trimmed spaces",
+      "oneLine": "One line",
+      "urlDecode": "URL-decoded",
+      "urlEncode": "URL-encoded",
+      "json": "Formatted JSON"
+    }
   },
   "webembed": {
     "addUrl": "Add a URL in settings",
@@ -707,7 +795,10 @@
       "myLocation": "My location",
       "findingYou": "Finding you…",
       "useMyLocation": "Use my location",
-      "searchCity": "Search a city…"
+      "searchCity": "Search a city…",
+      "allConditions": "All conditions",
+      "windy": "Windy",
+      "night": "Night"
     }
   },
   "stats": {
@@ -720,7 +811,9 @@
     "network": "Network",
     "session": "This session",
     "show": "Show",
-    "empty": "Nothing to show. Turn a stat on in settings."
+    "empty": "Nothing to show. Turn a stat on in settings.",
+    "gpu": "GPU",
+    "vram": "VRAM"
   },
   "diskinfo": {
     "title": "Disks",
@@ -1064,7 +1157,7 @@
     "note": {
       "notebook": "Notebook",
       "sticky": "Sticky note",
-      "board": "Idea board"
+      "board": "Whiteboard"
     }
   },
   "hub": {
@@ -1084,10 +1177,10 @@
       "fun": "Fun"
     },
     "desc": {
-      "note": "A notebook, a quick sticky note or an idea board.",
+      "note": "A notebook, a quick sticky note or a whiteboard.",
       "sticky": "A quick handwritten-style sticky note.",
       "todo": "A checklist for today, or an inbox for quick thoughts.",
-      "board": "A canvas of cards you can link together.",
+      "board": "Draw, sketch and map out ideas on an endless canvas.",
       "inbox": "Drop thoughts in now, sort them later.",
       "pomodoro": "Focus sessions with timed breaks.",
       "shelf": "Keep files and folders handy on your desktop.",
@@ -1175,6 +1268,246 @@
           "body": "Enjoy the update. You can find these notes again in Settings → About."
         }
       }
+    },
+    "v1121": {
+      "headline": "A real whiteboard, a smarter clipboard and more",
+      "notes": {
+        "whiteboard": "Whiteboard: pen, shapes, sticky notes and arrows that connect anything. Pages, export and full screen.",
+        "clipboard": "Clipboard: text, links, colours, images and files, with the app they came from, filters and pinboards.",
+        "quickpaste": "Quick Paste: press Win+Shift+V in any app to search your history and paste.",
+        "weather": "Weather: animated scenes for every condition, day and night.",
+        "pointer": "Pointers: 9 cursor themes in 5 sizes, in Settings → Appearance. Layer’s own cursors match.",
+        "scale": "UI scale for any screen size, and you can hide the nub.",
+        "gpu": "GPU usage, temperature and VRAM in the System widget.",
+        "fixes": "Fixes: Show desktop flicker, the screensaver wake screen, Calendar after midnight and Countdown time zones."
+      },
+      "tour": {
+        "intro": {
+          "title": "Welcome to Layer 1.12.1",
+          "body": "A quick look at what’s new. Under a minute."
+        },
+        "whiteboard": {
+          "title": "A real whiteboard",
+          "body": "Draw, add shapes and sticky notes, then drag the dots on any item to connect it to another."
+        },
+        "clipboard": {
+          "title": "A smarter clipboard",
+          "body": "Everything you copy, including images and files, with smart cards, filters and pinboards."
+        },
+        "quickpaste": {
+          "title": "Quick Paste, anywhere",
+          "body": "Press Win+Shift+V in any app. Search, press Enter, and it pastes right where you were."
+        },
+        "weather": {
+          "title": "Weather that moves",
+          "body": "Every condition has its own animation, by day and by night."
+        },
+        "pointer": {
+          "title": "Pick your pointer",
+          "body": "Settings → Appearance → Mouse pointer. Hover to try a cursor, then Apply."
+        },
+        "more": {
+          "title": "And a few more",
+          "body": "UI scale, hide the nub, GPU stats in System, and a batch of fixes."
+        },
+        "done": {
+          "title": "That’s 1.12.1!",
+          "body": "Enjoy. You can find these notes again in Settings → About."
+        }
+      }
+    }
+  },
+  "whiteboard": {
+    "tools": {
+      "select": "Select",
+      "hand": "Pan",
+      "pen": "Pen",
+      "highlighter": "Highlighter",
+      "eraser": "Eraser",
+      "rect": "Rectangle",
+      "ellipse": "Ellipse",
+      "diamond": "Diamond",
+      "line": "Line",
+      "arrow": "Arrow",
+      "text": "Text",
+      "sticky": "Sticky note",
+      "image": "Image",
+      "laser": "Laser pointer"
+    },
+    "undo": "Undo",
+    "redo": "Redo",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomReset": "Reset zoom",
+    "fit": "Zoom to fit",
+    "minimap": "Minimap",
+    "page": "Page {{n}}",
+    "addPage": "New page",
+    "deletePage": "Delete page",
+    "renameHint": "Double-click a page to rename it",
+    "background": "Background",
+    "bg": {
+      "dots": "Dots",
+      "grid": "Grid",
+      "lines": "Lines",
+      "none": "None"
+    },
+    "snap": "Snap to grid",
+    "export": "Export",
+    "exportPng": "Export as PNG",
+    "exportSvg": "Export as SVG",
+    "copyImage": "Copy as image",
+    "exportPage": "Exports the whole page",
+    "exportSelection": "Exports the selection",
+    "copied": "Copied as image",
+    "exported": "Exported",
+    "exportFailed": "Couldn't export",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
+    "empty": "Pick a tool and start drawing",
+    "textPlaceholder": "Type…",
+    "style": {
+      "stroke": "Color",
+      "fill": "Fill",
+      "width": "Stroke",
+      "dash": "Style",
+      "opacity": "Opacity",
+      "fontSize": "Text size",
+      "stickyColor": "Note color",
+      "curved": "Curved",
+      "doubleArrow": "Arrow on both ends",
+      "auto": "Automatic"
+    },
+    "fill": {
+      "none": "None",
+      "semi": "Tint",
+      "solid": "Solid"
+    },
+    "width": {
+      "thin": "Thin",
+      "medium": "Medium",
+      "bold": "Bold"
+    },
+    "dash": {
+      "solid": "Solid",
+      "dashed": "Dashed",
+      "dotted": "Dotted"
+    },
+    "size": {
+      "s": "Small",
+      "m": "Medium",
+      "l": "Large",
+      "xl": "Extra large"
+    },
+    "actions": {
+      "forward": "Bring to front",
+      "backward": "Send to back",
+      "duplicate": "Duplicate",
+      "group": "Group",
+      "ungroup": "Ungroup",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "delete": "Delete",
+      "alignLeft": "Align left",
+      "alignCenter": "Align centers",
+      "alignRight": "Align right",
+      "alignTop": "Align top",
+      "alignMiddle": "Align middles",
+      "alignBottom": "Align bottom"
+    },
+    "groups": {
+      "draw": "Draw",
+      "shapes": "Shapes"
+    },
+    "more": "More",
+    "clear": "Clear page",
+    "clearTitle": "Clear “{{name}}”?",
+    "clearBody": "Everything on this page will be removed. You can undo with Ctrl+Z.",
+    "cancel": "Cancel",
+    "clearConfirm": "Clear"
+  },
+  "pointer": {
+    "active": "{{name}} · {{size}}",
+    "windowsDefault": "Windows default",
+    "applied": "{{name}} ({{size}} px) applied",
+    "restored": "Windows cursors restored",
+    "exported": "Cursor theme exported",
+    "exportTitle": "Choose a folder to export to",
+    "failed": "Couldn’t do that:",
+    "filled": "Filled",
+    "outline": "Outline",
+    "sizeTooltip": "{{size}} px cursors",
+    "canvasLight": "Show on light background",
+    "canvasDark": "Show on dark background",
+    "restore": "Restore",
+    "restoreTooltip": "Go back to the cursors you had before",
+    "export": "Export",
+    "exportTooltip": "Save this theme as .cur/.ani files",
+    "apply": "Apply",
+    "inUse": "In use",
+    "roles": {
+      "Arrow": "Normal",
+      "Help": "Help",
+      "AppStarting": "Working in background",
+      "Wait": "Busy",
+      "Crosshair": "Precision",
+      "IBeam": "Text",
+      "NWPen": "Handwriting",
+      "No": "Unavailable",
+      "SizeNS": "Vertical resize",
+      "SizeWE": "Horizontal resize",
+      "SizeNWSE": "Diagonal resize 1",
+      "SizeNESW": "Diagonal resize 2",
+      "SizeAll": "Move",
+      "UpArrow": "Alternate select",
+      "Hand": "Link",
+      "Pin": "Location",
+      "Person": "Person",
+      "Grab": "Grab",
+      "Grabbing": "Grabbing",
+      "Copy": "Copy",
+      "Alias": "Shortcut",
+      "ContextMenu": "Context menu",
+      "ZoomIn": "Zoom in",
+      "ZoomOut": "Zoom out",
+      "LeftSelect": "Left select",
+      "ColorSelect": "Color select",
+      "HandCopy": "Hand copy",
+      "HandAlias": "Hand shortcut",
+      "HandNo": "Hand unavailable",
+      "HandHelp": "Hand help",
+      "ResizeN": "Resize up",
+      "ResizeS": "Resize down",
+      "ResizeW": "Resize left",
+      "ResizeE": "Resize right",
+      "ResizeNW": "Resize up-left",
+      "ResizeNE": "Resize up-right",
+      "ResizeSW": "Resize down-left",
+      "ResizeSE": "Resize down-right",
+      "HBeam": "Vertical text",
+      "Eyedropper": "Eyedropper"
+    },
+    "prevTheme": "Previous theme",
+    "nextTheme": "Next theme",
+    "sets": {
+      "windows": "Windows",
+      "extras": "Extras",
+      "layer": "Layer"
+    },
+    "setHint": {
+      "windows": "The 17 cursors Windows uses everywhere. Hover a tile to try one.",
+      "extras": "Extra cursors for drag, copy, zoom and more, included in exports.",
+      "layer": "Layer’s own cursors switch to this theme when you apply it."
+    },
+    "layerRoles": {
+      "normal": "Normal",
+      "button": "Button",
+      "grab": "Grab",
+      "grabbing": "Grabbing",
+      "resize": "Resize",
+      "resizeNesw": "Resize (other diagonal)",
+      "resizeNs": "Resize vertical",
+      "resizeEw": "Resize horizontal"
     }
   }
 }

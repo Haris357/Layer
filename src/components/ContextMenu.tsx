@@ -13,7 +13,7 @@ import {
 import { useCanvasStore } from '../store/canvasStore'
 import { useMonitorStore } from '../store/monitorStore'
 import { hexToRgba } from '../lib/utils'
-import { widgetRegistry } from '../lib/widgetRegistry'
+import { minSizeOf, widgetRegistry } from '../lib/widgetRegistry'
 import { Segmented, Slider, Toggle } from './ui'
 
 // Quick Small/Medium/Large sizing — interpolated between a widget type's own
@@ -174,7 +174,7 @@ export function ContextMenu({ x, y, widgetId, onClose }: ContextMenuProps) {
   const def = widgetRegistry[widget.type]
   const lockAspect = widget.type === 'clock' && widget.variant === 'analog'
   const presets = def
-    ? sizePresets(def.minSize ?? { width: 120, height: 80 }, def.maxSize, lockAspect)
+    ? sizePresets(minSizeOf(def, widget), def.maxSize, lockAspect)
     : null
   const activePreset = presets
     ? (Object.entries(presets).find(

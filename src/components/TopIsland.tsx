@@ -197,7 +197,7 @@ function WidgetScroller({
         if (Math.abs(dx) < 5) return
         drag.moved = true
         el.setPointerCapture(e.pointerId)
-        el.style.cursor = 'grabbing'
+        el.style.cursor = 'var(--cur-grabbing), grabbing'
         if (raf.current !== null) cancelAnimationFrame(raf.current)
         raf.current = null
       }
@@ -508,7 +508,7 @@ export function TopIsland() {
       swallowClick.current = true
       // The drag may leave the pill's own hit box: take the whole window.
       setForceInteractive(true).catch(() => {})
-      document.body.style.cursor = 'grabbing'
+      document.body.style.cursor = 'var(--cur-grabbing), grabbing'
       hubAnim.current?.stop()
       leavingRef.current = false
     }
@@ -610,6 +610,7 @@ export function TopIsland() {
   }, [])
 
   const open = mode === 'edit'
+  const showNub = useSettingsStore((s) => s.showNub)
   // The hub hangs from the full toolbar; leaving edit mode collapses the bar
   // to its pill, so the hub retracts first instead of squeezing down with it.
   useEffect(() => {
@@ -708,7 +709,9 @@ export function TopIsland() {
         onMouseLeave={handleLeave}
       >
         <motion.div
-          animate={{ y: down ? 0 : -40 }}
+          // Tucked away it peeks out as a small nub, or hides completely when
+          // the nub is turned off (hovering the top edge still brings it down).
+          animate={{ y: down ? 0 : showNub ? -40 : -64, opacity: down || showNub ? 1 : 0 }}
           transition={spring}
         >
           {/* rubber-band offset while the pill is being pulled */}

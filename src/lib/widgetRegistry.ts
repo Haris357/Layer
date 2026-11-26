@@ -56,6 +56,9 @@ export interface WidgetDefinition<T extends Widget = Widget> {
   icon: LucideIcon
   enabled: boolean
   minSize?: WidgetSize
+  // Content-aware minimum (e.g. grows with the rows a widget shows), so the
+  // smallest size still fits everything: no clipping, no scrollbars.
+  minSizeFor?: (widget: T) => WidgetSize
   maxSize?: WidgetSize
   // If present, adding from the bar opens a style dropdown instead of adding
   // the default straight away.
@@ -72,6 +75,18 @@ export interface WidgetDefinition<T extends Widget = Widget> {
   // Optional gate: when it returns false for a given instance, the in-canvas
   // settings popover is hidden (e.g. an analog clock has no options).
   hasSettings?: (widget: T) => boolean
+}
+
+export function minSizeOf(def: WidgetDefinition, widget: Widget): WidgetSize {
+  const base = def.minSize ?? { width: 120, height: 80 }
+  const fit = def.minSizeFor?.(widget)
+  if (!fit) return base
+  const w = Math.ceil(Math.max(base.width, fit.width))
+  const h = Math.ceil(Math.max(base.height, fit.height))
+  return {
+    width: def.maxSize ? Math.min(w, def.maxSize.width) : w,
+    height: def.maxSize ? Math.min(h, def.maxSize.height) : h,
+  }
 }
 
 export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {

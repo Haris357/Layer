@@ -8,14 +8,19 @@ import {
   BatteryCharging,
   Battery,
   ArrowDownUp,
+  CircuitBoard,
+  Layers2,
 } from 'lucide-react'
-import { getSystemStats, isTauri, type SystemStats } from '../../lib/ipc'
+import { getGpuStats, getSystemStats, isTauri, type GpuStats, type SystemStats } from '../../lib/ipc'
 import type { StatsMetric, StatsWidget as StatsWidgetType } from '../../types/widget'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 import { FieldRow, Toggle } from '../ui'
 
 const DEFAULT_METRICS: Record<StatsMetric, boolean> = {
   cpu: true,
+  // Off for existing widgets (so their layout doesn't suddenly grow); new
+  // Stats widgets turn it on in create().
+  gpu: false,
   memory: true,
   disk: true,
   battery: true,
@@ -23,6 +28,14 @@ const DEFAULT_METRICS: Record<StatsMetric, boolean> = {
 }
 
 const HISTORY = 40
+
+// Height the rows need (see the Renderer: 12px gaps, 14px breathing room top
+// and bottom, a 30px bar row, a 67px network row), so the widget can never be
+// shrunk until it clips.
+function fitHeight(m: Record<StatsMetric, boolean>): number {
+  const bars = [m.cpu, m.gpu, m.gpu, m.memory, m.disk, m.battery].filter(Boolean).length
+  return 30 + 17 + bars * 42 + (m.network ? 79 : 0)
+}
 
 function resolveMetrics(widget: StatsWidgetType): Record<StatsMetric, boolean> {
   return { ...DEFAULT_METRICS, ...widget.metrics }
@@ -198,6 +211,7 @@ function NetworkRow({ stats }: { stats: SystemStats | null }) {
 function StatsRenderer({ widget }: { widget: StatsWidgetType }) {
   const { t } = useTranslation()
   const [stats, setStats] = useState<SystemStats | null>(null)
+  const [gpu, setGpu] = useState<GpuStats | null>(null)
   const show = resolveMetrics(widget)
   // Faster polling only while the network row is visible, so the rate feels
   // live; CPU/memory/disk alone don't need it.
@@ -208,8 +222,11 @@ function StatsRenderer({ widget }: { widget: StatsWidgetType }) {
     let cancelled = false
     const poll = async () => {
       try {
-        const s = await getSystemStats()
-        if (!cancelled) setStats(s)
+        const [s, g] = await Promise.all([getSystemStats(), show.gpu ? getGpuStats().catch(() => null) : Promise.resolve(null)])
+        if (!cancelled) {
+          setStats(s)
+          setGpu(g)
+        }
       } catch {
         /* ignore */
       }
@@ -220,7 +237,9 @@ function StatsRenderer({ widget }: { widget: StatsWidgetType }) {
       cancelled = true
       window.clearInterval(id)
     }
-  }, [pollMs])
+    // show.gpu decides whether the GPU is polled at all
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pollMs, show.gpu])
 
   const memPct = stats
     ? (stats.memUsed / Math.max(1, stats.memTotal)) * 100
@@ -228,7 +247,7 @@ function StatsRenderer({ widget }: { widget: StatsWidgetType }) {
   const gb = (n: number) => (n / 1024 / 1024 / 1024).toFixed(1)
   const hasBattery = !!stats && stats.battery >= 0
   const nothing =
-    !show.cpu && !show.memory && !show.disk && !show.network && !(show.battery && hasBattery)
+    !show.cpu && !(show.gpu && gpu) && !show.memory && !show.disk && !show.network && !(show.battery && hasBattery)
 
   return (
     <div className="glass flex h-full w-full flex-col justify-center gap-3 overflow-hidden rounded-[12px] border border-[var(--border)] px-4">
@@ -245,6 +264,24 @@ function StatsRenderer({ widget }: { widget: StatsWidgetType }) {
           pct={stats?.cpu ?? 0}
           detail={stats ? `${Math.round(stats.cpu)}%` : '—'}
         />
+      )}
+      {show.gpu && gpu && (
+        <>
+          <Bar
+            icon={CircuitBoard}
+            label={t('stats.gpu')}
+            pct={gpu.usage ?? 0}
+            detail={[gpu.usage !== null ? `${Math.round(gpu.usage)}%` : null, gpu.temperature !== null ? `${Math.round(gpu.temperature)}°C` : null].filter(Boolean).join(' · ') || '—'}
+          />
+          {gpu.vramTotal > 0 && (
+            <Bar
+              icon={Layers2}
+              label={t('stats.vram')}
+              pct={gpu.vramUsed !== null ? (gpu.vramUsed / gpu.vramTotal) * 100 : 0}
+              detail={gpu.vramUsed !== null ? `${gb(gpu.vramUsed)} / ${gb(gpu.vramTotal)} GB` : `${gb(gpu.vramTotal)} GB`}
+            />
+          )}
+        </>
       )}
       {show.memory && (
         <Bar
@@ -301,6 +338,7 @@ function StatsSettings({
   const show = resolveMetrics(widget)
   const rows: { key: StatsMetric; label: string }[] = [
     { key: 'cpu', label: t('stats.cpu') },
+    { key: 'gpu', label: t('stats.gpu') },
     { key: 'memory', label: t('stats.memory') },
     { key: 'disk', label: t('stats.storage') },
     { key: 'battery', label: t('stats.battery') },
@@ -329,7 +367,8 @@ export const statsDefinition: WidgetDefinition<StatsWidgetType> = {
   icon: Activity,
   enabled: true,
   minSize: { width: 230, height: 120 },
-  maxSize: { width: 460, height: 440 },
+  minSizeFor: (w) => ({ width: 230, height: fitHeight(resolveMetrics(w)) }),
+  maxSize: { width: 460, height: 480 },
   // System stats and disk info share this toolbar icon; each style below adds that widget.
   styles: [
     { key: 'overview', label: 'Overview', patch: {} },
@@ -340,9 +379,9 @@ export const statsDefinition: WidgetDefinition<StatsWidgetType> = {
     x,
     y,
     width: 260,
-    height: 320,
+    height: fitHeight({ ...DEFAULT_METRICS, gpu: true, network: true }) + 8,
     locked: false,
-    metrics: { ...DEFAULT_METRICS, network: true },
+    metrics: { ...DEFAULT_METRICS, gpu: true, network: true },
   }),
   Renderer: StatsRenderer,
   Settings: StatsSettings,

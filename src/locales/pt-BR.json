@@ -64,7 +64,7 @@
     "quick": "Atalhos rápidos",
     "winget": "Atualizações de apps",
     "screentime": "Tempo de tela",
-    "board": "Quadro de ideias"
+    "board": "Quadro branco"
   },
   "settings": {
     "title": "Configurações",
@@ -89,7 +89,8 @@
       "canvas": "Tela",
       "exportImage": "Exportar tela como imagem",
       "resetSpace": "Redefinir este espaço",
-      "resetSpaceConfirm": "Clique novamente para limpar “{{name}}”"
+      "resetSpaceConfirm": "Clique novamente para limpar “{{name}}”",
+      "showNub": "Mostrar a aba do Layer no topo"
     },
     "appearance": {
       "theme": "Tema",
@@ -100,7 +101,11 @@
       "showOn": "Mostrar o Layer em",
       "showOnHint": "Em qual monitor a pílula, as Configurações e os pop-ups aparecem.",
       "autoPrimary": "Automático (principal)",
-      "display": "Tela {{n}}"
+      "display": "Tela {{n}}",
+      "uiScale": "Escala da interface",
+      "uiScaleReset": "Redefinir",
+      "uiScaleHint": "Deixa o Layer menor ou maior. Seus widgets ficam onde estão.",
+      "pointer": "Ponteiro do mouse"
     },
     "screensaver": {
       "storeNote": "Definir o Layer como protetor de tela do Windows não está disponível na versão da Microsoft Store (o sandbox não pode registrar um protetor de tela do sistema). Você ainda pode visualizar os estilos com Ctrl+Shift+S.",
@@ -414,7 +419,90 @@
     "remove": "Remover",
     "clearUnpinned": "Limpar não fixados",
     "copied": "Copiado para a área de transferência",
-    "copyFailed": "Não foi possível copiar"
+    "copyFailed": "Não foi possível copiar",
+    "cancelSelect": "Cancelar seleção",
+    "clear": "Limpar",
+    "clearConfirm": "Clique de novo para limpar o não fixado",
+    "copy": "Copiar",
+    "copyAs": "Copiar como",
+    "copyMerged": "Copiar juntos",
+    "folder": "pasta",
+    "image": "Imagem",
+    "less": "Menos",
+    "more": "Mais",
+    "moreActions": "Mais ações",
+    "nChars": "{{n}} caracteres",
+    "nFiles": "{{count}} arquivos",
+    "newBoard": "Novo mural…",
+    "openFile": "Abrir arquivo",
+    "openLink": "Abrir link",
+    "pause": "Pausar gravação",
+    "pausedBadge": "Pausado",
+    "pinboards": "Murais",
+    "quickPasteHint": "Win+Shift+V abre a Colagem rápida em qualquer lugar",
+    "resume": "Retomar gravação",
+    "selected": "{{n}} selecionados",
+    "showInFolder": "Mostrar na pasta",
+    "writeEmail": "Escrever e-mail",
+    "quick": {
+      "copyOnly": "só copiar",
+      "direct": "colar direto",
+      "paste": "colar",
+      "search": "Pesquise na área de transferência…",
+      "switch": "trocar",
+      "tabs": {
+        "all": "Tudo",
+        "pinned": "Fixados",
+        "text": "Texto",
+        "image": "Imagens",
+        "files": "Arquivos"
+      }
+    },
+    "settings": {
+      "days": "{{n}} d",
+      "files": "Gravar arquivos",
+      "forget": "Esquecer o não fixado após",
+      "ignore": "Nunca gravar de",
+      "ignoreHint": "Gerenciadores de senha são sempre ignorados. Toque num app para ignorá-lo também.",
+      "images": "Gravar imagens",
+      "keep": "Manter histórico",
+      "never": "Nunca",
+      "pause": "Pausar gravação",
+      "quickPaste": "Colagem rápida (Win+Shift+V)",
+      "quickPasteHint": "Pesquise e cole seu histórico em qualquer app."
+    },
+    "time": {
+      "day": "há {{n}} d",
+      "hour": "há {{n}} h",
+      "min": "há {{n}} min",
+      "now": "agora"
+    },
+    "filters": {
+      "all": "Tudo",
+      "pinned": "Fixados",
+      "text": "Texto",
+      "link": "Links",
+      "image": "Imagens",
+      "files": "Arquivos",
+      "color": "Cores",
+      "code": "Código"
+    },
+    "groups": {
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "earlier": "Antes"
+    },
+    "transforms": {
+      "upper": "MAIÚSCULAS",
+      "lower": "minúsculas",
+      "title": "Iniciais Maiúsculas",
+      "sentence": "Primeira maiúscula",
+      "trim": "Espaços removidos",
+      "oneLine": "Uma linha",
+      "urlDecode": "URL decodificada",
+      "urlEncode": "URL codificada",
+      "json": "JSON formatado"
+    }
   },
   "webembed": {
     "addUrl": "Adicione uma URL nas configurações",
@@ -685,7 +773,10 @@
       "myLocation": "Minha localização",
       "findingYou": "Localizando você…",
       "useMyLocation": "Usar minha localização",
-      "searchCity": "Buscar uma cidade…"
+      "searchCity": "Buscar uma cidade…",
+      "allConditions": "Todas as condições",
+      "windy": "Ventania",
+      "night": "Noite"
     }
   },
   "stats": {
@@ -698,7 +789,9 @@
     "network": "Rede",
     "session": "Esta sessão",
     "show": "Mostrar",
-    "empty": "Nada para mostrar. Ative uma estatística nas configurações."
+    "empty": "Nada para mostrar. Ative uma estatística nas configurações.",
+    "gpu": "GPU",
+    "vram": "VRAM"
   },
   "diskinfo": {
     "title": "Discos",
@@ -1064,7 +1157,7 @@
     "note": {
       "notebook": "Caderno",
       "sticky": "Post-it",
-      "board": "Quadro de ideias"
+      "board": "Quadro branco"
     }
   },
   "hub": {
@@ -1084,10 +1177,10 @@
       "fun": "Diversão"
     },
     "desc": {
-      "note": "Um caderno, um post-it ou um quadro de ideias.",
+      "note": "Um caderno, um post-it ou um quadro branco.",
       "sticky": "Um post-it rápido com cara de escrito à mão.",
       "todo": "Uma lista para hoje ou uma caixa para ideias rápidas.",
-      "board": "Um quadro de cartões que você pode conectar.",
+      "board": "Desenhe, rabisque e organize ideias numa tela infinita.",
       "inbox": "Anote ideias agora, organize depois.",
       "pomodoro": "Sessões de foco com pausas.",
       "shelf": "Arquivos e pastas sempre à mão.",
@@ -1175,6 +1268,246 @@
           "body": "Aproveite a atualização. Você encontra estas notas em Configurações → Sobre."
         }
       }
+    },
+    "v1121": {
+      "headline": "Um quadro branco de verdade, uma área de transferência mais esperta e mais",
+      "notes": {
+        "whiteboard": "Quadro branco: caneta, formas, notas e setas que ligam qualquer coisa. Páginas, exportação e tela cheia.",
+        "clipboard": "Área de transferência: texto, links, cores, imagens e arquivos, com o app de origem, filtros e murais.",
+        "quickpaste": "Colagem rápida: Win+Shift+V em qualquer app para pesquisar e colar.",
+        "weather": "Clima: cenas animadas para cada condição, de dia e de noite.",
+        "pointer": "Ponteiros: 9 temas em 5 tamanhos, em Configurações → Aparência. Os cursores do Layer acompanham.",
+        "scale": "Escala da interface para qualquer tela, e dá para esconder a alça.",
+        "gpu": "Uso, temperatura e VRAM da GPU no widget Sistema.",
+        "fixes": "Correções: piscar do Mostrar área de trabalho, tela ao acordar do protetor, Calendário após a meia-noite e fusos da contagem regressiva."
+      },
+      "tour": {
+        "intro": {
+          "title": "Bem-vindo ao Layer 1.12.1",
+          "body": "Uma olhada rápida nas novidades. Menos de um minuto."
+        },
+        "whiteboard": {
+          "title": "Um quadro branco de verdade",
+          "body": "Desenhe, adicione formas e notas, e arraste os pontos de um item para ligá-lo a outro."
+        },
+        "clipboard": {
+          "title": "Área de transferência mais esperta",
+          "body": "Tudo o que você copia, até imagens e arquivos, com cartões inteligentes, filtros e murais."
+        },
+        "quickpaste": {
+          "title": "Colagem rápida, em qualquer lugar",
+          "body": "Win+Shift+V em qualquer app. Pesquise, Enter, e cola onde você estava."
+        },
+        "weather": {
+          "title": "Clima que se move",
+          "body": "Cada condição tem sua animação, de dia e de noite."
+        },
+        "pointer": {
+          "title": "Escolha seu ponteiro",
+          "body": "Configurações → Aparência → Ponteiro. Passe o mouse para testar e Aplique."
+        },
+        "more": {
+          "title": "E mais",
+          "body": "Escala da interface, esconder a alça, GPU no Sistema e várias correções."
+        },
+        "done": {
+          "title": "Isso é o 1.12.1!",
+          "body": "Aproveite. Estas notas ficam em Configurações → Sobre."
+        }
+      }
+    }
+  },
+  "whiteboard": {
+    "tools": {
+      "select": "Selecionar",
+      "hand": "Mover",
+      "pen": "Caneta",
+      "highlighter": "Marca-texto",
+      "eraser": "Borracha",
+      "rect": "Retângulo",
+      "ellipse": "Elipse",
+      "diamond": "Losango",
+      "line": "Linha",
+      "arrow": "Seta",
+      "text": "Texto",
+      "sticky": "Post-it",
+      "image": "Imagem",
+      "laser": "Ponteiro laser"
+    },
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "zoomIn": "Aumentar zoom",
+    "zoomOut": "Diminuir zoom",
+    "zoomReset": "Redefinir zoom",
+    "fit": "Ajustar à tela",
+    "minimap": "Minimapa",
+    "page": "Página {{n}}",
+    "addPage": "Nova página",
+    "deletePage": "Excluir página",
+    "renameHint": "Clique duas vezes numa página para renomear",
+    "background": "Fundo",
+    "bg": {
+      "dots": "Pontos",
+      "grid": "Grade",
+      "lines": "Linhas",
+      "none": "Nenhum"
+    },
+    "snap": "Alinhar à grade",
+    "export": "Exportar",
+    "exportPng": "Exportar como PNG",
+    "exportSvg": "Exportar como SVG",
+    "copyImage": "Copiar como imagem",
+    "exportPage": "Exporta a página inteira",
+    "exportSelection": "Exporta a seleção",
+    "copied": "Copiado como imagem",
+    "exported": "Exportado",
+    "exportFailed": "Não foi possível exportar",
+    "fullscreen": "Tela cheia",
+    "exitFullscreen": "Sair da tela cheia",
+    "empty": "Escolha uma ferramenta e comece a desenhar",
+    "textPlaceholder": "Digite…",
+    "style": {
+      "stroke": "Cor",
+      "fill": "Preenchimento",
+      "width": "Traço",
+      "dash": "Estilo",
+      "opacity": "Opacidade",
+      "fontSize": "Tamanho do texto",
+      "stickyColor": "Cor da nota",
+      "curved": "Curva",
+      "doubleArrow": "Seta nas duas pontas",
+      "auto": "Automático"
+    },
+    "fill": {
+      "none": "Nenhum",
+      "semi": "Suave",
+      "solid": "Sólido"
+    },
+    "width": {
+      "thin": "Fino",
+      "medium": "Médio",
+      "bold": "Grosso"
+    },
+    "dash": {
+      "solid": "Contínuo",
+      "dashed": "Tracejado",
+      "dotted": "Pontilhado"
+    },
+    "size": {
+      "s": "Pequeno",
+      "m": "Médio",
+      "l": "Grande",
+      "xl": "Muito grande"
+    },
+    "actions": {
+      "forward": "Trazer para a frente",
+      "backward": "Enviar para trás",
+      "duplicate": "Duplicar",
+      "group": "Agrupar",
+      "ungroup": "Desagrupar",
+      "lock": "Bloquear",
+      "unlock": "Desbloquear",
+      "delete": "Excluir",
+      "alignLeft": "Alinhar à esquerda",
+      "alignCenter": "Centralizar na horizontal",
+      "alignRight": "Alinhar à direita",
+      "alignTop": "Alinhar ao topo",
+      "alignMiddle": "Centralizar na vertical",
+      "alignBottom": "Alinhar à base"
+    },
+    "groups": {
+      "draw": "Desenhar",
+      "shapes": "Formas"
+    },
+    "more": "Mais",
+    "clear": "Limpar página",
+    "clearTitle": "Limpar “{{name}}”?",
+    "clearBody": "Tudo nesta página será removido. Desfaça com Ctrl+Z.",
+    "cancel": "Cancelar",
+    "clearConfirm": "Limpar"
+  },
+  "pointer": {
+    "active": "{{name}} · {{size}}",
+    "windowsDefault": "Padrão do Windows",
+    "applied": "{{name}} ({{size}} px) aplicado",
+    "restored": "Cursores do Windows restaurados",
+    "exported": "Tema de cursor exportado",
+    "exportTitle": "Escolha uma pasta para exportar",
+    "failed": "Não foi possível:",
+    "filled": "Preenchido",
+    "outline": "Contorno",
+    "sizeTooltip": "Cursores de {{size}} px",
+    "canvasLight": "Ver em fundo claro",
+    "canvasDark": "Ver em fundo escuro",
+    "restore": "Restaurar",
+    "restoreTooltip": "Voltar aos cursores de antes",
+    "export": "Exportar",
+    "exportTooltip": "Salvar o tema como arquivos .cur/.ani",
+    "apply": "Aplicar",
+    "inUse": "Em uso",
+    "roles": {
+      "Arrow": "Normal",
+      "Help": "Ajuda",
+      "AppStarting": "Trabalhando em segundo plano",
+      "Wait": "Ocupado",
+      "Crosshair": "Precisão",
+      "IBeam": "Texto",
+      "NWPen": "Escrita à mão",
+      "No": "Indisponível",
+      "SizeNS": "Redimensionar vertical",
+      "SizeWE": "Redimensionar horizontal",
+      "SizeNWSE": "Redimensionar diagonal 1",
+      "SizeNESW": "Redimensionar diagonal 2",
+      "SizeAll": "Mover",
+      "UpArrow": "Seleção alternativa",
+      "Hand": "Link",
+      "Pin": "Local",
+      "Person": "Pessoa",
+      "Grab": "Agarrar",
+      "Grabbing": "Agarrando",
+      "Copy": "Copiar",
+      "Alias": "Atalho",
+      "ContextMenu": "Menu de contexto",
+      "ZoomIn": "Ampliar",
+      "ZoomOut": "Reduzir",
+      "LeftSelect": "Seleção à esquerda",
+      "ColorSelect": "Selecionar cor",
+      "HandCopy": "Mão copiar",
+      "HandAlias": "Mão atalho",
+      "HandNo": "Mão indisponível",
+      "HandHelp": "Mão ajuda",
+      "ResizeN": "Para cima",
+      "ResizeS": "Para baixo",
+      "ResizeW": "Para a esquerda",
+      "ResizeE": "Para a direita",
+      "ResizeNW": "Cima esquerda",
+      "ResizeNE": "Cima direita",
+      "ResizeSW": "Baixo esquerda",
+      "ResizeSE": "Baixo direita",
+      "HBeam": "Texto vertical",
+      "Eyedropper": "Conta-gotas"
+    },
+    "prevTheme": "Tema anterior",
+    "nextTheme": "Próximo tema",
+    "sets": {
+      "windows": "Windows",
+      "extras": "Extras",
+      "layer": "Layer"
+    },
+    "setHint": {
+      "windows": "Os 17 cursores que o Windows usa em todo lugar. Passe o mouse sobre um para testar.",
+      "extras": "Cursores extras para arrastar, copiar, zoom e mais, incluídos na exportação.",
+      "layer": "Os cursores do próprio Layer mudam para este tema ao aplicar."
+    },
+    "layerRoles": {
+      "normal": "Normal",
+      "button": "Botão",
+      "grab": "Agarrar",
+      "grabbing": "Agarrando",
+      "resize": "Redimensionar",
+      "resizeNesw": "Redimensionar (outra diagonal)",
+      "resizeNs": "Redimensionar vertical",
+      "resizeEw": "Redimensionar horizontal"
     }
   }
 }

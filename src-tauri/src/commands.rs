@@ -121,8 +121,9 @@ pub fn get_launch_mode(state: State<crate::screensaver::Launch>) -> String {
 // Called by the ambient view on any key/mouse activity to dismiss the
 // screensaver.
 #[tauri::command]
-pub fn exit_screensaver(app: AppHandle) {
-    app.exit(0);
+pub fn exit_screensaver() {
+    // Instant: hide our windows, then terminate (see window::instant_exit).
+    crate::window::instant_exit();
 }
 
 // Returns the desktop's dominant accent colour as a #rrggbb hex string,
@@ -337,6 +338,30 @@ pub fn read_asset(app: AppHandle, asset_path: String) -> Result<tauri::ipc::Resp
     }
     let bytes = std::fs::read(&file).map_err(|e| e.to_string())?;
     Ok(tauri::ipc::Response::new(bytes))
+}
+
+// A pasted/dropped image (bytes, not a file on disk), e.g. a screenshot pasted
+// onto the Whiteboard. Saved like import_asset, returns its asset path.
+#[tauri::command]
+pub fn import_asset_bytes(app: AppHandle, bytes: Vec<u8>, ext: String) -> Result<String, String> {
+    let ext: String = ext.chars().filter(|c| c.is_ascii_alphanumeric()).take(5).collect();
+    let ext = if ext.is_empty() { "png".to_string() } else { ext };
+    let dest = storage::assets_dir(&app)?.join(format!("{}.{}", uuid::Uuid::new_v4(), ext));
+    std::fs::write(&dest, bytes).map_err(|e| e.to_string())?;
+    Ok(dest.to_string_lossy().to_string())
+}
+
+// Write an export (PNG/SVG) to a path the user just picked in the save dialog.
+#[tauri::command]
+pub fn save_export(path: String, bytes: Vec<u8>) -> Result<(), String> {
+    std::fs::write(&path, bytes).map_err(|e| e.to_string())
+}
+
+// Latest GPU sample (see gpu.rs); None until the first sample, or on machines
+// without a hardware GPU.
+#[tauri::command]
+pub fn get_gpu_stats() -> Option<crate::gpu::GpuStats> {
+    crate::gpu::latest()
 }
 
 #[tauri::command]

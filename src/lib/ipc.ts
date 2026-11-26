@@ -54,6 +54,16 @@ export interface SystemStats {
 export const getSystemStats = () =>
   invoke<SystemStats>('get_system_stats')
 
+export interface GpuStats {
+  name: string
+  usage: number | null // %
+  vramUsed: number | null // bytes
+  vramTotal: number // bytes
+  temperature: number | null // °C, when the driver reports it
+}
+/** The main GPU's latest sample; null without a hardware GPU. */
+export const getGpuStats = () => invoke<GpuStats | null>('get_gpu_stats')
+
 // [latitude, longitude] from the Windows location service. Rejects if location
 // is disabled/blocked.
 export const getSystemLocation = () =>

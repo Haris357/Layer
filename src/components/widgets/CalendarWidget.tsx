@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -24,12 +24,12 @@ import {
   eventsOnDay,
   fmtTime,
   sameDay,
-  startOfDay,
 } from '../../lib/calendar'
 import { months, weekdays, dateLocale } from '../../lib/locale'
 import { cn } from '../../lib/utils'
 import { Menu } from '../Menu'
 import { FieldRow, Segmented, Toggle } from '../ui'
+import { useToday } from '../../hooks/useToday'
 import { Tooltip } from '../Tooltip'
 import type { WidgetDefinition } from '../../lib/widgetRegistry'
 import { useCalendarSourcesStore } from '../../store/calendarSourcesStore'
@@ -737,10 +737,18 @@ function YearLine() {
 function CalendarRenderer({ widget }: { widget: CalendarWidgetType }) {
   const { t } = useTranslation()
   const events = useAllEvents()
-  const today = useMemo(() => startOfDay(new Date()), [])
+  // Rolls over at midnight (GitHub #5: it used to stay on the day Layer started).
+  const today = useToday()
   const weekStart = useSettingsStore((s) => s.weekStart)
   const [view, setView] = useState<ViewKind>('month')
   const [cursor, setCursor] = useState<Date>(today)
+  // When the day changes, follow it if you were looking at the old today.
+  const prevToday = useRef(today)
+  useEffect(() => {
+    const was = prevToday.current
+    prevToday.current = today
+    setCursor((c) => (c.getTime() === was.getTime() ? today : c))
+  }, [today])
   const [openDay, setOpenDay] = useState<Date | null>(null)
   const [editing, setEditing] = useState<
     CalendarEvent | { dateHint: Date } | null

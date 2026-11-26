@@ -64,7 +64,7 @@
     "quick": "Schnellschalter",
     "winget": "App-Updates",
     "screentime": "Bildschirmzeit",
-    "board": "Ideenboard"
+    "board": "Whiteboard"
   },
   "settings": {
     "title": "Einstellungen",
@@ -89,7 +89,8 @@
       "canvas": "Arbeitsfläche",
       "exportImage": "Arbeitsfläche als Bild exportieren",
       "resetSpace": "Diesen Bereich zurücksetzen",
-      "resetSpaceConfirm": "Erneut klicken, um „{{name}}“ zu leeren"
+      "resetSpaceConfirm": "Erneut klicken, um „{{name}}“ zu leeren",
+      "showNub": "Layer-Lasche oben anzeigen"
     },
     "appearance": {
       "theme": "Design",
@@ -100,7 +101,11 @@
       "showOn": "Layer anzeigen auf",
       "showOnHint": "Auf welchem Monitor die Pille, die Einstellungen und Pop-ups erscheinen.",
       "autoPrimary": "Automatisch (primär)",
-      "display": "Bildschirm {{n}}"
+      "display": "Bildschirm {{n}}",
+      "uiScale": "UI-Größe",
+      "uiScaleReset": "Zurücksetzen",
+      "uiScaleHint": "Macht Layer kleiner oder größer. Deine Widgets bleiben an ihrem Platz.",
+      "pointer": "Mauszeiger"
     },
     "screensaver": {
       "storeNote": "Layer als deinen Windows-Bildschirmschoner einzurichten, ist in der Microsoft-Store-Version nicht verfügbar (die Sandbox kann keinen System-Bildschirmschoner registrieren). Du kannst die Stile dennoch mit Ctrl+Shift+S in der Vorschau ansehen.",
@@ -414,7 +419,90 @@
     "remove": "Entfernen",
     "clearUnpinned": "Nicht angeheftete löschen",
     "copied": "In die Zwischenablage kopiert",
-    "copyFailed": "Kopieren fehlgeschlagen"
+    "copyFailed": "Kopieren fehlgeschlagen",
+    "cancelSelect": "Auswahl aufheben",
+    "clear": "Leeren",
+    "clearConfirm": "Erneut klicken, um Ungepinntes zu leeren",
+    "copy": "Kopieren",
+    "copyAs": "Kopieren als",
+    "copyMerged": "Zusammen kopieren",
+    "folder": "Ordner",
+    "image": "Bild",
+    "less": "Weniger",
+    "more": "Mehr",
+    "moreActions": "Weitere Aktionen",
+    "nChars": "{{n}} Zeichen",
+    "nFiles": "{{count}} Dateien",
+    "newBoard": "Neue Pinnwand…",
+    "openFile": "Datei öffnen",
+    "openLink": "Link öffnen",
+    "pause": "Aufzeichnung pausieren",
+    "pausedBadge": "Pausiert",
+    "pinboards": "Pinnwände",
+    "quickPasteHint": "Win+Umschalt+V öffnet Quick Paste überall",
+    "resume": "Aufzeichnung fortsetzen",
+    "selected": "{{n}} ausgewählt",
+    "showInFolder": "Im Ordner zeigen",
+    "writeEmail": "E-Mail schreiben",
+    "quick": {
+      "copyOnly": "nur kopieren",
+      "direct": "direkt einfügen",
+      "paste": "einfügen",
+      "search": "Zwischenablage durchsuchen…",
+      "switch": "wechseln",
+      "tabs": {
+        "all": "Alle",
+        "pinned": "Angepinnt",
+        "text": "Text",
+        "image": "Bilder",
+        "files": "Dateien"
+      }
+    },
+    "settings": {
+      "days": "{{n}} T.",
+      "files": "Dateien aufzeichnen",
+      "forget": "Ungepinntes vergessen nach",
+      "ignore": "Nie aufzeichnen von",
+      "ignoreHint": "Passwortmanager werden immer übersprungen. Tippe auf eine App, um sie auch zu ignorieren.",
+      "images": "Bilder aufzeichnen",
+      "keep": "Verlauf behalten",
+      "never": "Nie",
+      "pause": "Aufzeichnung pausieren",
+      "quickPaste": "Quick Paste (Win+Umschalt+V)",
+      "quickPasteHint": "Verlauf durchsuchen und in jede App einfügen."
+    },
+    "time": {
+      "day": "vor {{n}} T.",
+      "hour": "vor {{n}} Std.",
+      "min": "vor {{n}} Min.",
+      "now": "gerade eben"
+    },
+    "filters": {
+      "all": "Alle",
+      "pinned": "Angepinnt",
+      "text": "Text",
+      "link": "Links",
+      "image": "Bilder",
+      "files": "Dateien",
+      "color": "Farben",
+      "code": "Code"
+    },
+    "groups": {
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "earlier": "Früher"
+    },
+    "transforms": {
+      "upper": "GROSSBUCHSTABEN",
+      "lower": "kleinbuchstaben",
+      "title": "Jedes Wort Groß",
+      "sentence": "Satzanfang groß",
+      "trim": "Leerzeichen entfernt",
+      "oneLine": "Eine Zeile",
+      "urlDecode": "URL-dekodiert",
+      "urlEncode": "URL-kodiert",
+      "json": "Formatiertes JSON"
+    }
   },
   "webembed": {
     "addUrl": "URL in den Einstellungen hinzufügen",
@@ -685,7 +773,10 @@
       "myLocation": "Mein Standort",
       "findingYou": "Standort wird ermittelt…",
       "useMyLocation": "Meinen Standort verwenden",
-      "searchCity": "Stadt suchen…"
+      "searchCity": "Stadt suchen…",
+      "allConditions": "Alle Wetterlagen",
+      "windy": "Windig",
+      "night": "Nacht"
     }
   },
   "stats": {
@@ -698,7 +789,9 @@
     "network": "Netzwerk",
     "session": "Diese Sitzung",
     "show": "Anzeigen",
-    "empty": "Nichts anzuzeigen. Aktiviere einen Wert in den Einstellungen."
+    "empty": "Nichts anzuzeigen. Aktiviere einen Wert in den Einstellungen.",
+    "gpu": "GPU",
+    "vram": "Grafikspeicher"
   },
   "diskinfo": {
     "title": "Laufwerke",
@@ -1064,7 +1157,7 @@
     "note": {
       "notebook": "Notizbuch",
       "sticky": "Haftnotiz",
-      "board": "Ideenboard"
+      "board": "Whiteboard"
     }
   },
   "hub": {
@@ -1084,10 +1177,10 @@
       "fun": "Spaß"
     },
     "desc": {
-      "note": "Ein Notizbuch, eine schnelle Haftnotiz oder ein Ideenboard.",
+      "note": "Ein Notizbuch, eine schnelle Haftnotiz oder ein Whiteboard.",
       "sticky": "Eine schnelle Haftnotiz im Handschrift-Look.",
       "todo": "Eine Checkliste für heute oder ein Eingang für Gedanken.",
-      "board": "Eine Fläche mit Karten, die du verbinden kannst.",
+      "board": "Zeichnen, skizzieren und Ideen auf einer endlosen Fläche ordnen.",
       "inbox": "Gedanken jetzt ablegen, später sortieren.",
       "pomodoro": "Fokus-Sitzungen mit getakteten Pausen.",
       "shelf": "Dateien und Ordner griffbereit auf dem Desktop.",
@@ -1175,6 +1268,246 @@
           "body": "Viel Spaß mit dem Update. Du findest diese Notizen jederzeit unter Einstellungen → Über."
         }
       }
+    },
+    "v1121": {
+      "headline": "Ein echtes Whiteboard, eine klügere Zwischenablage und mehr",
+      "notes": {
+        "whiteboard": "Whiteboard: Stift, Formen, Haftnotizen und Pfeile, die alles verbinden. Seiten, Export und Vollbild.",
+        "clipboard": "Zwischenablage: Text, Links, Farben, Bilder und Dateien, mit der Quell-App, Filtern und Pinnwänden.",
+        "quickpaste": "Quick Paste: Win+Umschalt+V in jeder App, Verlauf durchsuchen und einfügen.",
+        "weather": "Wetter: animierte Szenen für jede Wetterlage, bei Tag und Nacht.",
+        "pointer": "Mauszeiger: 9 Designs in 5 Größen, unter Einstellungen → Darstellung. Layers eigene Zeiger passen sich an.",
+        "scale": "UI-Skalierung für jede Bildschirmgröße, und der Griff lässt sich ausblenden.",
+        "gpu": "GPU-Auslastung, Temperatur und VRAM im System-Widget.",
+        "fixes": "Fehlerbehebungen: Flackern bei „Desktop anzeigen“, Bildschirmschoner beim Aufwachen, Kalender nach Mitternacht und Countdown-Zeitzonen."
+      },
+      "tour": {
+        "intro": {
+          "title": "Willkommen bei Layer 1.12.1",
+          "body": "Ein kurzer Blick auf die Neuerungen. Unter einer Minute."
+        },
+        "whiteboard": {
+          "title": "Ein echtes Whiteboard",
+          "body": "Zeichne, füge Formen und Haftnotizen hinzu und zieh an den Punkten eines Elements, um es mit einem anderen zu verbinden."
+        },
+        "clipboard": {
+          "title": "Eine klügere Zwischenablage",
+          "body": "Alles, was du kopierst, auch Bilder und Dateien, mit smarten Karten, Filtern und Pinnwänden."
+        },
+        "quickpaste": {
+          "title": "Quick Paste, überall",
+          "body": "Drück Win+Umschalt+V in jeder App. Suchen, Enter, und es wird genau dort eingefügt."
+        },
+        "weather": {
+          "title": "Wetter, das sich bewegt",
+          "body": "Jede Wetterlage hat ihre eigene Animation, bei Tag und Nacht."
+        },
+        "pointer": {
+          "title": "Wähl deinen Zeiger",
+          "body": "Einstellungen → Darstellung → Mauszeiger. Zum Ausprobieren darüberfahren, dann Anwenden."
+        },
+        "more": {
+          "title": "Und noch mehr",
+          "body": "UI-Skalierung, Griff ausblenden, GPU-Werte im System-Widget und viele Fehlerbehebungen."
+        },
+        "done": {
+          "title": "Das ist 1.12.1!",
+          "body": "Viel Spaß. Diese Notizen findest du unter Einstellungen → Info."
+        }
+      }
+    }
+  },
+  "whiteboard": {
+    "tools": {
+      "select": "Auswählen",
+      "hand": "Verschieben",
+      "pen": "Stift",
+      "highlighter": "Textmarker",
+      "eraser": "Radierer",
+      "rect": "Rechteck",
+      "ellipse": "Ellipse",
+      "diamond": "Raute",
+      "line": "Linie",
+      "arrow": "Pfeil",
+      "text": "Text",
+      "sticky": "Haftnotiz",
+      "image": "Bild",
+      "laser": "Laserpointer"
+    },
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "zoomReset": "Zoom zurücksetzen",
+    "fit": "Alles zeigen",
+    "minimap": "Übersichtskarte",
+    "page": "Seite {{n}}",
+    "addPage": "Neue Seite",
+    "deletePage": "Seite löschen",
+    "renameHint": "Doppelklick auf eine Seite zum Umbenennen",
+    "background": "Hintergrund",
+    "bg": {
+      "dots": "Punkte",
+      "grid": "Raster",
+      "lines": "Linien",
+      "none": "Keiner"
+    },
+    "snap": "Am Raster ausrichten",
+    "export": "Exportieren",
+    "exportPng": "Als PNG exportieren",
+    "exportSvg": "Als SVG exportieren",
+    "copyImage": "Als Bild kopieren",
+    "exportPage": "Exportiert die ganze Seite",
+    "exportSelection": "Exportiert die Auswahl",
+    "copied": "Als Bild kopiert",
+    "exported": "Exportiert",
+    "exportFailed": "Export fehlgeschlagen",
+    "fullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild beenden",
+    "empty": "Wähle ein Werkzeug und leg los",
+    "textPlaceholder": "Tippen…",
+    "style": {
+      "stroke": "Farbe",
+      "fill": "Füllung",
+      "width": "Strich",
+      "dash": "Stil",
+      "opacity": "Deckkraft",
+      "fontSize": "Textgröße",
+      "stickyColor": "Notizfarbe",
+      "curved": "Gebogen",
+      "doubleArrow": "Pfeil an beiden Enden",
+      "auto": "Automatisch"
+    },
+    "fill": {
+      "none": "Keine",
+      "semi": "Getönt",
+      "solid": "Voll"
+    },
+    "width": {
+      "thin": "Dünn",
+      "medium": "Mittel",
+      "bold": "Dick"
+    },
+    "dash": {
+      "solid": "Durchgehend",
+      "dashed": "Gestrichelt",
+      "dotted": "Gepunktet"
+    },
+    "size": {
+      "s": "Klein",
+      "m": "Mittel",
+      "l": "Groß",
+      "xl": "Sehr groß"
+    },
+    "actions": {
+      "forward": "In den Vordergrund",
+      "backward": "In den Hintergrund",
+      "duplicate": "Duplizieren",
+      "group": "Gruppieren",
+      "ungroup": "Gruppierung aufheben",
+      "lock": "Sperren",
+      "unlock": "Entsperren",
+      "delete": "Löschen",
+      "alignLeft": "Links ausrichten",
+      "alignCenter": "Mittig ausrichten",
+      "alignRight": "Rechts ausrichten",
+      "alignTop": "Oben ausrichten",
+      "alignMiddle": "Vertikal zentrieren",
+      "alignBottom": "Unten ausrichten"
+    },
+    "groups": {
+      "draw": "Zeichnen",
+      "shapes": "Formen"
+    },
+    "more": "Mehr",
+    "clear": "Seite leeren",
+    "clearTitle": "„{{name}}“ leeren?",
+    "clearBody": "Alles auf dieser Seite wird entfernt. Mit Strg+Z rückgängig machen.",
+    "cancel": "Abbrechen",
+    "clearConfirm": "Leeren"
+  },
+  "pointer": {
+    "active": "{{name}} · {{size}}",
+    "windowsDefault": "Windows-Standard",
+    "applied": "{{name}} ({{size}} px) angewendet",
+    "restored": "Windows-Zeiger wiederhergestellt",
+    "exported": "Zeigerdesign exportiert",
+    "exportTitle": "Ordner für den Export wählen",
+    "failed": "Das hat nicht geklappt:",
+    "filled": "Gefüllt",
+    "outline": "Kontur",
+    "sizeTooltip": "{{size}}-px-Zeiger",
+    "canvasLight": "Auf hellem Hintergrund zeigen",
+    "canvasDark": "Auf dunklem Hintergrund zeigen",
+    "restore": "Wiederherstellen",
+    "restoreTooltip": "Zurück zu deinen vorherigen Zeigern",
+    "export": "Exportieren",
+    "exportTooltip": "Design als .cur/.ani-Dateien speichern",
+    "apply": "Anwenden",
+    "inUse": "Aktiv",
+    "roles": {
+      "Arrow": "Normal",
+      "Help": "Hilfe",
+      "AppStarting": "Arbeitet im Hintergrund",
+      "Wait": "Beschäftigt",
+      "Crosshair": "Präzision",
+      "IBeam": "Text",
+      "NWPen": "Handschrift",
+      "No": "Nicht verfügbar",
+      "SizeNS": "Vertikal skalieren",
+      "SizeWE": "Horizontal skalieren",
+      "SizeNWSE": "Diagonal skalieren 1",
+      "SizeNESW": "Diagonal skalieren 2",
+      "SizeAll": "Verschieben",
+      "UpArrow": "Alternative Auswahl",
+      "Hand": "Link",
+      "Pin": "Ort",
+      "Person": "Person",
+      "Grab": "Greifen",
+      "Grabbing": "Gegriffen",
+      "Copy": "Kopieren",
+      "Alias": "Verknüpfung",
+      "ContextMenu": "Kontextmenü",
+      "ZoomIn": "Vergrößern",
+      "ZoomOut": "Verkleinern",
+      "LeftSelect": "Links auswählen",
+      "ColorSelect": "Farbe wählen",
+      "HandCopy": "Hand kopieren",
+      "HandAlias": "Hand Verknüpfung",
+      "HandNo": "Hand nicht verfügbar",
+      "HandHelp": "Hand Hilfe",
+      "ResizeN": "Nach oben",
+      "ResizeS": "Nach unten",
+      "ResizeW": "Nach links",
+      "ResizeE": "Nach rechts",
+      "ResizeNW": "Nach oben links",
+      "ResizeNE": "Nach oben rechts",
+      "ResizeSW": "Nach unten links",
+      "ResizeSE": "Nach unten rechts",
+      "HBeam": "Vertikaler Text",
+      "Eyedropper": "Pipette"
+    },
+    "prevTheme": "Vorheriges Design",
+    "nextTheme": "Nächstes Design",
+    "sets": {
+      "windows": "Windows",
+      "extras": "Extras",
+      "layer": "Layer"
+    },
+    "setHint": {
+      "windows": "Die 17 Zeiger, die Windows überall nutzt. Zum Ausprobieren auf eine Kachel zeigen.",
+      "extras": "Zusätzliche Zeiger für Ziehen, Kopieren, Zoom und mehr – im Export enthalten.",
+      "layer": "Layers eigene Zeiger übernehmen dieses Design, wenn du es anwendest."
+    },
+    "layerRoles": {
+      "normal": "Normal",
+      "button": "Schaltfläche",
+      "grab": "Greifen",
+      "grabbing": "Gegriffen",
+      "resize": "Größe ändern",
+      "resizeNesw": "Größe ändern (andere Diagonale)",
+      "resizeNs": "Höhe ändern",
+      "resizeEw": "Breite ändern"
     }
   }
 }

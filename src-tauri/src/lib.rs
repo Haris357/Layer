@@ -1,6 +1,9 @@
 mod appname;
 mod audio;
 mod commands;
+mod cursors;
+mod clipboard;
+mod gpu;
 mod notch;
 mod quick;
 mod screensaver;
@@ -141,6 +144,9 @@ pub fn run() {
             let _ = commands::apply_shortcuts(app.handle(), &commands::default_shortcuts());
             commands::start_shortcut_gate(app.handle().clone());
             screentime::start();
+            gpu::start();
+            cursors::restore_session(app.handle());
+            clipboard::start(app.handle().clone());
 
             let toggle_item =
                 MenuItemBuilder::with_id("toggle", "Toggle edit mode").build(app)?;
@@ -239,6 +245,8 @@ pub fn run() {
             commands::open_url,
             commands::import_asset,
             commands::read_asset,
+            commands::import_asset_bytes,
+            commands::save_export,
             commands::delete_asset,
             commands::quit_app,
             commands::get_app_version,
@@ -283,6 +291,16 @@ pub fn run() {
             commands::set_shortcuts_everywhere,
             commands::get_screen_time,
             commands::get_idle_ms,
+            commands::get_gpu_stats,
+            cursors::pointer_status,
+            cursors::pointer_apply,
+            cursors::pointer_restore,
+            cursors::pointer_export,
+            clipboard::clip_copy,
+            clipboard::clip_paste,
+            clipboard::clip_cancel,
+            clipboard::clip_options,
+            clipboard::clip_forget_image,
             commands::list_audio_devices,
             commands::set_audio_device,
             commands::list_audio_sessions,

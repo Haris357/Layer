@@ -22,6 +22,18 @@ function localMidnightIso(ymd: string): string {
   const [y, m, d] = ymd.split('-').map(Number)
   return new Date(y!, m! - 1, d!).toISOString()
 }
+/**
+ * Before 1.12 the picker saved dates as midnight *UTC*, so the countdown was
+ * off by the user's UTC offset (5 h for US Eastern). Those saved targets are
+ * exactly 00:00:00.000Z — read them as the local midnight of that date instead,
+ * so old countdowns correct themselves without re-picking.
+ */
+export function effectiveTarget(iso: string): string {
+  if (iso.endsWith('T00:00:00.000Z') && new Date().getTimezoneOffset() !== 0) {
+    return localMidnightIso(iso.slice(0, 10))
+  }
+  return iso
+}
 function localYmd(iso: string): string {
   const d = new Date(iso)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -59,7 +71,7 @@ function CountdownRenderer({ widget }: { widget: CountdownWidgetType }) {
   // Fire exactly one notification when this countdown hits zero. The
   // dedupe key is keyed to the widget + target so it never repeats.
   useEffect(() => {
-    const targetMs = new Date(widget.target).getTime()
+    const targetMs = new Date(effectiveTarget(widget.target)).getTime()
     const remaining = targetMs - Date.now()
     const fire = () =>
       notify({
@@ -76,7 +88,7 @@ function CountdownRenderer({ widget }: { widget: CountdownWidgetType }) {
   }, [widget.id, widget.target, widget.label, t])
 
   const card = widget.background !== false
-  const b = breakdown(new Date(widget.target).getTime())
+  const b = breakdown(new Date(effectiveTarget(widget.target)).getTime())
 
   const segs: { value: number; label: string }[] = [
     { value: b.days, label: t('countdown.units.days') },
@@ -161,7 +173,7 @@ function CountdownSettings({
       />
       <input
         type="date"
-        value={localYmd(widget.target)}
+        value={localYmd(effectiveTarget(widget.target))}
         onMouseDown={(e) => e.stopPropagation()}
         onChange={(e) => {
           if (e.target.value) {

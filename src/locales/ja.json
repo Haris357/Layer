@@ -64,7 +64,7 @@
     "quick": "クイック切替",
     "winget": "アプリの更新",
     "screentime": "スクリーンタイム",
-    "board": "アイデアボード"
+    "board": "ホワイトボード"
   },
   "settings": {
     "title": "設定",
@@ -89,7 +89,8 @@
       "canvas": "キャンバス",
       "exportImage": "キャンバスを画像として書き出し",
       "resetSpace": "このスペースをリセット",
-      "resetSpaceConfirm": "もう一度クリックして「{{name}}」を消去"
+      "resetSpaceConfirm": "もう一度クリックして「{{name}}」を消去",
+      "showNub": "上部に Layer のつまみを表示"
     },
     "appearance": {
       "theme": "テーマ",
@@ -100,7 +101,11 @@
       "showOn": "Layer の表示先",
       "showOnHint": "ピル、設定、ポップアップを表示するモニターです。",
       "autoPrimary": "自動（メイン）",
-      "display": "ディスプレイ {{n}}"
+      "display": "ディスプレイ {{n}}",
+      "uiScale": "UI のサイズ",
+      "uiScaleReset": "リセット",
+      "uiScaleHint": "Layer 全体を小さく・大きくします。ウィジェットの位置はそのままです。",
+      "pointer": "マウスポインター"
     },
     "screensaver": {
       "storeNote": "Microsoft Store 版では Layer を Windows のスクリーンセーバーとして設定できません（サンドボックスではシステムのスクリーンセーバーを登録できないため）。Ctrl+Shift+S でスタイルをプレビューすることは可能です。",
@@ -414,7 +419,90 @@
     "remove": "削除",
     "clearUnpinned": "ピン留め以外を消去",
     "copied": "クリップボードにコピーしました",
-    "copyFailed": "コピーできませんでした"
+    "copyFailed": "コピーできませんでした",
+    "cancelSelect": "選択を解除",
+    "clear": "クリア",
+    "clearConfirm": "もう一度クリックでピン留め以外を消去",
+    "copy": "コピー",
+    "copyAs": "形式を変えてコピー",
+    "copyMerged": "まとめてコピー",
+    "folder": "フォルダー",
+    "image": "画像",
+    "less": "閉じる",
+    "more": "もっと見る",
+    "moreActions": "その他の操作",
+    "nChars": "{{n}} 文字",
+    "nFiles": "{{count}} 個のファイル",
+    "newBoard": "新しいピンボード…",
+    "openFile": "ファイルを開く",
+    "openLink": "リンクを開く",
+    "pause": "記録を一時停止",
+    "pausedBadge": "一時停止中",
+    "pinboards": "ピンボード",
+    "quickPasteHint": "Win+Shift+V でどこでもクイック貼り付け",
+    "resume": "記録を再開",
+    "selected": "{{n}} 件を選択",
+    "showInFolder": "フォルダーで表示",
+    "writeEmail": "メールを書く",
+    "quick": {
+      "copyOnly": "コピーのみ",
+      "direct": "直接貼り付け",
+      "paste": "貼り付け",
+      "search": "クリップボードを検索…",
+      "switch": "切り替え",
+      "tabs": {
+        "all": "すべて",
+        "pinned": "ピン留め",
+        "text": "テキスト",
+        "image": "画像",
+        "files": "ファイル"
+      }
+    },
+    "settings": {
+      "days": "{{n}} 日",
+      "files": "ファイルを記録",
+      "forget": "ピン留め以外を削除するまで",
+      "ignore": "記録しないアプリ",
+      "ignoreHint": "パスワード管理アプリは常に除外されます。アプリをタップして除外に追加できます。",
+      "images": "画像を記録",
+      "keep": "履歴の件数",
+      "never": "しない",
+      "pause": "記録を一時停止",
+      "quickPaste": "クイック貼り付け (Win+Shift+V)",
+      "quickPasteHint": "履歴を検索して、どのアプリにも貼り付けられます。"
+    },
+    "time": {
+      "day": "{{n}} 日前",
+      "hour": "{{n}} 時間前",
+      "min": "{{n}} 分前",
+      "now": "たった今"
+    },
+    "filters": {
+      "all": "すべて",
+      "pinned": "ピン留め",
+      "text": "テキスト",
+      "link": "リンク",
+      "image": "画像",
+      "files": "ファイル",
+      "color": "カラー",
+      "code": "コード"
+    },
+    "groups": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "earlier": "それ以前"
+    },
+    "transforms": {
+      "upper": "大文字",
+      "lower": "小文字",
+      "title": "単語の先頭を大文字",
+      "sentence": "文頭を大文字",
+      "trim": "余分な空白を削除",
+      "oneLine": "1 行にまとめる",
+      "urlDecode": "URL デコード",
+      "urlEncode": "URL エンコード",
+      "json": "整形した JSON"
+    }
   },
   "webembed": {
     "addUrl": "設定で URL を追加してください",
@@ -679,7 +767,10 @@
       "myLocation": "現在地",
       "findingYou": "現在地を取得中…",
       "useMyLocation": "現在地を使用",
-      "searchCity": "都市を検索…"
+      "searchCity": "都市を検索…",
+      "allConditions": "すべての天気",
+      "windy": "強風",
+      "night": "夜"
     }
   },
   "stats": {
@@ -692,7 +783,9 @@
     "network": "ネットワーク",
     "session": "このセッション",
     "show": "表示",
-    "empty": "表示する項目がありません。設定で項目をオンにしてください。"
+    "empty": "表示する項目がありません。設定で項目をオンにしてください。",
+    "gpu": "GPU",
+    "vram": "VRAM"
   },
   "diskinfo": {
     "title": "ディスク",
@@ -1058,7 +1151,7 @@
     "note": {
       "notebook": "ノートブック",
       "sticky": "ふせん",
-      "board": "アイデアボード"
+      "board": "ホワイトボード"
     }
   },
   "hub": {
@@ -1078,10 +1171,10 @@
       "fun": "お楽しみ"
     },
     "desc": {
-      "note": "ノートブック、ふせん、アイデアボード。",
+      "note": "ノートブック、ふせん、ホワイトボード。",
       "sticky": "手書き風のふせん。",
       "todo": "今日のチェックリスト、またはメモ用の受信箱。",
-      "board": "カードを並べてつなげられるボード。",
+      "board": "無限のキャンバスに描いて、スケッチして、アイデアを整理。",
       "inbox": "思いついたことを今すぐメモ、整理は後で。",
       "pomodoro": "休憩つきの集中セッション。",
       "shelf": "ファイルやフォルダーをすぐ手元に。",
@@ -1169,6 +1262,246 @@
           "body": "アップデートをお楽しみください。この内容は「設定 → 情報」でいつでも見られます。"
         }
       }
+    },
+    "v1121": {
+      "headline": "本格的なホワイトボード、賢くなったクリップボードなど",
+      "notes": {
+        "whiteboard": "ホワイトボード: ペン、図形、付箋、何でもつなげる矢印。ページ、書き出し、全画面にも対応。",
+        "clipboard": "クリップボード: テキスト、リンク、色、画像、ファイルを、コピー元のアプリやフィルター、ピンボードと一緒に。",
+        "quickpaste": "クイック貼り付け: どのアプリでも Win+Shift+V で履歴を検索して貼り付け。",
+        "weather": "天気: すべての天気にアニメーション。昼も夜も。",
+        "pointer": "ポインター: 9 テーマ × 5 サイズ。設定 → 外観 から。Layer のカーソルも揃います。",
+        "scale": "どの画面サイズにも合う UI 拡大縮小、ノブの非表示。",
+        "gpu": "システム ウィジェットに GPU 使用率・温度・VRAM。",
+        "fixes": "修正: デスクトップ表示のちらつき、スクリーンセーバー復帰時の画面、日付をまたいだカレンダー、カウントダウンのタイムゾーン。"
+      },
+      "tour": {
+        "intro": {
+          "title": "Layer 1.12.1 へようこそ",
+          "body": "新機能をさっと紹介します。1 分もかかりません。"
+        },
+        "whiteboard": {
+          "title": "本格的なホワイトボード",
+          "body": "描いて、図形や付箋を置き、アイテムの点をドラッグして別のものとつなげましょう。"
+        },
+        "clipboard": {
+          "title": "賢くなったクリップボード",
+          "body": "画像やファイルも含めてコピーしたものすべてを、スマートカード、フィルター、ピンボードで。"
+        },
+        "quickpaste": {
+          "title": "どこでもクイック貼り付け",
+          "body": "どのアプリでも Win+Shift+V。検索して Enter で、その場所に貼り付けます。"
+        },
+        "weather": {
+          "title": "動く天気",
+          "body": "それぞれの天気に昼と夜のアニメーションがあります。"
+        },
+        "pointer": {
+          "title": "ポインターを選ぶ",
+          "body": "設定 → 外観 → マウスポインター。ホバーで試して適用。"
+        },
+        "more": {
+          "title": "ほかにも",
+          "body": "UI 拡大縮小、ノブの非表示、GPU 情報、そして多数の修正。"
+        },
+        "done": {
+          "title": "1.12.1 の紹介は以上です！",
+          "body": "お楽しみください。この内容は 設定 → 情報 でいつでも見られます。"
+        }
+      }
+    }
+  },
+  "whiteboard": {
+    "tools": {
+      "select": "選択",
+      "hand": "移動",
+      "pen": "ペン",
+      "highlighter": "蛍光ペン",
+      "eraser": "消しゴム",
+      "rect": "四角形",
+      "ellipse": "楕円",
+      "diamond": "ひし形",
+      "line": "線",
+      "arrow": "矢印",
+      "text": "テキスト",
+      "sticky": "ふせん",
+      "image": "画像",
+      "laser": "レーザーポインター"
+    },
+    "undo": "元に戻す",
+    "redo": "やり直す",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "zoomReset": "ズームをリセット",
+    "fit": "全体を表示",
+    "minimap": "ミニマップ",
+    "page": "ページ {{n}}",
+    "addPage": "新しいページ",
+    "deletePage": "ページを削除",
+    "renameHint": "ページをダブルクリックで名前を変更",
+    "background": "背景",
+    "bg": {
+      "dots": "ドット",
+      "grid": "グリッド",
+      "lines": "罫線",
+      "none": "なし"
+    },
+    "snap": "グリッドに吸着",
+    "export": "エクスポート",
+    "exportPng": "PNG で書き出す",
+    "exportSvg": "SVG で書き出す",
+    "copyImage": "画像としてコピー",
+    "exportPage": "ページ全体を書き出します",
+    "exportSelection": "選択範囲を書き出します",
+    "copied": "画像としてコピーしました",
+    "exported": "書き出しました",
+    "exportFailed": "書き出せませんでした",
+    "fullscreen": "全画面",
+    "exitFullscreen": "全画面を終了",
+    "empty": "ツールを選んで描き始めましょう",
+    "textPlaceholder": "入力…",
+    "style": {
+      "stroke": "色",
+      "fill": "塗り",
+      "width": "線の太さ",
+      "dash": "線の種類",
+      "opacity": "不透明度",
+      "fontSize": "文字サイズ",
+      "stickyColor": "ふせんの色",
+      "curved": "曲線",
+      "doubleArrow": "両端に矢印",
+      "auto": "自動"
+    },
+    "fill": {
+      "none": "なし",
+      "semi": "淡色",
+      "solid": "塗りつぶし"
+    },
+    "width": {
+      "thin": "細い",
+      "medium": "標準",
+      "bold": "太い"
+    },
+    "dash": {
+      "solid": "実線",
+      "dashed": "破線",
+      "dotted": "点線"
+    },
+    "size": {
+      "s": "小",
+      "m": "中",
+      "l": "大",
+      "xl": "特大"
+    },
+    "actions": {
+      "forward": "最前面へ",
+      "backward": "最背面へ",
+      "duplicate": "複製",
+      "group": "グループ化",
+      "ungroup": "グループ解除",
+      "lock": "ロック",
+      "unlock": "ロック解除",
+      "delete": "削除",
+      "alignLeft": "左揃え",
+      "alignCenter": "左右中央揃え",
+      "alignRight": "右揃え",
+      "alignTop": "上揃え",
+      "alignMiddle": "上下中央揃え",
+      "alignBottom": "下揃え"
+    },
+    "groups": {
+      "draw": "描画",
+      "shapes": "図形"
+    },
+    "more": "その他",
+    "clear": "ページをクリア",
+    "clearTitle": "「{{name}}」をクリアしますか？",
+    "clearBody": "このページの内容がすべて削除されます。Ctrl+Z で元に戻せます。",
+    "cancel": "キャンセル",
+    "clearConfirm": "クリア"
+  },
+  "pointer": {
+    "active": "{{name}} · {{size}}",
+    "windowsDefault": "Windows 標準",
+    "applied": "{{name}}（{{size}} px）を適用しました",
+    "restored": "Windows のカーソルを元に戻しました",
+    "exported": "カーソルテーマを書き出しました",
+    "exportTitle": "書き出し先のフォルダーを選択",
+    "failed": "実行できませんでした:",
+    "filled": "塗り",
+    "outline": "線",
+    "sizeTooltip": "{{size}} px カーソル",
+    "canvasLight": "明るい背景で表示",
+    "canvasDark": "暗い背景で表示",
+    "restore": "元に戻す",
+    "restoreTooltip": "以前のカーソルに戻します",
+    "export": "書き出し",
+    "exportTooltip": ".cur/.ani ファイルとして保存",
+    "apply": "適用",
+    "inUse": "使用中",
+    "roles": {
+      "Arrow": "通常の選択",
+      "Help": "ヘルプの選択",
+      "AppStarting": "バックグラウンドで作業中",
+      "Wait": "待ち状態",
+      "Crosshair": "領域選択",
+      "IBeam": "テキスト選択",
+      "NWPen": "手書き",
+      "No": "利用不可",
+      "SizeNS": "上下に拡大/縮小",
+      "SizeWE": "左右に拡大/縮小",
+      "SizeNWSE": "斜めに拡大/縮小 1",
+      "SizeNESW": "斜めに拡大/縮小 2",
+      "SizeAll": "移動",
+      "UpArrow": "代替選択",
+      "Hand": "リンクの選択",
+      "Pin": "場所の選択",
+      "Person": "人の選択",
+      "Grab": "つかむ",
+      "Grabbing": "つかみ中",
+      "Copy": "コピー",
+      "Alias": "ショートカット",
+      "ContextMenu": "コンテキストメニュー",
+      "ZoomIn": "拡大",
+      "ZoomOut": "縮小",
+      "LeftSelect": "左選択",
+      "ColorSelect": "色の選択",
+      "HandCopy": "手 コピー",
+      "HandAlias": "手 ショートカット",
+      "HandNo": "手 利用不可",
+      "HandHelp": "手 ヘルプ",
+      "ResizeN": "上へ",
+      "ResizeS": "下へ",
+      "ResizeW": "左へ",
+      "ResizeE": "右へ",
+      "ResizeNW": "左上へ",
+      "ResizeNE": "右上へ",
+      "ResizeSW": "左下へ",
+      "ResizeSE": "右下へ",
+      "HBeam": "縦書きテキスト",
+      "Eyedropper": "スポイト"
+    },
+    "prevTheme": "前のテーマ",
+    "nextTheme": "次のテーマ",
+    "sets": {
+      "windows": "Windows",
+      "extras": "追加",
+      "layer": "Layer"
+    },
+    "setHint": {
+      "windows": "Windows 全体で使われる 17 種類のカーソル。タイルにポインターを重ねると試せます。",
+      "extras": "ドラッグ、コピー、ズームなどの追加カーソル。書き出しにも含まれます。",
+      "layer": "適用すると、Layer 独自のカーソルもこのテーマになります。"
+    },
+    "layerRoles": {
+      "normal": "通常",
+      "button": "ボタン",
+      "grab": "つかむ",
+      "grabbing": "つかみ中",
+      "resize": "サイズ変更",
+      "resizeNesw": "サイズ変更 (逆の斜め)",
+      "resizeNs": "上下にサイズ変更",
+      "resizeEw": "左右にサイズ変更"
     }
   }
 }

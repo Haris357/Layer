@@ -498,7 +498,7 @@ export function LayerHub({
       if (Math.abs(dy) < 4) return
       d.moved = true
       setForceInteractive(true).catch(() => {})
-      document.body.style.cursor = 'grabbing'
+      document.body.style.cursor = 'var(--cur-grabbing), grabbing'
     }
     const now = performance.now()
     d.v = (e.clientY - d.lastY) / Math.max(1, now - d.lastT)

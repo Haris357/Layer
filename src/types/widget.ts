@@ -143,7 +143,7 @@ export interface WeatherWidget extends BaseWidget {
   unit?: 'c' | 'f'
 }
 
-export type StatsMetric = 'cpu' | 'memory' | 'disk' | 'battery' | 'network'
+export type StatsMetric = 'cpu' | 'gpu' | 'memory' | 'disk' | 'battery' | 'network'
 
 export interface StatsWidget extends BaseWidget {
   type: 'stats'
@@ -405,12 +405,60 @@ export interface BoardConnection {
   to: string // card id
 }
 
+// ── Whiteboard ──────────────────────────────────────────────────────────────
+export type WbKind = 'stroke' | 'rect' | 'ellipse' | 'diamond' | 'line' | 'arrow' | 'text' | 'sticky' | 'image'
+export type WbDash = 'solid' | 'dashed' | 'dotted'
+export type WbFill = 'none' | 'semi' | 'solid'
+
+export interface WbElement {
+  id: string
+  kind: WbKind
+  // Box (board coordinates). Strokes/lines/arrows derive theirs from points.
+  x: number
+  y: number
+  w: number
+  h: number
+  rotation?: number // degrees, box shapes only
+  // stroke: [x, y, pressure][]; line/arrow: [[x1, y1], [x2, y2]] (absolute)
+  points?: number[][]
+  stroke: string // a colour, or 'ink' (the theme's text colour)
+  fill?: WbFill
+  width: number
+  dash?: WbDash
+  opacity?: number
+  highlighter?: boolean
+  text?: string
+  fontSize?: number
+  color?: StickyColor // stickies
+  src?: string // images (asset path)
+  startId?: string // arrows/lines attached to elements
+  endId?: string
+  curved?: boolean
+  arrowStart?: boolean
+  groupId?: string
+  locked?: boolean
+}
+
+export interface WbPage {
+  id: string
+  name: string
+  elements: WbElement[]
+  panX: number
+  panY: number
+  zoom: number
+}
+
 export interface BoardWidget extends BaseWidget {
   type: 'board'
+  // Legacy Idea board data: migrated into the first page on first open.
   cards: BoardCard[]
   connections: BoardConnection[]
   panX?: number
   panY?: number
+  pages?: WbPage[]
+  pageId?: string
+  bg?: 'dots' | 'grid' | 'lines' | 'none'
+  snap?: boolean
 }
 
 export type Widget =

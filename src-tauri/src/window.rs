@@ -320,7 +320,7 @@ fn start_screensaver_input_watch() {
                     }
                 }
                 if moved || key_down {
-                    std::process::exit(0);
+                    instant_exit();
                 }
             }
         }
@@ -329,6 +329,36 @@ fn start_screensaver_input_watch() {
 
 #[cfg(not(target_os = "windows"))]
 fn start_screensaver_input_watch() {}
+
+/// Leave the screensaver *now*. `process::exit` runs the WebView2 shutdown
+/// hooks, which can wait on the browser helper processes while the
+/// half-torn-down windows stay on screen — users saw a grey screen for ~30 s
+/// (or until Ctrl+Alt+Del). Hide every window of ours first so the desktop is
+/// back instantly, then terminate without the slow teardown.
+#[cfg(target_os = "windows")]
+pub fn instant_exit() -> ! {
+    use windows_sys::core::BOOL;
+    use windows_sys::Win32::Foundation::{HWND, LPARAM};
+    use windows_sys::Win32::System::Threading::{GetCurrentProcess, GetCurrentProcessId, TerminateProcess};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{EnumWindows, GetWindowThreadProcessId, ShowWindow, SW_HIDE};
+    unsafe extern "system" fn hide_ours(hwnd: HWND, pid: LPARAM) -> BOOL {
+        let mut owner = 0u32;
+        GetWindowThreadProcessId(hwnd, &mut owner);
+        if owner as LPARAM == pid {
+            ShowWindow(hwnd, SW_HIDE);
+        }
+        1
+    }
+    unsafe {
+        EnumWindows(Some(hide_ours), GetCurrentProcessId() as LPARAM);
+        TerminateProcess(GetCurrentProcess(), 0);
+    }
+    std::process::exit(0)
+}
+#[cfg(not(target_os = "windows"))]
+pub fn instant_exit() -> ! {
+    std::process::exit(0)
+}
 
 #[cfg(target_os = "windows")]
 fn set_topmost(window: &WebviewWindow, on: bool) {
@@ -566,6 +596,15 @@ fn keep_in_desktop_layer(window: &WebviewWindow) {
         Ok(handle) => handle.0 as HWND,
         Err(_) => return,
     };
+    // Churn guard. On some setups (mostly Windows 10, wallpaper engines)
+    // Explorer re-raises the desktop every time we step above it during
+    // "Show desktop", and the two of us trade places every tick — the widgets
+    // flicker. If we've had to move more than a few times in one second it's
+    // a fight we can't win: stay put for a few seconds, then try again.
+    let now = churn_clock();
+    if now < CHURN_PAUSE_UNTIL.load(Ordering::Relaxed) {
+        return;
+    }
     unsafe {
         let desktop = match desktop_window_above(hwnd) {
             Some(d) => d,
@@ -597,18 +636,43 @@ fn keep_in_desktop_layer(window: &WebviewWindow) {
             SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOSENDCHANGING,
         );
     }
+    // Count this move; too many in a second = Explorer is fighting back.
+    if now.saturating_sub(CHURN_WINDOW_START.load(Ordering::Relaxed)) > 1000 {
+        CHURN_WINDOW_START.store(now, Ordering::Relaxed);
+        CHURN_COUNT.store(0, Ordering::Relaxed);
+    }
+    if CHURN_COUNT.fetch_add(1, Ordering::Relaxed) + 1 > CHURN_LIMIT {
+        CHURN_PAUSE_UNTIL.store(now + CHURN_BACKOFF_MS, Ordering::Relaxed);
+        CHURN_COUNT.store(0, Ordering::Relaxed);
+    }
 }
 #[cfg(not(target_os = "windows"))]
 fn keep_in_desktop_layer(_window: &WebviewWindow) {}
 
-// The shell's desktop window (Progman, or a WorkerW on older layouts) if it is
-// above Layer in the z-order.
+// Churn-guard state (see keep_in_desktop_layer). A real Show desktop needs one
+// or two moves; more than this many in a second means we're in a fight.
+const CHURN_LIMIT: u32 = 6;
+const CHURN_BACKOFF_MS: u64 = 4000;
+static CHURN_WINDOW_START: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+static CHURN_COUNT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+static CHURN_PAUSE_UNTIL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+fn churn_clock() -> u64 {
+    static START: std::sync::OnceLock<Instant> = std::sync::OnceLock::new();
+    START.get_or_init(Instant::now).elapsed().as_millis() as u64
+}
+
+// The shell's desktop window (Progman, or the WorkerW that hosts the icons on
+// older layouts) if it is above Layer in the z-order. Only the window that
+// actually holds the desktop icons counts: Windows 10 and wallpaper engines
+// keep an extra, empty WorkerW around, and chasing that one made Layer trade
+// places with Explorer over and over (flicker).
 #[cfg(target_os = "windows")]
 unsafe fn desktop_window_above(
     hwnd: windows_sys::Win32::Foundation::HWND,
 ) -> Option<windows_sys::Win32::Foundation::HWND> {
+    use windows_sys::w;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
-        GetClassNameW, GetWindow, IsWindowVisible, GW_HWNDPREV,
+        FindWindowExW, GetClassNameW, GetWindow, IsWindowVisible, GW_HWNDPREV,
     };
     let mut prev = GetWindow(hwnd, GW_HWNDPREV);
     let mut checked = 0;
@@ -618,7 +682,10 @@ unsafe fn desktop_window_above(
             let mut buf = [0u16; 16];
             let len = GetClassNameW(prev, buf.as_mut_ptr(), buf.len() as i32);
             let class = String::from_utf16_lossy(&buf[..len.max(0) as usize]);
-            if class == "Progman" || class == "WorkerW" {
+            let hosts_icons = || {
+                !FindWindowExW(prev, core::ptr::null_mut(), w!("SHELLDLL_DefView"), core::ptr::null()).is_null()
+            };
+            if class == "Progman" || (class == "WorkerW" && hosts_icons()) {
                 return Some(prev);
             }
         }
