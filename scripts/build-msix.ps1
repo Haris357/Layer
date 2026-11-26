@@ -90,6 +90,10 @@ New-Item -ItemType Directory -Path $outDir -Force | Out-Null
 
 Copy-Item $exe (Join-Path $stage 'Layer.exe')
 Copy-Item (Join-Path $msix 'Assets\*') (Join-Path $stage 'Assets')
+# Tauri resources (bundle.resources: the pointer themes' cursor files). The app
+# resolves $RESOURCE to the exe's folder, so they go next to Layer.exe.
+$res = Join-Path $tauri 'resources'
+if (Test-Path $res) { Copy-Item $res (Join-Path $stage 'resources') -Recurse }
 
 # fill manifest placeholders
 $man = Get-Content (Join-Path $msix 'AppxManifest.xml') -Raw
