@@ -1,5 +1,18 @@
 # Changelog
 
+### v1.12.1 — ✏️ A real whiteboard, a smarter clipboard and Quick Paste
+- ✏️ **Whiteboard**: the Idea board is now a full whiteboard. Pen, highlighter, shapes, text, sticky notes, images and a laser pointer, with pages, export to PNG/SVG and full screen. Drag the dots on any item to connect it to anything else.
+- 📋 **Clipboard, upgraded**: text, links, colours, code, images and files, each as its own card, with the app it came from. Filters, pinboards, "copy as" transforms and multi-select. Password managers are never recorded.
+- ⚡ **Quick Paste**: press **Win+Shift+V** in any app to search your clipboard history and paste straight into where you were.
+- 🌦️ **Weather that moves**: animated scenes for every condition, day and night.
+- 🖱️ **Mouse pointers**: 9 cursor themes in 5 sizes, 40 cursors each, in Settings → Appearance. Layer's own cursors switch to match.
+- 🔍 **UI scale**: make Layer bigger or smaller (75–125%) for any screen.
+- 🙈 **Hide the nub**: a toggle in Settings → General.
+- 🎮 **GPU in System**: usage, temperature and VRAM.
+- 📐 **Widgets never clip**: every widget's minimum size now fits its content.
+- 🐛 **Fixes**: Show desktop no longer flickers on Windows 10, waking from the screensaver no longer leaves a grey screen, Calendar moves to the new day after midnight, and Countdowns land at your local midnight.
+
+
 ### v1.12.0 — ✨ Layer Hub, Desktop Pebbles and a calmer desktop
 - 🧭 **Layer Hub**: pull the toolbar down to open it. Every widget with a live demo, plus Spaces, Notifications and Settings, in one sheet that hangs from the bar.
 - 👆 **Pull to open**: a short pull on the Layer pill opens the toolbar; keep pulling and the Hub follows your cursor down. Push it back up to close.
